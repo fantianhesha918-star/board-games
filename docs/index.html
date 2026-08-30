@@ -247,11 +247,10 @@
         <span class="name">オセロ</span>
         <span class="desc">8×8。CPU対戦 / 2人対面</span>
       </button>
-      <button class="game-card soon" data-game="trump">
-        <span class="badge">準備中</span>
+      <button class="game-card" data-game="trump">
         <span class="emoji">🃏</span>
         <span class="name">トランプ</span>
-        <span class="desc">ババ抜き・神経衰弱 ほか</span>
+        <span class="desc">神経衰弱ほか。CPU対戦 / 2人対面</span>
       </button>
       <button class="game-card soon" data-game="shogi">
         <span class="badge">準備中</span>
@@ -393,6 +392,7 @@
     if(!card) return;
     const g=card.dataset.game;
     if(g==="othello"){ show("othelloSetup"); return; }
+    if(g==="trump"){ location.href="trump.html"; return; }
     toast("準備中です。もう少しお待ちください");
   });
 

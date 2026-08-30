@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<title>トランプ</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .back-btn{
+    border:none;background:var(--surface);color:var(--text);width:38px;height:38px;border-radius:12px;font-size:20px;
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);cursor:pointer;flex:none;text-decoration:none;
+  }
+  .back-btn:active{transform:scale(.94);}
+  .lead{padding:16px 20px 2px;font-size:22px;font-weight:800;margin:0;}
+  .sub{padding:0 20px;color:var(--text-dim);font-size:13.5px;margin:0 0 6px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 16px 28px;}
+  .game-card{
+    position:relative;border:none;text-align:left;min-width:0;background:var(--surface);border-radius:20px;
+    padding:18px 16px 16px;box-shadow:var(--shadow);cursor:pointer;color:var(--text);
+    display:flex;flex-direction:column;gap:9px;min-height:126px;transition:transform .12s ease;text-decoration:none;
+  }
+  .game-card:active{transform:scale(.97);}
+  .game-card .emoji{font-size:30px;line-height:1;}
+  .game-card .name{font-weight:800;font-size:16px;}
+  .game-card .desc{font-size:12px;color:var(--text-dim);line-height:1.5;overflow-wrap:anywhere;}
+  .game-card.soon{opacity:.55;}
+  .game-card .badge{
+    position:absolute;top:12px;right:12px;font-size:10px;font-weight:800;letter-spacing:.04em;
+    background:var(--line);color:var(--text-dim);padding:4px 8px;border-radius:999px;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.82);color:#fff;font-size:14px;font-weight:700;padding:11px 18px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="back-btn" href="index.html">‹</a>
+    <h1>トランプ</h1>
+  </div>
+  <p class="lead">トランプ</p>
+  <p class="sub">チンチラ柄のカードで遊びます</p>
+  <div class="grid" id="grid">
+    <a class="game-card" href="memory.html">
+      <span class="emoji">🧠🃏</span>
+      <span class="name">神経衰弱</span>
+      <span class="desc">同じ数字・色のペア当て。CPU対戦 / 2人対面</span>
+    </a>
+    <button class="game-card soon" data-name="ババ抜き">
+      <span class="badge">準備中</span>
+      <span class="emoji">🃟</span>
+      <span class="name">ババ抜き</span>
+      <span class="desc">手札のペアを捨てて、最後にジョーカーを持つと負け</span>
+    </button>
+    <button class="game-card soon" data-name="七並べ">
+      <span class="badge">準備中</span>
+      <span class="emoji">🔢</span>
+      <span class="name">七並べ</span>
+      <span class="desc">7から順につなげる。パスの駆け引き</span>
+    </button>
+    <button class="game-card soon" data-name="大富豪">
+      <span class="badge">準備中</span>
+      <span class="emoji">👑</span>
+      <span class="name">大富豪</span>
+      <span class="desc">手札を早く出し切る。革命・しばりあり</span>
+    </button>
+    <button class="game-card soon" data-name="一人ゲーム">
+      <span class="badge">準備中</span>
+      <span class="emoji">♠️♦️</span>
+      <span class="name">一人ゲーム</span>
+      <span class="desc">ソリティア（クロンダイク）など</span>
+    </button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  let tt=null;
+  document.getElementById("grid").addEventListener("click",e=>{
+    const b=e.target.closest("button.soon"); if(!b) return;
+    const t=document.getElementById("toast");
+    t.textContent=(b.dataset.name||"このゲーム")+"は準備中です";
+    t.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),1600);
+  });
+</script>
+</body>
+</html>
