@@ -42,11 +42,11 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
     background:var(--bg);color:var(--text);
-    min-height:100dvh;
+    min-height:100dvh;overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
   }
   .app{
-    max-width:520px;margin:0 auto;min-height:100dvh;
+    width:100%;max-width:520px;margin:0 auto;min-height:100dvh;
     display:flex;flex-direction:column;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
@@ -83,7 +83,7 @@
     padding:16px 16px 28px;
   }
   .game-card{
-    position:relative;border:none;text-align:left;
+    position:relative;border:none;text-align:left;min-width:0;
     background:var(--surface);border-radius:20px;padding:18px 16px 16px;
     box-shadow:var(--shadow);cursor:pointer;color:var(--text);
     display:flex;flex-direction:column;gap:10px;min-height:132px;
@@ -91,8 +91,10 @@
   }
   .game-card:active{transform:scale(.97);}
   .game-card .emoji{font-size:34px;line-height:1;}
+  .game-card .thumbs{display:flex;gap:4px;height:38px;}
+  .game-card .thumbs img{width:38px;height:38px;object-fit:contain;}
   .game-card .name{font-weight:800;font-size:17px;}
-  .game-card .desc{font-size:12px;color:var(--text-dim);line-height:1.5;}
+  .game-card .desc{font-size:12px;color:var(--text-dim);line-height:1.5;overflow-wrap:anywhere;}
   .game-card.soon{opacity:.55;}
   .game-card .badge{
     position:absolute;top:12px;right:12px;
@@ -107,9 +109,9 @@
   .setup .field > .label{font-weight:800;font-size:14px;}
   .seg{display:flex;gap:8px;flex-wrap:wrap;}
   .seg button{
-    flex:1;min-width:84px;border:2px solid var(--line);background:var(--surface);
+    flex:1 1 84px;min-width:0;border:2px solid var(--line);background:var(--surface);
     color:var(--text);padding:12px 10px;border-radius:14px;font-size:14px;font-weight:700;
-    cursor:pointer;transition:all .12s ease;
+    cursor:pointer;transition:all .12s ease;white-space:normal;
   }
   .seg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
   .seg button:active{transform:scale(.96);}
@@ -126,7 +128,7 @@
     display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;
     min-height:26px;text-align:center;
   }
-  .status .turn-dot{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);}
+  .status .turn-dot{width:20px;height:20px;border-radius:50%;background-size:contain;background-repeat:no-repeat;background-position:center;}
   .scoreboard{
     display:flex;gap:12px;width:100%;max-width:420px;
   }
@@ -136,46 +138,58 @@
     border:2px solid transparent;transition:border-color .15s ease;
   }
   .score.active{border-color:var(--accent);}
-  .score .chip{width:26px;height:26px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);}
-  .score .chip.b{background:radial-gradient(circle at 34% 32%,#5a5a5a,#111 70%);}
-  .score .chip.w{background:radial-gradient(circle at 34% 32%,#fff,#c8c8c8 70%);}
+  .score .chip{width:30px;height:30px;flex:none;background-size:contain;background-repeat:no-repeat;background-position:center;}
+  .score .chip.b{background-image:url(assets/othello/black.webp);}
+  .score .chip.w{background-image:url(assets/othello/white.webp);}
   .score .meta{display:flex;flex-direction:column;line-height:1.2;}
   .score .who{font-size:11px;color:var(--text-dim);font-weight:700;}
   .score .num{font-size:22px;font-weight:800;}
 
   .board-wrap{
-    width:100%;max-width:420px;aspect-ratio:1/1;
-    background:var(--board-frame);border-radius:18px;padding:10px;
-    box-shadow:var(--shadow);
+    width:100%;max-width:430px;aspect-ratio:1/1;position:relative;
+    filter:drop-shadow(0 8px 18px rgba(0,0,0,.28));
   }
+  .board-bg{position:absolute;inset:0;}
+  .board-bg svg{width:100%;height:100%;display:block;}
   .board{
-    width:100%;height:100%;background:var(--board);border-radius:8px;
+    position:absolute;left:8.3333%;top:8.3333%;width:83.3333%;height:83.3333%;
     display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
-    gap:2px;padding:2px;position:relative;
   }
   .cell{
-    position:relative;background:var(--board);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
-  }
-  .cell::before{
-    content:"";position:absolute;inset:0;
-    box-shadow:inset 0 0 0 1px var(--board-line);
+    position:relative;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;perspective:640px;
   }
   .disc{
-    width:82%;height:82%;border-radius:50%;
-    transform:scale(0);transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .25s linear;
+    width:97%;height:97%;border-radius:50%;
+    background-size:contain;background-repeat:no-repeat;background-position:center;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
+    transform:scale(0);
+    transition:transform .28s cubic-bezier(.34,1.35,.64,1);
   }
-  .disc.b{background:radial-gradient(circle at 34% 32%,#5f5f5f,#0d0d0d 72%);transform:scale(1);}
-  .disc.w{background:radial-gradient(circle at 34% 32%,#ffffff,#c4c4c4 72%);transform:scale(1);}
+  .disc.b{background-image:url(assets/othello/black.webp);transform:scale(1);}
+  .disc.w{background-image:url(assets/othello/white.webp);transform:scale(1);}
+  .disc.flip-b{animation:flipToB .36s ease both;}
+  .disc.flip-w{animation:flipToW .36s ease both;}
+  @keyframes flipToB{
+    0%{transform:scaleX(1);}
+    50%{transform:scaleX(.06);background-image:url(assets/othello/black.webp);}
+    100%{transform:scaleX(1);background-image:url(assets/othello/black.webp);}
+  }
+  @keyframes flipToW{
+    0%{transform:scaleX(1);}
+    50%{transform:scaleX(.06);background-image:url(assets/othello/white.webp);}
+    100%{transform:scaleX(1);background-image:url(assets/othello/white.webp);}
+  }
   .hint{
-    width:26%;height:26%;border-radius:50%;
-    background:rgba(255,255,255,.4);
+    width:30%;height:30%;border-radius:50%;
+    background:rgba(255,255,255,.45);box-shadow:0 0 0 2px rgba(255,255,255,.25);
     animation:pulse 1.4s ease-in-out infinite;
   }
-  @keyframes pulse{0%,100%{opacity:.35;}50%{opacity:.85;}}
+  @keyframes pulse{0%,100%{opacity:.3;transform:scale(.9);}50%{opacity:.85;transform:scale(1);}}
   .last-mark{
-    position:absolute;width:10%;height:10%;border-radius:50%;
-    background:#ff4d4d;bottom:6%;right:6%;
+    position:absolute;width:12%;height:12%;border-radius:50%;
+    background:#ff4d4d;box-shadow:0 0 0 2px rgba(255,255,255,.6);
+    top:8%;right:8%;pointer-events:none;
   }
 
   .play-actions{display:flex;gap:10px;width:100%;max-width:420px;}
@@ -229,7 +243,7 @@
     </div>
     <div class="grid" id="gameGrid">
       <button class="game-card" data-game="othello">
-        <span class="emoji">⚫️⚪️</span>
+        <span class="thumbs"><img src="assets/othello/black.webp" alt=""><img src="assets/othello/white.webp" alt=""></span>
         <span class="name">オセロ</span>
         <span class="desc">8×8。CPU対戦 / 2人対面</span>
       </button>
@@ -316,6 +330,18 @@
       </div>
       <div class="status" id="othelloStatus"><span class="turn-dot" id="turnDot"></span><span id="statusText">黒の番</span></div>
       <div class="board-wrap">
+        <div class="board-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1536" aria-hidden="true">
+            <rect x="24" y="24" width="1488" height="1488" rx="70" fill="#35483D"/>
+            <rect x="42" y="42" width="1452" height="1452" rx="54" fill="#E6D9BB"/>
+            <rect x="55" y="55" width="1426" height="1426" rx="43" fill="none" stroke="#B5A784" stroke-width="2"/>
+            <rect x="112" y="112" width="1312" height="1312" rx="12" fill="#1F4533"/>
+            <rect x="128" y="128" width="1280" height="1280" fill="#42765D"/>
+            <g stroke="#254E3B" stroke-width="3"><path d="M288 128V1408M128 288H1408"/><path d="M448 128V1408M128 448H1408"/><path d="M608 128V1408M128 608H1408"/><path d="M768 128V1408M128 768H1408"/><path d="M928 128V1408M128 928H1408"/><path d="M1088 128V1408M128 1088H1408"/><path d="M1248 128V1408M128 1248H1408"/></g>
+            <g fill="#203F30"><circle cx="448" cy="448" r="10"/><circle cx="448" cy="1088" r="10"/><circle cx="1088" cy="448" r="10"/><circle cx="1088" cy="1088" r="10"/></g>
+            <g fill="#405447" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="bold" text-anchor="middle" dominant-baseline="central"><text x="208" y="85">A</text><text x="208" y="1451">A</text><text x="85" y="208">1</text><text x="1451" y="208">1</text><text x="368" y="85">B</text><text x="368" y="1451">B</text><text x="85" y="368">2</text><text x="1451" y="368">2</text><text x="528" y="85">C</text><text x="528" y="1451">C</text><text x="85" y="528">3</text><text x="1451" y="528">3</text><text x="688" y="85">D</text><text x="688" y="1451">D</text><text x="85" y="688">4</text><text x="1451" y="688">4</text><text x="848" y="85">E</text><text x="848" y="1451">E</text><text x="85" y="848">5</text><text x="1451" y="848">5</text><text x="1008" y="85">F</text><text x="1008" y="1451">F</text><text x="85" y="1008">6</text><text x="1451" y="1008">6</text><text x="1168" y="85">G</text><text x="1168" y="1451">G</text><text x="85" y="1168">7</text><text x="1451" y="1168">7</text><text x="1328" y="85">H</text><text x="1328" y="1451">H</text><text x="85" y="1328">8</text><text x="1451" y="1328">8</text></g>
+          </svg>
+        </div>
         <div class="board" id="othelloBoard"></div>
       </div>
       <div class="play-actions">
@@ -465,11 +491,17 @@
   });
 
   let lastMove=-1;
+  let animFlips=new Set();
   function render(){
     const legal = (!G.over && currentIsInteractive()) ? legalMoves(G.board,G.turn) : new Map();
     for(let i=0;i<64;i++){
       const c=cells[i], disc=c.firstChild;
-      disc.className="disc"+(G.board[i]===BLACK?" b":G.board[i]===WHITE?" w":"");
+      const now=G.board[i];
+      let cls="disc"+(now===BLACK?" b":now===WHITE?" w":"");
+      if(animFlips.has(i) && now!==0){
+        cls += now===BLACK?" flip-b":" flip-w";
+      }
+      disc.className=cls;
       let hint=c.querySelector(".hint");
       if(G.hints && legal.has(i)){
         if(!hint){ hint=document.createElement("div");hint.className="hint";c.appendChild(hint); }
@@ -485,9 +517,7 @@
     document.getElementById("scoreB").classList.toggle("active",!G.over&&G.turn===BLACK);
     document.getElementById("scoreW").classList.toggle("active",!G.over&&G.turn===WHITE);
     const dot=document.getElementById("turnDot");
-    dot.style.background = G.turn===BLACK
-      ? "radial-gradient(circle at 34% 32%,#5f5f5f,#0d0d0d 72%)"
-      : "radial-gradient(circle at 34% 32%,#fff,#c4c4c4 72%)";
+    dot.style.backgroundImage = "url(assets/othello/"+(G.turn===BLACK?"black":"white")+".webp)";
     const st=document.getElementById("statusText");
     if(G.over){ st.textContent="対局終了"; dot.style.visibility="hidden"; }
     else{
@@ -522,6 +552,7 @@
     G.history=[];
     G.busy=false; G.over=false;
     lastMove=-1;
+    animFlips=new Set();
     show("othelloPlay");
     render();
     maybeCpu();
@@ -547,6 +578,7 @@
     G.board[idx]=G.turn;
     for(const p of flips) G.board[p]=G.turn;
     lastMove=idx;
+    animFlips=new Set(flips);
   }
 
   function advance(){
@@ -710,6 +742,7 @@
   });
   document.getElementById("othelloUndo").addEventListener("click",()=>{
     if(G.busy||G.over) return;
+    animFlips=new Set();
     if(G.mode==="cpu"){
       // roll back to the player's previous decision point
       let target=null;
