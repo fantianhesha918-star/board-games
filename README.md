@@ -31,5 +31,5 @@
 - オセロ盤: `チンチラグレー_オセロ素材/othello_board.svg` を `index.html` にインライン化
 - オセロ駒: `othello_black.png` / `white.png` を 256px WebP 化 → `docs/assets/othello/`
 - トランプ54枚: `未使用/チンチラグレー_トランプ全54枚` を 340px WebP 化 → `docs/assets/cards/`（`S1`〜`S13`,`C*`,`H*`,`D*`,`JB`,`JR`）
-- カード裏面: `docs/assets/cards/back.svg`（自作。素材に裏面画像が無いため）
+- カード裏面: `docs/assets/cards/back.webp`（チンチラ＋唐草の一枚絵。元 `アプリ素材/Gemini_Generated_Image_20sh8i…jpg` を 340px WebP 化）
 - 素材フォルダは `クロコ確認フォルダ/アプリ素材/ボードゲームアプリ/`（`使用済み/` `未使用/` に仕分け、`_使用状況.md` あり）
