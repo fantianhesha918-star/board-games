@@ -186,17 +186,25 @@
   }
   .disc.b{background-image:url(assets/othello/black.webp);transform:scale(1);}
   .disc.w{background-image:url(assets/othello/white.webp);transform:scale(1);}
-  .disc.flip-b{animation:flipToB .36s ease both;}
-  .disc.flip-w{animation:flipToW .36s ease both;}
+  /* 置いた石のポップ演出 */
+  .disc.place{animation:dropIn .3s cubic-bezier(.34,1.65,.6,1) both;}
+  @keyframes dropIn{
+    0%{transform:scale(0);}
+    60%{transform:scale(1.16);}
+    100%{transform:scale(1);}
+  }
+  /* めくり演出。--d で1枚ずつ時間差をつけ、順番にひっくり返る */
+  .disc.flip-b{animation:flipToB .4s ease both;animation-delay:var(--d,0s);}
+  .disc.flip-w{animation:flipToW .4s ease both;animation-delay:var(--d,0s);}
   @keyframes flipToB{
-    0%{transform:scaleX(1);}
-    50%{transform:scaleX(.06);background-image:url(assets/othello/black.webp);}
-    100%{transform:scaleX(1);background-image:url(assets/othello/black.webp);}
+    0%,49.9%{transform:rotateY(0deg);background-image:url(assets/othello/white.webp);}
+    50%{transform:rotateY(90deg) scale(1.06);}
+    50.1%,100%{transform:rotateY(0deg);background-image:url(assets/othello/black.webp);}
   }
   @keyframes flipToW{
-    0%{transform:scaleX(1);}
-    50%{transform:scaleX(.06);background-image:url(assets/othello/white.webp);}
-    100%{transform:scaleX(1);background-image:url(assets/othello/white.webp);}
+    0%,49.9%{transform:rotateY(0deg);background-image:url(assets/othello/black.webp);}
+    50%{transform:rotateY(90deg) scale(1.06);}
+    50.1%,100%{transform:rotateY(0deg);background-image:url(assets/othello/white.webp);}
   }
   .hint{
     width:30%;height:30%;border-radius:50%;
@@ -569,15 +577,34 @@
 
   let lastMove=-1;
   let animFlips=new Set();
+  let flipSeq=new Map();   // マス番号 -> めくり開始の遅延(秒)
+  // 置いたマスから近い順に、1枚ずつ時間差でめくれるよう遅延を割り当てる
+  function buildFlipSeq(placed, flipSet){
+    const pr=placed>>3, pc=placed&7;
+    const arr=[...flipSet].filter(i=>i!==placed).sort((a,b)=>{
+      const da=Math.max(Math.abs((a>>3)-pr),Math.abs((a&7)-pc));
+      const db=Math.max(Math.abs((b>>3)-pr),Math.abs((b&7)-pc));
+      return da-db || a-b;
+    });
+    const m=new Map();
+    arr.forEach((idx,k)=>m.set(idx, +(k*0.075).toFixed(3)));
+    return m;
+  }
   function render(){
     const legal = (!G.over && currentIsInteractive()) ? legalMoves(G.board,G.turn) : new Map();
     for(let i=0;i<64;i++){
       const c=cells[i], disc=c.firstChild;
       const now=G.board[i];
       let cls="disc"+(now===BLACK?" b":now===WHITE?" w":"");
-      if(animFlips.has(i) && now!==0){
+      let delay="";
+      if(now!==0 && i===lastMove && animFlips.size>0){
+        cls += " place";
+      }else if(now!==0 && animFlips.has(i)){
         cls += now===BLACK?" flip-b":" flip-w";
+        delay = (flipSeq.get(i)||0)+"s";
       }
+      if(delay) disc.style.setProperty("--d",delay);
+      else disc.style.removeProperty("--d");
       disc.className=cls;
       let hint=c.querySelector(".hint");
       if(G.hints && legal.has(i)){
@@ -640,7 +667,7 @@
     G.history=[];
     G.busy=false; G.over=false;
     lastMove=-1;
-    animFlips=new Set();
+    animFlips=new Set(); flipSeq=new Map();
     show("othelloPlay");
     render();
     maybeCpu();
@@ -687,7 +714,7 @@
     G.board = freshBoard();
     G.turn = BLACK;
     G.history=[]; G.busy=true; G.over=false;
-    lastMove=-1; animFlips=new Set();
+    lastMove=-1; animFlips=new Set(); flipSeq=new Map();
     G.online = { code, role, myColor:(role==="host"?BLACK:WHITE), roomState:null, unsub:null, hbTimer:null, chkTimer:null, prevStatus:"waiting", ended:false };
     show("othelloPlay");
     render();
@@ -716,15 +743,16 @@
     G.online.prevStatus = data.status;
 
     const s = data.state || {};
+    lastMove = (typeof s.last==="number") ? s.last : -1;
     if(s.board && s.board.length===64){
       const nb = strToBoard(s.board);
       const flips=new Set();
       if(G.board){ for(let i=0;i<64;i++) if(G.board[i]!==nb[i] && nb[i]!==0) flips.add(i); }
       G.board = nb;
       animFlips = flips;
+      flipSeq = buildFlipSeq(lastMove, flips);
     }
     G.turn = s.turn==="w" ? WHITE : BLACK;
-    lastMove = (typeof s.last==="number") ? s.last : -1;
     G.over = !!s.winner;
     G.busy = data.status!=="playing";   // 待機中は操作不可。対戦中は currentIsInteractive() で制御
     render();
@@ -841,6 +869,7 @@
     for(const p of flips) G.board[p]=G.turn;
     lastMove=idx;
     animFlips=new Set(flips);
+    flipSeq=buildFlipSeq(idx,animFlips);
   }
 
   function advance(){
@@ -1019,7 +1048,7 @@
   document.getElementById("othelloUndo").addEventListener("click",()=>{
     if(G.mode==="online"){ toast("オンライン対戦では待ったできません"); return; }
     if(G.busy||G.over) return;
-    animFlips=new Set();
+    animFlips=new Set(); flipSeq=new Map();
     if(G.mode==="cpu"){
       // roll back to the player's previous decision point
       let target=null;
