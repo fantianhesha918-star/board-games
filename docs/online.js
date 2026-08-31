@@ -117,12 +117,100 @@ export async function heartbeat(code, role) {
   }
 }
 
-// 部屋を閉じる（ホストのみ許可）。
+// 部屋を閉じる（ホスト / 席0 のみ許可）。
 export async function closeRoom(code) {
   try {
     await deleteDoc(doc(db, "rooms", clip(code, 8)));
   } catch (e) {
     /* 権限が無い / すでに無い場合は無視 */
+  }
+}
+
+/* =========================================================================
+ * 複数人（2〜4席）用の部屋。othello の 2人用（host/guest）とは別スキーマ。
+ *   rooms/{code} = {
+ *     game, status: "waiting"|"playing",
+ *     host: { uid, name },      // 席0 の人（= 部屋を閉じられる人）
+ *     cap: 2..4,                // 人間の席数
+ *     cpu: 0..2,                // CPU の席数（席 cap..cap+cpu-1 を占める）
+ *     seats: [ { uid, name } ], // 参加した人間（参加順 = 席番号）。cap 人で playing
+ *     state: { turn: 0..(cap+cpu-1), seq, over, ... ゲーム固有 },
+ *     createdAt, updatedAt,
+ *     seen: { <uid>: timestamp },
+ *   }
+ * ======================================================================= */
+
+// 複数人部屋を作成。cap=人間席数, cpu=CPU席数。部屋番号を返す。
+export async function createRoomN(game, name, cap, cpu, state) {
+  const uid = await getUid();
+  const c = Math.max(2, Math.min(4, cap | 0));
+  const cp = Math.max(0, Math.min(2, cpu | 0));
+  for (let attempt = 0; attempt < 15; attempt++) {
+    const code = code4();
+    const ref = doc(db, "rooms", code);
+    try {
+      const ok = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        if (snap.exists()) return false;
+        tx.set(ref, {
+          game,
+          status: "waiting",
+          host: { uid, name: clip(name, 12) || "ホスト" },
+          cap: c,
+          cpu: cp,
+          seats: [{ uid, name: clip(name, 12) || "ホスト" }],
+          state: state || {},
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          seen: { [uid]: serverTimestamp() },
+        });
+        return true;
+      });
+      if (ok) return code;
+    } catch (e) {
+      /* 再試行 */
+    }
+  }
+  throw new Error("部屋番号を確保できませんでした。もう一度お試しください。");
+}
+
+// 複数人部屋に参加（または再入室）。{ index, data } を返す。index = 自分の席番号。
+export async function joinRoomN(code, name) {
+  const uid = await getUid();
+  const ref = doc(db, "rooms", clip(code, 8));
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error("その部屋番号は見つかりません。");
+    const d = snap.data();
+    if (!Array.isArray(d.seats)) throw new Error("この部屋には参加できません。");
+    const mine = d.seats.findIndex((s) => s && s.uid === uid);
+    if (mine >= 0) {
+      tx.update(ref, { ["seen." + uid]: serverTimestamp() });
+      return { index: mine, data: d };
+    }
+    if (d.status !== "waiting") throw new Error("その部屋はすでに始まっています。");
+    if (d.seats.length >= d.cap) throw new Error("その部屋は満員です。");
+    const myIndex = d.seats.length;
+    const seats = d.seats.concat([{ uid, name: clip(name, 12) || "プレイヤー" }]);
+    const full = seats.length === d.cap;
+    tx.update(ref, {
+      seats,
+      status: full ? "playing" : "waiting",
+      ["seen." + uid]: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return { index: myIndex, data: { ...d, seats, status: full ? "playing" : "waiting" } };
+  });
+}
+
+// 複数人部屋の生存通知。seen[自分のuid] を更新。
+export async function heartbeatN(code) {
+  const uid = await getUid();
+  const ref = doc(db, "rooms", clip(code, 8));
+  try {
+    await updateDoc(ref, { ["seen." + uid]: serverTimestamp() });
+  } catch (e) {
+    /* 一時的な失敗は無視 */
   }
 }
 
@@ -136,6 +224,9 @@ window.BGOnline = {
   pushRoom,
   heartbeat,
   closeRoom,
+  createRoomN,
+  joinRoomN,
+  heartbeatN,
   getUid,
 };
 window.dispatchEvent(new Event("bgonline-ready"));

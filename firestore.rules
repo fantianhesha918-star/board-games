@@ -2,8 +2,16 @@ rules_version = '2';
 
 // ボードゲームアプリ オンライン対戦 Firestore セキュリティルール
 // 方針: 匿名認証のみ・個人情報なし。部屋番号(ドキュメントID)を知っている人だけが
-// get でき、一覧(list)は誰にも許可しない。対戦中の state 更新は「今の手番の
-// プレイヤー」だけに限定して競合・不正な手を防ぐ。
+// get でき、一覧(list)は誰にも許可しない。
+//
+// 部屋には2スキーマある:
+//   A) 2人用（othello）  … host / guest / hostSeen / guestSeen
+//        state.turn   : "b"|"w"（ホスト=黒/ゲスト=白）
+//        state.winner : "b"|"w"|"draw"（未決着 null）
+//   B) 複数人用（memory 等）… host / cap / cpu / seats[] / seen{uid:ts}
+//        state.turn   : 0..(cap+cpu-1)（席番号。0..cap-1=人間 seats[i]、以降=CPU）
+//        state.seq    : 単調増加の整数（stale な上書きを弾く）
+//        state.over   : 全員終了フラグ
 service cloud.firestore {
   match /databases/{database}/documents {
     match /rooms/{code} {
@@ -19,28 +27,44 @@ service cloud.firestore {
           && n().host.uid == d().host.uid
           && n().createdAt == d().createdAt;
       }
-      function isPlayerUid(u) {
-        return u == d().host.uid || (d().guest != null && u == d().guest.uid);
-      }
 
-      // 部屋番号を直接指定した get のみ許可。一覧検索(list)は誰にも許可しない。
       allow get: if signedIn();
       allow list: if false;
 
-      // 部屋作成: 自分がホスト・待機中・ゲスト未定・4桁の部屋番号
-      allow create: if signedIn()
-        && n().host.uid == uid()
-        && n().status == "waiting"
-        && n().guest == null
-        && n().game is string
-        && code.matches("[0-9]{4}");
+      // ---------- 作成 ----------
+      // seats フィールドの有無でスキーマを判別（memory 等 = 複数人 / othello = 2人）
+      allow create: if signedIn() && code.matches("[0-9]{4}") && (
+        (("seats" in n()) && createMulti()) || (!("seats" in n()) && createDuo())
+      );
+      function createDuo() {
+        return n().host.uid == uid()
+          && n().status == "waiting"
+          && n().guest == null
+          && n().game is string;
+      }
+      function createMulti() {
+        return n().host.uid == uid()
+          && n().status == "waiting"
+          && n().game is string
+          && n().cap is int && n().cap >= 2 && n().cap <= 4
+          && n().cpu is int && n().cpu >= 0 && n().cpu <= 2
+          && n().seats.size() == 1
+          && n().seats[0].uid == uid();
+      }
 
+      // ---------- 更新 ----------
       allow update: if signedIn() && coreUnchanged() && (
-        isJoin() || isHeartbeat() || isMove()
+        (("seats" in d()) && multiUpdate())
+        || (!("seats" in d()) && duoUpdate())
       );
 
-      // 待機中の部屋にゲストとして参加する
-      function isJoin() {
+      /* ===== A) 2人用（othello） ===== */
+      function isPlayerUid(u) {
+        return u == d().host.uid || (d().guest != null && u == d().guest.uid);
+      }
+      function duoUpdate() { return isJoinDuo() || isHeartbeatDuo() || isMoveDuo(); }
+
+      function isJoinDuo() {
         return d().status == "waiting"
           && d().guest == null
           && n().status == "playing"
@@ -48,32 +72,13 @@ service cloud.firestore {
           && n().guest.name is string
           && changed().hasOnly(["guest", "status", "guestSeen", "updatedAt"]);
       }
-
-      // 生存通知だけの更新（離脱検知用）。自分の Seen フィールドのみ。
-      function isHeartbeat() {
+      function isHeartbeatDuo() {
         return (changed().hasOnly(["hostSeen"]) && uid() == d().host.uid)
           || (changed().hasOnly(["guestSeen"]) && d().guest != null && uid() == d().guest.uid);
       }
-
-      // 対戦中に盤面(state)を進める。
-      // 通常の手は「今の手番のプレイヤー」のみ。投了は「自分の負け（＝相手の勝ち）」
-      // としてゲームを終了する場合に限りいつでも可。
-      //
-      // ★共通の約束（新しい2人ゲームはこれに合わせれば、このルールは変更不要）:
-      //   state.turn   … 0 = ホスト / 1 = ゲスト
-      //   state.winner … "h" = ホストの勝ち / "g" = ゲストの勝ち / "draw"（未決着は null）
-      // othello だけは歴史的に turn:"b"|"w"・winner:"b"|"w"|"draw" を使っているので特例。
-      function myTurnTag() {
-        return d().game == "othello"
-          ? (uid() == d().host.uid ? "b" : "w")
-          : (uid() == d().host.uid ? 0 : 1);
-      }
-      function oppWinTag() {
-        return d().game == "othello"
-          ? (uid() == d().host.uid ? "w" : "b")
-          : (uid() == d().host.uid ? "g" : "h");
-      }
-      function isMove() {
+      function myTurnTag() { return uid() == d().host.uid ? "b" : "w"; }
+      function oppWinTag() { return uid() == d().host.uid ? "w" : "b"; }
+      function isMoveDuo() {
         return d().status == "playing"
           && isPlayerUid(uid())
           && n().guest.uid == d().guest.uid
@@ -84,8 +89,56 @@ service cloud.firestore {
           );
       }
 
-      // 部屋を閉じられるのはホストのみ
-      allow delete: if signedIn() && uid() == d().host.uid;
+      /* ===== B) 複数人用（memory 等） ===== */
+      function iAmSeated() {
+        return d().seats.size() >= 1 && (
+          d().seats[0].uid == uid()
+          || (d().seats.size() > 1 && d().seats[1].uid == uid())
+          || (d().seats.size() > 2 && d().seats[2].uid == uid())
+          || (d().seats.size() > 3 && d().seats[3].uid == uid())
+        );
+      }
+      function multiUpdate() { return isJoinMulti() || isHeartbeatMulti() || isMoveMulti(); }
+
+      function seatsUnchanged() {
+        return n().seats.size() == d().seats.size()
+          && n().seats[0].uid == d().seats[0].uid
+          && (d().seats.size() < 2 || n().seats[1].uid == d().seats[1].uid)
+          && (d().seats.size() < 3 || n().seats[2].uid == d().seats[2].uid)
+          && (d().seats.size() < 4 || n().seats[3].uid == d().seats[3].uid);
+      }
+
+      function isJoinMulti() {
+        return d().status == "waiting"
+          && d().seats.size() < d().cap
+          && n().seats.size() == d().seats.size() + 1
+          && n().seats[d().seats.size()].uid == uid()
+          && n().seats[d().seats.size()].name is string
+          && n().seats[0].uid == d().seats[0].uid
+          && n().cap == d().cap && n().cpu == d().cpu
+          && n().status == (n().seats.size() == d().cap ? "playing" : "waiting")
+          && changed().hasOnly(["seats", "status", "seen", "updatedAt"]);
+      }
+      function isHeartbeatMulti() {
+        return changed().hasOnly(["seen", "updatedAt"]) && iAmSeated();
+      }
+      // 対戦中の state 更新: 席についている本人なら可。席・cap・cpu は不変、
+      // seq は単調増加（古い/重複の上書きを弾く）。手番の厳密判定はクライアント側。
+      function isMoveMulti() {
+        return d().status == "playing"
+          && iAmSeated()
+          && seatsUnchanged()
+          && n().cap == d().cap && n().cpu == d().cpu
+          && changed().hasOnly(["state", "seen", "updatedAt"])
+          && n().state.seq is int
+          && n().state.seq > d().state.seq;
+      }
+
+      // ---------- 削除 ----------
+      allow delete: if signedIn() && (
+        (("seats" in d()) && d().seats.size() >= 1 && uid() == d().seats[0].uid)
+        || (!("seats" in d()) && uid() == d().host.uid)
+      );
     }
   }
 }
