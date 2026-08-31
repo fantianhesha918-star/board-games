@@ -58,13 +58,20 @@ service cloud.firestore {
       // 対戦中に盤面(state)を進める。
       // 通常の手は「今の手番のプレイヤー」のみ。投了は「自分の負け（＝相手の勝ち）」
       // としてゲームを終了する場合に限りいつでも可。
-      // ※ 現在はオセロ専用の判定（ホスト=黒 "b" / ゲスト=白 "w"）。別ゲームを
-      //   オンライン対応する際はこの関数を拡張すること。
-      function myColor() {
-        return uid() == d().host.uid ? "b" : "w";
+      //
+      // ★共通の約束（新しい2人ゲームはこれに合わせれば、このルールは変更不要）:
+      //   state.turn   … 0 = ホスト / 1 = ゲスト
+      //   state.winner … "h" = ホストの勝ち / "g" = ゲストの勝ち / "draw"（未決着は null）
+      // othello だけは歴史的に turn:"b"|"w"・winner:"b"|"w"|"draw" を使っているので特例。
+      function myTurnTag() {
+        return d().game == "othello"
+          ? (uid() == d().host.uid ? "b" : "w")
+          : (uid() == d().host.uid ? 0 : 1);
       }
-      function oppColor() {
-        return uid() == d().host.uid ? "w" : "b";
+      function oppWinTag() {
+        return d().game == "othello"
+          ? (uid() == d().host.uid ? "w" : "b")
+          : (uid() == d().host.uid ? "g" : "h");
       }
       function isMove() {
         return d().status == "playing"
@@ -72,8 +79,8 @@ service cloud.firestore {
           && n().guest.uid == d().guest.uid
           && changed().hasOnly(["state", "status", "updatedAt", "hostSeen", "guestSeen"])
           && (
-            d().state.turn == myColor()
-            || (d().state.winner == null && n().state.winner == oppColor())
+            d().state.turn == myTurnTag()
+            || (d().state.winner == null && n().state.winner == oppWinTag())
           );
       }
 

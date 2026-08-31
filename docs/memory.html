@@ -70,6 +70,18 @@
   .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
   .howto p{margin:4px 0;}
   .howto b{color:var(--accent);font-weight:700;}
+  /* online */
+  .txt-in{
+    width:100%;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 14px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;
+  }
+  .txt-in:focus{outline:none;border-color:var(--accent);}
+  .or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-dim);font-size:12px;font-weight:700;}
+  .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}
+  .join-row{display:flex;gap:8px;}
+  .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
+  .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
+  .mini-msg.err{color:var(--accent-press);}
 
   /* play */
   .play{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 12px 24px;}
@@ -150,6 +162,24 @@
     </div>
     <div class="setup">
       <div class="field">
+        <span class="label">対戦モード</span>
+        <div class="seg" id="segMode">
+          <button data-val="local" class="on">この端末で</button>
+          <button data-val="online">オンライン</button>
+        </div>
+      </div>
+      <div class="field" id="fieldOnline" style="display:none">
+        <span class="label">オンライン対戦（別の端末の相手と・2人）</span>
+        <input id="onlineName" class="txt-in" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="off">
+        <button class="start-btn" id="onlineCreate" style="margin:8px 0 0">部屋を作る</button>
+        <div class="or-sep"><span>または</span></div>
+        <div class="join-row">
+          <input id="onlineCode" class="txt-in" type="tel" inputmode="numeric" maxlength="4" placeholder="部屋番号（4桁）">
+          <button class="icon-btn" id="onlineJoin" style="height:auto;padding:0 20px;">参加</button>
+        </div>
+        <p class="mini-msg" id="onlineMsg"></p>
+      </div>
+      <div class="field local-only">
         <span class="label">人間（この端末で交代プレイ）</span>
         <div class="seg" id="segHumans">
           <button data-val="1" class="on">1人</button>
@@ -158,7 +188,7 @@
           <button data-val="4">4人</button>
         </div>
       </div>
-      <div class="field">
+      <div class="field local-only">
         <span class="label">CPU</span>
         <div class="seg" id="segCpu">
           <button data-val="0">なし</button>
@@ -167,8 +197,8 @@
           <button data-val="3">3人</button>
         </div>
       </div>
-      <p class="hint-text" id="countNote"></p>
-      <div class="field" id="fieldLevel">
+      <p class="hint-text local-only" id="countNote"></p>
+      <div class="field local-only" id="fieldLevel">
         <span class="label">CPUの記憶力</span>
         <div class="seg" id="segLevel">
           <button data-val="1">弱い</button>
@@ -177,7 +207,7 @@
         </div>
       </div>
       <div class="field">
-        <span class="label">カードの枚数</span>
+        <span class="label">カードの枚数<span id="sizeHostNote" style="display:none;font-weight:600;color:var(--text-dim);font-size:12px;">（部屋を作る人が決めます）</span></span>
         <div class="seg" id="segSize">
           <button data-val="12">やさしい<br>12枚</button>
           <button data-val="20" class="on">ふつう<br>20枚</button>
@@ -224,6 +254,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script type="module" src="online.js"></script>
 <script>
 "use strict";
 (function(){
@@ -255,12 +286,22 @@
   const getCpu=seg("segCpu",updateCountNote);
   const getLevel=seg("segLevel");
   const getSize=seg("segSize");
+  const getMode=seg("segMode",onModeChange);
+  function onModeChange(){
+    const online = getMode()==="online";
+    document.querySelectorAll(".local-only").forEach(el=>{ el.style.display = online ? "none" : ""; });
+    document.getElementById("fieldOnline").style.display = online ? "flex" : "none";
+    document.getElementById("startBtn").style.display = online ? "none" : "";
+    document.getElementById("sizeHostNote").style.display = online ? "inline" : "none";
+    if(!online) updateCountNote();
+  }
 
   const boardEl=document.getElementById("board");
   const G={
     humans:1, n:2, level:2, cards:[], cols:4, turn:0,
     score:[], busy:false, first:[], over:false,
-    cpuMems:{}, pLevel:0.72
+    cpuMems:{}, pLevel:0.72,
+    net:false, online:null
   };
   function isHuman(i){ return i<G.humans; }
   function pname(i){ return i<G.humans ? (G.humans===1?"あなた":"プレイヤー"+(i+1)) : "CPU"+(i-G.humans+1); }
@@ -291,6 +332,9 @@
   }
 
   function startGame(){
+    if(getMode()==="online") return;   // オンラインは専用の導線から
+    if(G.online) teardownNet();
+    G.net=false;
     const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
     if(tot<2){ toast("合計2人以上にしてください"); return; }
     if(tot>4){ toast("合計4人までにしてください"); return; }
@@ -309,6 +353,8 @@
     for(let i=G.humans;i<G.n;i++) G.cpuMems[i]={};
     G.turn=0;
 
+    document.getElementById("restartBtn").textContent="最初から";
+    document.getElementById("restartBtn2").textContent="最初から";
     buildScoreboard();
     renderBoard();
     updateHud();
@@ -345,9 +391,10 @@
     });
   }
 
-  function isCpuTurn(){ return !isHuman(G.turn); }
+  function isCpuTurn(){ return !G.net && !isHuman(G.turn); }
 
   function updateHud(){
+    if(G.net){ updateHudNet(); return; }
     for(let i=0;i<G.n;i++){
       const d=document.getElementById("score"+i);
       if(!d) continue;
@@ -416,6 +463,7 @@
   }
 
   async function pick(card){
+    if(G.net){ netPick(card); return; }
     if(G.busy||G.over||card.matched||card.up) return;
     if(isCpuTurn()) return;
     G.busy=true;
@@ -430,6 +478,278 @@
     const card=G.cards[+el.dataset.pos];
     pick(card);
   });
+
+  /* ================= オンライン対戦 ================= */
+  const SUITS_OF_COLOR = { b:["S","C"], r:["H","D"] };
+  function onlineReady(){
+    if(window.BGOnline) return Promise.resolve(window.BGOnline);
+    return new Promise((res,rej)=>{
+      const to=setTimeout(()=>rej(new Error("オンライン機能の読み込みに失敗しました")),8000);
+      window.addEventListener("bgonline-ready",()=>{ clearTimeout(to); res(window.BGOnline); },{once:true});
+    });
+  }
+  function omsg(t,isErr){
+    const el=document.getElementById("onlineMsg");
+    el.textContent=t||""; el.classList.toggle("err",!!isErr);
+  }
+  // size 枚のカード配置（コードの配列）をランダム生成
+  function buildNetDeck(size){
+    const pairs=size/2;
+    const all=[];
+    for(let r=1;r<=13;r++){ all.push(["b",r]); all.push(["r",r]); }
+    for(let i=all.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [all[i],all[j]]=[all[j],all[i]]; }
+    const deck=[];
+    all.slice(0,pairs).forEach(([col,r])=>{
+      SUITS_OF_COLOR[col].forEach(su=> deck.push(su+r));
+    });
+    for(let i=deck.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [deck[i],deck[j]]=[deck[j],deck[i]]; }
+    return deck;
+  }
+  function buildNetCards(deckStr){
+    G.cards = deckStr.split(",").map((code,i)=>{
+      const su=code[0], r=+code.slice(1);
+      const color = (su==="S"||su==="C") ? "b" : "r";
+      return {
+        code, pos:i, key:color+"-"+r,
+        face:"url(assets/cards/"+code+".webp)",
+        label:RANKS[r-1]+su,
+        up:false, matched:false
+      };
+    });
+    const size=G.cards.length;
+    G.cols = size<=12?4 : size<=20?4 : 5;
+  }
+  function myIdx(){ return G.online.role==="host" ? 0 : 1; }
+
+  function buildScoreboardNet(){
+    const sb=document.getElementById("scoreboard");
+    sb.innerHTML="";
+    const names=[ G.online.hostName||"ホスト", G.online.guestName||"ゲスト" ];
+    for(let i=0;i<2;i++){
+      const d=document.createElement("div");
+      d.className="score"; d.id="score"+i;
+      const tag = i===myIdx() ? "（あなた）" : "";
+      d.innerHTML='<span class="ava"></span><span class="meta"><span class="who">'+
+        (names[i]||("プレイヤー"+(i+1)))+tag+'</span><span class="num">0<small>組</small></span></span>';
+      d.querySelector(".ava").style.backgroundImage = i===0 ? "url(assets/cards/S1.webp)" : "url(assets/cards/H1.webp)";
+      sb.appendChild(d);
+    }
+  }
+  function updateHudNet(){
+    const s = G.online.roomState && G.online.roomState.state;
+    for(let i=0;i<2;i++){
+      const d=document.getElementById("score"+i); if(!d) continue;
+      d.querySelector(".num").innerHTML = ((s&&s.scores[i])||0)+'<small>組</small>';
+      d.classList.toggle("active", !G.over && s && s.turn===i);
+    }
+    const st=document.getElementById("statusText");
+    if(G.over){ st.textContent="ゲーム終了"; return; }
+    const rs=G.online.roomState;
+    if(!rs || rs.status==="waiting"){
+      st.textContent="相手を待っています…（部屋番号 "+G.online.code+"）"; return;
+    }
+    const oppSeen = G.online.role==="host" ? rs.guestSeen : rs.hostSeen;
+    let stale=false;
+    try{ if(oppSeen && oppSeen.toMillis) stale=(Date.now()-oppSeen.toMillis())>16000; }catch(e){}
+    let base = s.turn===myIdx() ? "あなたの番" : "相手の番";
+    st.textContent = stale ? base+"／相手の接続が不安定です…" : base;
+  }
+
+  function syncNetVisual(){
+    const s=G.online.roomState.state;
+    const upSet=new Set(s.up||[]);
+    G.cards.forEach(card=>{
+      const taken = s.taken[card.pos]!==".";
+      const wantUp = taken || upSet.has(card.pos);
+      if(wantUp && !card.up && card.el){ card.el.classList.add("flip"); setTimeout(()=>card.el&&card.el.classList.remove("flip"),260); }
+      card.up = wantUp;
+      card.matched = taken;
+      if(card.el){
+        card.el.classList.toggle("up", wantUp);
+        card.el.classList.toggle("matched", taken);
+      }
+    });
+  }
+
+  function netPick(card){
+    if(!G.online || G.over) return;
+    const rs=G.online.roomState;
+    if(!rs || rs.status!=="playing") return;
+    const s=rs.state;
+    if(s.winner) return;
+    if(s.turn!==myIdx()){ toast("相手の番です"); return; }
+    if((s.up||[]).length>=2 || G.online.busy) return;
+    if(card.matched || (s.up||[]).includes(card.pos)) return;
+    const up=(s.up||[]).concat(card.pos);
+    G.online.busy=true;
+    // 先に見た目を反映（自分の端末のもたつき防止）
+    card.up=true; if(card.el){ card.el.classList.add("flip"); setTimeout(()=>card.el&&card.el.classList.remove("flip"),260); card.el.classList.add("up"); }
+    pushNet({ up, seq:(s.seq||0)+1 }).finally(()=>{ G.online.busy=false; });
+  }
+
+  // state の一部だけ差し替えて送信
+  function pushNet(patchState){
+    const s=G.online.roomState.state;
+    const next=Object.assign({}, s, patchState);
+    return onlineReady()
+      .then(API=>API.pushRoom(G.online.code, { state: next }))
+      .catch(()=>toast("通信に失敗しました"));
+  }
+
+  async function doNetResolve(){
+    if(!G.online) return;
+    const s=G.online.roomState.state;
+    if(!s || (s.up||[]).length!==2 || s.winner || s.turn!==myIdx()) { G.online.resolving=false; return; }
+    const [p,q]=s.up;
+    const c1=G.cards[p], c2=G.cards[q];
+    const match = c1 && c2 && c1.key===c2.key;
+    const taken=s.taken.split("");
+    const scores=[s.scores[0],s.scores[1]];
+    let turn=s.turn;
+    if(match){
+      taken[p]=String(turn); taken[q]=String(turn);
+      scores[turn]++;
+    }else{
+      if(c1&&c1.el){ c1.el.classList.add("nudge"); }
+      if(c2&&c2.el){ c2.el.classList.add("nudge"); }
+      await wait(600);
+      if(c1&&c1.el) c1.el.classList.remove("nudge");
+      if(c2&&c2.el) c2.el.classList.remove("nudge");
+      turn = turn===0?1:0;
+    }
+    const allTaken = taken.every(ch=>ch!==".");
+    let winner=null;
+    if(allTaken) winner = scores[0]>scores[1]?"h" : scores[1]>scores[0]?"g" : "draw";
+    G.online.resolving=false;
+    await pushNet({ taken:taken.join(""), up:[], turn, scores, winner, seq:(s.seq||0)+1 });
+  }
+
+  function enterOnlineGame(code, role){
+    teardownNet();
+    G.net=true; G.over=false; G.busy=false; G.cards=[]; G.first=[];
+    G.online = {
+      code, role, roomState:null, unsub:null, hbTimer:null, chkTimer:null,
+      prevStatus:"waiting", ended:false, busy:false, resolving:false,
+      hostName:null, guestName:null
+    };
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("restartBtn").textContent="やめる";
+    document.getElementById("restartBtn2").textContent="やめる";
+    document.getElementById("statusText").textContent =
+      role==="host" ? "相手を待っています…（部屋番号 "+code+"）" : "接続中…";
+    document.getElementById("scoreboard").innerHTML="";
+    boardEl.innerHTML="";
+    show("play");
+    onlineReady().then(API=>{
+      G.online.unsub = API.watchRoom(code, onRoomUpdate);
+      G.online.hbTimer = setInterval(()=>{ if(G.online) API.heartbeat(code, G.online.role); }, 5000);
+      API.heartbeat(code, role);
+    });
+    G.online.chkTimer = setInterval(()=>{ if(G.online) updateHudNet(); }, 3000);
+  }
+
+  function onRoomUpdate(data){
+    if(!G.online) return;
+    if(!data){
+      if(!G.online.ended) showNetEnd("部屋が閉じられました","相手が退出したか、部屋が削除されました");
+      return;
+    }
+    G.online.roomState=data;
+    if(data.host) G.online.hostName=data.host.name;
+    if(data.guest) G.online.guestName=data.guest.name;
+
+    if(data.status==="playing" && G.online.prevStatus==="waiting"){
+      toast("対戦相手が参加しました！");
+    }
+    G.online.prevStatus=data.status;
+
+    const s=data.state||{};
+    if(!G.cards.length && s.deck){
+      buildNetCards(s.deck);
+      buildScoreboardNet();
+      renderBoard();
+    }else if(G.cards.length && (!G.online._sbNames || G.online._sbNames!==(G.online.hostName+"/"+G.online.guestName))){
+      G.online._sbNames = G.online.hostName+"/"+G.online.guestName;
+      buildScoreboardNet();
+    }
+
+    if(G.cards.length){ syncNetVisual(); }
+    G.over = !!s.winner;
+    updateHudNet();
+
+    if(s.winner && !G.online.ended){
+      const meWon = (s.winner==="h" && myIdx()===0) || (s.winner==="g" && myIdx()===1);
+      const title = s.winner==="draw" ? "引き分け" : (meWon ? "あなたの勝ち！" : "あなたの負け…");
+      const detail = "あなた "+(s.scores[myIdx()]||0)+"組 ／ 相手 "+(s.scores[1-myIdx()]||0)+"組";
+      showNetEnd(title, detail);
+      return;
+    }
+
+    // 2枚めくられていて自分の手番なら、少し見せてから判定して送信する
+    if(data.status==="playing" && !s.winner && (s.up||[]).length===2 && s.turn===myIdx() && !G.online.resolving){
+      G.online.resolving=true;
+      setTimeout(doNetResolve, 950);
+    }
+    if((s.up||[]).length<2) G.online.resolving=false;
+  }
+
+  function showNetEnd(title, detail){
+    if(G.online) G.online.ended=true;
+    G.over=true;
+    document.getElementById("ovResult").textContent=title;
+    document.getElementById("ovDetail").textContent=detail||"";
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  function teardownNet(){
+    const o=G.online;
+    G.online=null; G.net=false;
+    if(!o) return;
+    try{ o.unsub && o.unsub(); }catch(e){}
+    clearInterval(o.hbTimer); clearInterval(o.chkTimer);
+    const rs=o.roomState;
+    const ended = o.ended || (rs && rs.state && rs.state.winner) || (rs && rs.status!=="playing");
+    onlineReady().then(API=>{
+      if(o.role==="host"){
+        API.closeRoom(o.code).catch(()=>{});
+      }else if(!ended && rs && rs.state){
+        API.pushRoom(o.code, { state: Object.assign({}, rs.state, { winner:"h" }) }).catch(()=>{});
+      }
+    }).catch(()=>{});
+  }
+
+  document.getElementById("onlineCreate").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineCreate");
+    const name=document.getElementById("onlineName").value.trim();
+    if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    const size=+getSize();
+    btn.disabled=true; omsg("部屋を作成中…");
+    try{
+      const API=await onlineReady();
+      const deck=buildNetDeck(size).join(",");
+      const state={ deck, taken:".".repeat(size), up:[], turn:0, scores:[0,0], winner:null, seq:0 };
+      const code=await API.createRoom("memory", name, state);
+      enterOnlineGame(code, "host");
+    }catch(e){ omsg((e&&e.message)||"部屋を作れませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+
+  document.getElementById("onlineJoin").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineJoin");
+    const name=document.getElementById("onlineName").value.trim();
+    const code=document.getElementById("onlineCode").value.trim();
+    if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    if(!/^[0-9]{4}$/.test(code)){ omsg("部屋番号は4桁の数字です",true); return; }
+    btn.disabled=true; omsg("参加中…");
+    try{
+      const API=await onlineReady();
+      const {role}=await API.joinRoom(code, name);
+      enterOnlineGame(code, role);
+    }catch(e){ omsg((e&&e.message)||"参加できませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+
+  window.addEventListener("pagehide", (e)=>{ if(!e.persisted && G.online) teardownNet(); });
 
   /* ---------- CPU ---------- */
   function cpuChoose(mem){
@@ -509,11 +829,24 @@
 
   document.getElementById("startBtn").addEventListener("click",startGame);
   document.getElementById("ovAgain").addEventListener("click",()=>{
-    document.getElementById("overlay").classList.remove("show"); startGame();
+    document.getElementById("overlay").classList.remove("show");
+    if(G.net || G.online){ teardownNet(); show("setup"); return; }
+    startGame();
   });
-  document.getElementById("restartBtn").addEventListener("click",()=>{ if(!G.busy||G.over) startGame(); });
-  document.getElementById("restartBtn2").addEventListener("click",()=>{ if(!G.busy||G.over) startGame(); });
-  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
+  function backToSetupFromNet(){ teardownNet(); document.getElementById("overlay").classList.remove("show"); show("setup"); }
+  document.getElementById("restartBtn").addEventListener("click",()=>{
+    if(G.net || G.online){ backToSetupFromNet(); return; }
+    if(!G.busy||G.over) startGame();
+  });
+  document.getElementById("restartBtn2").addEventListener("click",()=>{
+    if(G.net || G.online){ backToSetupFromNet(); return; }
+    if(!G.busy||G.over) startGame();
+  });
+  document.getElementById("toSetup").addEventListener("click",e=>{
+    e.preventDefault();
+    if(G.net || G.online) teardownNet();
+    show("setup");
+  });
 
   updateCountNote();
 })();
