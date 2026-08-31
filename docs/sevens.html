@@ -62,6 +62,15 @@
   .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
   .howto p{margin:4px 0;}
   .howto b{color:var(--accent);font-weight:700;}
+  /* online */
+  .txt-in{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--text);padding:12px 14px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;}
+  .txt-in:focus{outline:none;border-color:var(--accent);}
+  .or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-dim);font-size:12px;font-weight:700;}
+  .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}
+  .join-row{display:flex;gap:8px;}
+  .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
+  .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
+  .mini-msg.err{color:var(--accent-press);}
 
   .play{flex:1;display:flex;flex-direction:column;padding:2px 10px 14px;gap:9px;}
   .rowinfo{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
@@ -170,6 +179,41 @@
     </div>
     <div class="setup">
       <div class="field">
+        <span class="label">対戦モード</span>
+        <div class="seg" id="segMode">
+          <button data-val="local" class="on">この端末で</button>
+          <button data-val="online">オンライン</button>
+        </div>
+      </div>
+      <div class="field" id="fieldOnline" style="display:none">
+        <span class="label">オンライン対戦（別々の端末から2〜4人）</span>
+        <input id="onlineName" class="txt-in" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="off">
+        <div class="field" style="margin-top:6px">
+          <span class="label" style="font-size:13px">合計人数（部屋を作る人が設定）</span>
+          <div class="seg" id="segNetTotal">
+            <button data-val="2" class="on">2人</button>
+            <button data-val="3">3人</button>
+            <button data-val="4">4人</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <span class="label" style="font-size:13px">うち CPU</span>
+          <div class="seg" id="segNetCpu">
+            <button data-val="0" class="on">なし</button>
+            <button data-val="1">1人</button>
+            <button data-val="2">2人</button>
+          </div>
+          <p class="hint-text" id="netCountNote" style="margin:2px 0 0"></p>
+        </div>
+        <button class="start-btn" id="onlineCreate" style="margin:12px 0 0">部屋を作る</button>
+        <div class="or-sep"><span>または</span></div>
+        <div class="join-row">
+          <input id="onlineCode" class="txt-in" type="tel" inputmode="numeric" maxlength="4" placeholder="部屋番号（4桁）">
+          <button class="icon-btn" id="onlineJoin" style="height:auto;padding:0 20px;">参加</button>
+        </div>
+        <p class="mini-msg" id="onlineMsg"></p>
+      </div>
+      <div class="field local-only">
         <span class="label">人間（この端末で交代プレイ）</span>
         <div class="seg" id="segHumans">
           <button data-val="1" class="on">1人</button>
@@ -178,7 +222,7 @@
           <button data-val="4">4人</button>
         </div>
       </div>
-      <div class="field">
+      <div class="field local-only">
         <span class="label">CPU</span>
         <div class="seg" id="segCpu">
           <button data-val="0">なし</button>
@@ -187,7 +231,7 @@
           <button data-val="3">3人</button>
         </div>
       </div>
-      <p class="hint-text" id="countNote"></p>
+      <p class="hint-text local-only" id="countNote"></p>
       <div class="field">
         <span class="label">パスできる回数</span>
         <div class="seg" id="segPass">
@@ -256,6 +300,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script type="module" src="online.js"></script>
 <script>
 "use strict";
 (function(){
@@ -290,9 +335,29 @@
   const getCpu=seg("segCpu",updateCountNote);
   const getPass=seg("segPass");
   const getJoker=seg("segJoker",v=>{ document.getElementById("hintJk").style.display=v==="on"?"":"none"; });
+  const getMode=seg("segMode",onModeChange);
+  const getNetTotal=seg("segNetTotal",onNetCountChange);
+  const getNetCpu=seg("segNetCpu",onNetCountChange);
+  function onModeChange(){
+    const online=getMode()==="online";
+    document.querySelectorAll(".local-only").forEach(el=>{ el.style.display=online?"none":""; });
+    document.getElementById("fieldOnline").style.display=online?"flex":"none";
+    document.getElementById("startBtn").style.display=online?"none":"";
+    if(online) onNetCountChange(); else updateCountNote();
+  }
+  function onNetCountChange(){
+    const tot=+getNetTotal(), maxCpu=Math.max(0,tot-2);
+    document.querySelectorAll("#segNetCpu button").forEach(b=>{
+      const dis=(+b.dataset.val)>maxCpu; b.disabled=dis; b.style.opacity=dis?.4:"";
+      if(dis&&b.classList.contains("on")){ b.classList.remove("on"); document.querySelector('#segNetCpu button[data-val="0"]').classList.add("on"); }
+    });
+    const cpu=Math.min(+getNetCpu(),maxCpu), hu=tot-cpu;
+    document.getElementById("netCountNote").textContent="人間 "+hu+"人（自分＋"+(hu-1)+"人）"+(cpu>0?" ＋ CPU "+cpu+"人":"");
+  }
 
   const G={ humans:1, n:2, passLimit:3, jokerOn:true, players:[], B:{}, cur:0,
-            over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null, forced:null };
+            over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null, forced:null,
+            net:false, online:null };
 
   function filled(s,r){ return r>=1&&r<=13 && G.B[s][r]!=null; }
   // そのスートで今おけるランク一覧。A(1)またはK(13)まで並ぶと逆側から折り返す変則ルール。
@@ -333,12 +398,21 @@
     return G.players[p].hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
   }
 
-  function name(i){ if(i<G.humans) return G.humans===1?"あなた":"プレイヤー"+(i+1); return "CPU"+(i-G.humans+1); }
-  function isHuman(i){ return i<G.humans; }
+  function name(i){
+    if(G.net && G.online){
+      if(i<G.online.cap) return (G.online.seatNames[i]||("プレイヤー"+(i+1)))+(i===G.online.myIdx?"(あなた)":"");
+      return "CPU"+(i-G.online.cap+1);
+    }
+    if(i<G.humans) return G.humans===1?"あなた":"プレイヤー"+(i+1); return "CPU"+(i-G.humans+1);
+  }
+  function isHuman(i){ return G.net ? (G.online && i<G.online.cap) : i<G.humans; }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
   function nextActive(from){ let q=from; do{ q=(q+1)%G.n; }while(G.players[q].done && q!==from); return q; }
 
   function startGame(){
+    if(getMode()==="online") return;
+    if(G.online) teardownNet();
+    G.net=false;
     const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
     if(tot<2){ toast("合計2人以上にしてください"); return; }
     if(tot>4){ toast("合計4人までにしてください"); return; }
@@ -504,6 +578,7 @@
   /* ---------- interaction ---------- */
   document.getElementById("hand").addEventListener("click",e=>{
     if(G.busy||G.over) return;
+    if(G.net && G.cur!==G.online.myIdx) return;
     const el=e.target.closest(".card"); if(!el) return;
     const p=G.cur, P=G.players[p];
     const i=+el.dataset.i, c=P.hand[i];
@@ -512,6 +587,7 @@
     if(fi>=0){
       if(i!==fi){ toast("ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください"); return; }
       G.busy=true; G.jokerMode=false;
+      if(G.net){ netAct(p,{type:"play",s:c.suit,r:c.rank,joker:false}); return; }
       (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(220); endTurn(p); })();
       return;
     }
@@ -525,6 +601,7 @@
     }
     if(slotOpen(c.suit,c.rank)){
       G.busy=true; G.jokerMode=false;
+      if(G.net){ netAct(p,{type:"play",s:c.suit,r:c.rank,joker:false}); return; }
       (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(220); endTurn(p); })();
     }else{
       toast("そのカードはまだ出せません");
@@ -533,12 +610,14 @@
 
   document.getElementById("board").addEventListener("click",e=>{
     if(G.busy||G.over) return;
+    if(G.net && G.cur!==G.online.myIdx) return;
     const cell=e.target.closest(".cell"); if(!cell) return;
     const s=cell.dataset.s, r=+cell.dataset.r;
     if(!s) return;
     const p=G.cur;
     if(G.jokerMode && slotOpen(s,r)){
       G.busy=true; G.jokerMode=false;
+      if(G.net){ netAct(p,{type:"play",s:s,r:r,joker:true}); return; }
       (async()=>{ await playCardData(p,s,r,true); await wait(220); endTurn(p); })();
       return;
     }
@@ -547,9 +626,11 @@
   document.getElementById("passBtn").addEventListener("click",()=>{
     if(G.busy||G.over) return;
     const p=G.cur;
+    if(G.net && p!==G.online.myIdx) return;
     if(!isHuman(p)) return;
     if(forcedIdx(p)>=0){ toast("ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください"); return; }
     G.busy=true; G.jokerMode=false;
+    if(G.net){ netAct(p,{type:"pass"}); return; }
     (async()=>{ await doPass(p); endTurn(p); })();
   });
 
@@ -687,12 +768,303 @@
     document.getElementById("overlay").classList.add("show");
   }
 
+  /* ==================== オンライン対戦 ==================== */
+  const BIDX=(s,r)=>SUITS.indexOf(s)*13+(r-1);
+  function bfilledS(board,s,r){ return r>=1&&r<=13 && board[BIDX(s,r)]!=="."; }
+  function openRanksB(board,s){
+    const F=r=>bfilledS(board,s,r);
+    let hi=7; while(hi+1<=13&&F(hi+1)) hi++;
+    let lo=7; while(lo-1>=1&&F(lo-1)) lo--;
+    const aP=F(1), kP=F(13); const out=[];
+    if(!aP&&!kP){ for(let r=1;r<=13;r++) if(!F(r)&&(F(r-1)||F(r+1))) out.push(r); }
+    else if(aP&&!kP){ let f; if(!F(13)) f=13; else { let w=13; while(w-1>=1&&F(w-1)) w--; f=w-1; } if(f>hi) out.push(f); }
+    else if(kP&&!aP){ let f; if(!F(1)) f=1; else { let w=1; while(w+1<=13&&F(w+1)) w++; f=w+1; } if(f<lo) out.push(f); }
+    else { let gapHi=false; for(let r=hi+1;r<=12;r++) if(!F(r)) gapHi=true;
+           let gapLo=false; for(let r=2;r<=lo-1;r++) if(!F(r)) gapLo=true;
+           if(gapHi){ let w=13; while(w-1>=1&&F(w-1)) w--; if(w-1>hi) out.push(w-1); }
+           if(gapLo){ let w=1; while(w+1<=13&&F(w+1)) w++; if(w+1<lo) out.push(w+1); } }
+    return out;
+  }
+  function slotOpenB(board,s,r){ return r>=1&&r<=13 && board[BIDX(s,r)]==="." && openRanksB(board,s).indexOf(r)>=0; }
+  function jokerSlotsB(board){ const o=[]; for(const s of SUITS) for(let r=1;r<=13;r++) if(slotOpenB(board,s,r)) o.push([s,r]); return o; }
+  function bset(board,s,r,ch){ const i=BIDX(s,r); return board.slice(0,i)+ch+board.slice(i+1); }
+
+  const cmpCode=(a,b)=>{ if(a==="JK") return 1; if(b==="JK") return -1;
+    const sa=SUITS.indexOf(a[0]), sb=SUITS.indexOf(b[0]); return sa!==sb ? sa-sb : (+a.slice(1))-(+b.slice(1)); };
+  function strToHand(csv){ if(!csv) return []; return csv.split(",").map(c=> c==="JK"?{joker:true,rank:0}:{joker:false,suit:c[0],rank:+c.slice(1)}); }
+  function handStrRemove(csv, code){ const a=csv?csv.split(","):[]; const i=a.indexOf(code); if(i>=0) a.splice(i,1); return a.join(","); }
+
+  function dealSevens(nSeats, jokerOn){
+    let board=".".repeat(52);
+    for(const s of SUITS) board=bset(board,s,7,"o");
+    const deck=[];
+    for(const s of SUITS) for(let r=1;r<=13;r++) if(r!==7) deck.push(s+r);
+    if(jokerOn) deck.push("JK");
+    shuffle(deck);
+    const hands=Array.from({length:nSeats},()=>[]);
+    deck.forEach((c,i)=>hands[i%nSeats].push(c));
+    hands.forEach(h=>h.sort(cmpCode));
+    return { board, hands: hands.map(h=>h.join(",")) };
+  }
+
+  function finalizeRankingNet(ns){
+    const N=ns.hands.length, fin=[], act=[], bst=[];
+    for(let i=0;i<N;i++){ if(ns.alive[i]==="d") fin.push(i); else if(ns.alive[i]==="a") act.push(i); else bst.push(i); }
+    fin.sort((a,b)=>ns.place[a]-ns.place[b]);
+    bst.sort((a,b)=>ns.bustAt[b]-ns.bustAt[a]);
+    [...fin,...act,...bst].forEach((idx,k)=>{ ns.place[idx]=k+1; });
+  }
+
+  // 1手ぶんの行動を state に適用し、次の state を返す（純粋関数）
+  function applyAction(st, seat, act){
+    const ns={
+      cfg:st.cfg, board:st.board, hands:st.hands.slice(), pass:st.pass.slice(),
+      alive:st.alive.slice(), place:st.place.slice(), bustAt:st.bustAt.slice(),
+      finishSeq:st.finishSeq||0, bustSeq:st.bustSeq||0, turn:st.turn,
+      forced:st.forced||null, last:st.last||null, over:false, seq:(st.seq||0)+1
+    };
+    if(act.type==="play"){
+      const code = act.joker ? "JK" : (act.s+act.r);
+      ns.hands[seat] = handStrRemove(ns.hands[seat], code);
+      ns.board = bset(ns.board, act.s, act.r, act.joker?"j":"o");
+      if(act.joker){ ns.forced={s:act.s,r:act.r}; ns.last={s:act.s,r:act.r,joker:true}; }
+      else { if(ns.forced && ns.forced.s===act.s && ns.forced.r===act.r) ns.forced=null; ns.last={s:act.s,r:act.r,joker:false}; }
+      if(ns.hands[seat]==="" && ns.alive[seat]==="a"){
+        ns.alive[seat]="d"; ns.finishSeq++; ns.place[seat]=ns.finishSeq;
+      }
+    }else{ // pass
+      ns.pass[seat]--;
+      if(ns.pass[seat]<0){
+        ns.alive[seat]="b"; ns.bustSeq++; ns.bustAt[seat]=ns.bustSeq;
+        for(const c of strToHand(ns.hands[seat])){
+          if(c.joker){ const js=jokerSlotsB(ns.board); if(js.length){ ns.board=bset(ns.board,js[0][0],js[0][1],"j"); ns.forced={s:js[0][0],r:js[0][1]}; } }
+          else ns.board=bset(ns.board,c.suit,c.rank,"o");
+        }
+        ns.hands[seat]="";
+        if(ns.forced){
+          const s=ns.forced.s, r=ns.forced.r;
+          const held=ns.hands.some((h,i)=> ns.alive[i]!=="b" && strToHand(h).some(c=>!c.joker&&c.suit===s&&c.rank===r));
+          if(ns.board[BIDX(s,r)]!=="j" || !held) ns.forced=null;
+        }
+      }
+    }
+    // 決着判定
+    let active=0, lastActive=-1;
+    for(let i=0;i<ns.alive.length;i++) if(ns.alive[i]==="a"){ active++; lastActive=i; }
+    if(active<=1){ finalizeRankingNet(ns); ns.over=true; }
+    else { let q=seat; do{ q=(q+1)%ns.alive.length; }while(ns.alive[q]!=="a" && q!==seat); ns.turn=q; }
+    return ns;
+  }
+
+  function onlineReady(){
+    if(window.BGOnline) return Promise.resolve(window.BGOnline);
+    return new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error("オンライン機能の読み込みに失敗しました")),8000);
+      window.addEventListener("bgonline-ready",()=>{ clearTimeout(to); res(window.BGOnline); },{once:true}); });
+  }
+  function omsg(t,isErr){ const el=document.getElementById("onlineMsg"); el.textContent=t||""; el.classList.toggle("err",!!isErr); }
+
+  function applyNetSnapshot(s){
+    G.n=s.hands.length; G.viewer=G.online.myIdx;
+    G.jokerOn=s.cfg.joker; G.passLimit=s.cfg.pass;
+    G.B={}; for(const su of SUITS){ G.B[su]=new Array(14).fill(null);
+      for(let r=1;r<=13;r++){ const ch=s.board[BIDX(su,r)]; G.B[su][r]= ch==="."?null : ch==="j"?"J":"C"; } }
+    G.forced = s.forced ? {suit:s.forced.s, rank:s.forced.r} : null;
+    G.last = s.last ? {suit:s.last.s, rank:s.last.r, joker:!!s.last.joker} : null;
+    G.cur=s.turn; G.over=!!s.over;
+    G.players=s.hands.map((csv,i)=>({
+      hand: strToHand(csv), done: s.alive[i]!=="a", busted: s.alive[i]==="b",
+      passLeft: s.pass[i], place: s.place[i], bustSeq: s.bustAt[i]
+    }));
+    G.busy=false;
+  }
+
+  async function netAct(seat, act){
+    if(!G.online || G.online.pending) return;
+    const cur=G.online.roomState && G.online.roomState.state;
+    if(!cur || cur.over || cur.turn!==seat) return;
+    G.online.pending=true;
+    if(act.type==="play") popCell(act.s, act.r);
+    try{ await pushNet(applyAction(cur, seat, act)); }
+    catch(e){ toast("送信に失敗しました"); }
+    finally{ G.online.pending=false; }
+  }
+
+  function pushNet(ns){
+    return onlineReady().then(API=>API.pushRoom(G.online.code, { state: ns }));
+  }
+
+  async function netCpuTurn(){
+    if(!G.online || G.online.myIdx!==0 || G.online.cpuActing) return;
+    const s0=G.online.roomState.state;
+    if(!s0 || s0.over || s0.turn<G.online.cap) return;
+    const seat=s0.turn; G.online.cpuActing=true;
+    try{
+      await wait(800);
+      const st=G.online.roomState.state;
+      if(st.turn!==seat || st.over) return;
+      const hand=strToHand(st.hands[seat]); const board=st.board;
+      let act=null;
+      const fdMatch = st.forced && board[BIDX(st.forced.s,st.forced.r)]==="j"
+        && hand.some(c=>!c.joker&&c.suit===st.forced.s&&c.rank===st.forced.r);
+      if(fdMatch){ act={type:"play",s:st.forced.s,r:st.forced.r,joker:false}; }
+      else {
+        const pl=hand.filter(c=>!c.joker && slotOpenB(board,c.suit,c.rank));
+        if(pl.length){ pl.sort((a,b)=>Math.abs(b.rank-7)-Math.abs(a.rank-7)); const c=pl[0]; act={type:"play",s:c.suit,r:c.rank,joker:false}; }
+        else {
+          const jk=hand.find(c=>c.joker);
+          if(jk){
+            const slots=jokerSlotsB(board).filter(([s,r])=>!hand.some(c=>!c.joker&&c.suit===s&&c.rank===r));
+            const unblock=slots.find(([s,r])=>hand.some(c=>!c.joker&&c.suit===s&&(c.rank===r-1||c.rank===r+1)));
+            if(unblock) act={type:"play",s:unblock[0],r:unblock[1],joker:true};
+            else if(st.pass[seat]<=0 && slots.length) act={type:"play",s:slots[0][0],r:slots[0][1],joker:true};
+          }
+          if(!act) act={type:"pass"};
+        }
+      }
+      await pushNet(applyAction(st, seat, act));
+    }catch(e){ /* 次のスナップショットで再試行される */ }
+    finally{ G.online.cpuActing=false; }
+  }
+
+  function enterOnlineGame(code, myIdx, cap, cpu){
+    teardownNet();
+    G.net=true; G.over=false; G.busy=false; G.jokerMode=false;
+    G.online={ code, myIdx, cap, cpu, total:cap+cpu, roomState:null, unsub:null, hbTimer:null,
+      prevStatus:"waiting", ended:false, cpuActing:false, pending:false, seatNames:[] };
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("restartBtn").textContent="やめる";
+    document.getElementById("restartBtn2").textContent="やめる";
+    setStatus("接続中…（部屋番号 "+code+"）");
+    document.getElementById("rowinfo").innerHTML="";
+    document.getElementById("board").innerHTML="";
+    document.getElementById("hand").innerHTML="";
+    show("play");
+    onlineReady().then(API=>{
+      G.online.unsub=API.watchRoom(code, onRoomUpdate);
+      G.online.hbTimer=setInterval(()=>{ if(G.online) API.heartbeatN(code); }, 5000);
+      API.heartbeatN(code);
+    });
+  }
+
+  function onRoomUpdate(data){
+    if(!G.online) return;
+    if(!data){ if(!G.online.ended){ G.online.ended=true; G.over=true;
+      document.getElementById("ovResult").textContent="部屋が閉じられました";
+      document.getElementById("ovRank").innerHTML="<li><span>だれかが退出したか、部屋が削除されました</span></li>";
+      document.getElementById("overlay").classList.add("show"); } return; }
+    G.online.roomState=data;
+    const names=[]; (data.seats||[]).forEach((st,i)=>{ names[i]=st&&st.name; });
+    G.online.seatNames=names;
+    if(data.status==="playing" && G.online.prevStatus==="waiting") toast("全員そろいました！");
+    G.online.prevStatus=data.status;
+    if(data.status!=="playing"){
+      setStatus((data.seats?data.seats.length:1)+"/"+G.online.cap+"人 参加待ち…（部屋番号 "+G.online.code+"）");
+      return;
+    }
+    const s=data.state; if(!s || !s.hands) return;
+    applyNetSnapshot(s);
+    render();
+    if(s.over){
+      if(!G.online.ended){ G.online.ended=true; showNetEnd(s); }
+      return;
+    }
+    const P=G.players[G.cur];
+    if(G.cur===G.online.myIdx){
+      if(forcedIdx(G.cur)>=0) setStatus("あなたの番：ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください");
+      else setStatus(playable(P.hand).length ? "あなたの番：出せるカードを選んでください" : "あなたの番：出せるカードがありません（パス）");
+    }else if(G.cur>=G.online.cap){
+      setStatus("CPU"+(G.cur-G.online.cap+1)+" が考えています…");
+    }else{
+      setStatus(name(G.cur)+"の番");
+    }
+    if(G.cur>=G.online.cap && G.online.myIdx===0 && !G.online.cpuActing) netCpuTurn();
+  }
+
+  function showNetEnd(s){
+    G.over=true;
+    const N=s.hands.length;
+    const order=Array.from({length:N},(_,i)=>i).sort((a,b)=>s.place[a]-s.place[b]);
+    const my=s.place[G.online.myIdx];
+    document.getElementById("ovResult").textContent =
+      my===1 ? "あなたの勝ち！（1位）" : my===N ? "あなたの負け…（最下位）" : "あなたは "+my+"位";
+    const ul=document.getElementById("ovRank"); ul.innerHTML="";
+    order.forEach(idx=>{
+      const li=document.createElement("li");
+      const tag = s.alive[idx]==="b" ? "（バースト）" : "";
+      li.innerHTML="<b>"+s.place[idx]+"位</b><span>"+name(idx)+" "+tag+"</span>";
+      ul.appendChild(li);
+    });
+    setStatus("ゲーム終了");
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  function teardownNet(){
+    const o=G.online; G.online=null; G.net=false;
+    if(!o) return;
+    try{ o.unsub && o.unsub(); }catch(e){}
+    clearInterval(o.hbTimer);
+    const rs=o.roomState;
+    const done=o.ended || (rs && rs.state && rs.state.over) || (rs && rs.status!=="playing");
+    onlineReady().then(API=>{
+      if(o.myIdx===0) API.closeRoom(o.code).catch(()=>{});
+      else if(!done && rs && rs.state) API.pushRoom(o.code,{ state:Object.assign({},rs.state,{over:true,seq:(rs.state.seq||0)+1}) }).catch(()=>{});
+    }).catch(()=>{});
+  }
+
+  document.getElementById("onlineCreate").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineCreate");
+    const nm=document.getElementById("onlineName").value.trim();
+    if(nm.length<1){ omsg("ニックネームを入力してください",true); return; }
+    try{ localStorage.setItem("bg_nick", nm); }catch(e){}
+    const total=+getNetTotal(), cpu=Math.min(+getNetCpu(),Math.max(0,total-2)), cap=total-cpu;
+    const jokerOn=getJoker()==="on", passLimit=+getPass();
+    btn.disabled=true; omsg("部屋を作成中…");
+    try{
+      const API=await onlineReady();
+      const {board,hands}=dealSevens(total, jokerOn);
+      const state={ cfg:{pass:passLimit,joker:jokerOn}, board, hands,
+        pass:new Array(total).fill(passLimit), alive:new Array(total).fill("a"),
+        place:new Array(total).fill(0), bustAt:new Array(total).fill(0),
+        finishSeq:0, bustSeq:0, turn:0, forced:null, last:null, over:false, seq:0 };
+      const code=await API.createRoomN("sevens", nm, cap, cpu, state);
+      enterOnlineGame(code, 0, cap, cpu);
+    }catch(e){ omsg((e&&e.message)||"部屋を作れませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+
+  document.getElementById("onlineJoin").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineJoin");
+    const nm=document.getElementById("onlineName").value.trim();
+    const code=document.getElementById("onlineCode").value.trim();
+    if(nm.length<1){ omsg("ニックネームを入力してください",true); return; }
+    if(!/^[0-9]{4}$/.test(code)){ omsg("部屋番号は4桁の数字です",true); return; }
+    try{ localStorage.setItem("bg_nick", nm); }catch(e){}
+    btn.disabled=true; omsg("参加中…");
+    try{
+      const API=await onlineReady();
+      const {index,data}=await API.joinRoomN(code, nm);
+      enterOnlineGame(code, index, data.cap, data.cpu);
+    }catch(e){ omsg((e&&e.message)||"参加できませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+
+  window.addEventListener("pagehide",(e)=>{ if(!e.persisted && G.online) teardownNet(); });
+
+  function backToSetup(){ if(G.online) teardownNet(); document.getElementById("overlay").classList.remove("show"); show("setup"); }
+
   document.getElementById("startBtn").addEventListener("click",startGame);
-  document.getElementById("ovAgain").addEventListener("click",startGame);
-  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
-  document.getElementById("restartBtn2").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
-  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
+  document.getElementById("ovAgain").addEventListener("click",()=>{ if(G.net||G.online){ backToSetup(); return; } startGame(); });
+  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.net||G.online){ backToSetup(); return; } if(G.over||!G.busy) startGame(); });
+  document.getElementById("restartBtn2").addEventListener("click",()=>{ if(G.net||G.online){ backToSetup(); return; } if(G.over||!G.busy) startGame(); });
+  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); if(G.online) teardownNet(); show("setup"); });
   updateCountNote();
+
+  (function(){
+    const el=document.getElementById("onlineName");
+    try{ const v=localStorage.getItem("bg_nick"); if(v) el.value=v; }catch(e){}
+    const save=()=>{ try{ localStorage.setItem("bg_nick", el.value.trim()); }catch(e){} };
+    el.addEventListener("change",save); el.addEventListener("blur",save);
+  })();
 })();
 </script>
 </body>
