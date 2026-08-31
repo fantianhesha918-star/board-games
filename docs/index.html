@@ -395,7 +395,7 @@
         </div>
         <div class="board" id="othelloBoard"></div>
       </div>
-      <div class="play-actions">
+      <div class="play-actions" id="playActions">
         <button id="othelloUndo">待った</button>
         <button id="othelloRestart">最初から</button>
       </div>
@@ -668,11 +668,17 @@
     G.busy=false; G.over=false;
     lastMove=-1;
     animFlips=new Set(); flipSeq=new Map();
+    document.getElementById("playActions").style.display="";   // 待った・最初からを表示
     show("othelloPlay");
     render();
     maybeCpu();
   }
   document.getElementById("othelloStart").addEventListener("click",startGame);
+
+  // タブ／アプリを本当に閉じるときだけ後片付け（放置部屋が残らないように）。
+  // persisted=true は「一時的に別アプリへ切替（bfcache）」なので触らない
+  // ＝スマホでアプリを行き来しても対戦は継続する。
+  window.addEventListener("pagehide", (e)=>{ if(!e.persisted && G.online) teardownOnline(); });
 
   /* ---- online flow ---- */
   document.getElementById("onlineCreate").addEventListener("click", async ()=>{
@@ -716,6 +722,7 @@
     G.history=[]; G.busy=true; G.over=false;
     lastMove=-1; animFlips=new Set(); flipSeq=new Map();
     G.online = { code, role, myColor:(role==="host"?BLACK:WHITE), roomState:null, unsub:null, hbTimer:null, chkTimer:null, prevStatus:"waiting", ended:false };
+    document.getElementById("playActions").style.display="none";   // オンラインでは「待った・最初から」は使わない
     show("othelloPlay");
     render();
     document.getElementById("statusText").textContent =
