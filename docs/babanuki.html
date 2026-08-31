@@ -13,6 +13,7 @@
     --accent:#1f6f43;--accent-press:#185c37;
     --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
     --felt:#2f7d55;
+    --back:url(assets/cards/back.webp);
   }
   @media (prefers-color-scheme:dark){
     :root{
@@ -75,32 +76,46 @@
   .opp.target{border-color:var(--accent);}
   .opp.done{opacity:.45;}
   .opp .oname{font-size:11.5px;font-weight:800;color:var(--text-dim);white-space:nowrap;}
-  .opp .fan{position:relative;height:64px;display:flex;align-items:flex-start;}
+  .opp .fan{position:relative;height:58px;display:flex;align-items:flex-start;}
   .opp .fan .mini{
-    width:44px;aspect-ratio:2/3;border-radius:4px;background:var(--back) center/cover;
-    box-shadow:0 1px 3px rgba(0,0,0,.3);margin-left:-32px;flex:none;
+    width:40px;aspect-ratio:2/3;border-radius:4px;background:var(--back) center/cover;
+    box-shadow:0 1px 3px rgba(0,0,0,.3);margin-left:-29px;flex:none;
   }
   .opp .fan .mini:first-child{margin-left:0;}
-  .opp .fan .mini.pick{cursor:pointer;}
-  .opp .fan .mini.pick:active{transform:translateY(-6px);}
-  .opp .fan.pickable .mini{cursor:pointer;transition:transform .1s;}
-  .opp .fan.pickable .mini:hover{transform:translateY(-6px);}
 
   .stage{
-    flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
     background:var(--felt);border-radius:16px;box-shadow:var(--shadow),inset 0 0 26px rgba(0,0,0,.14);
-    padding:18px 14px;min-height:150px;position:relative;
+    padding:16px 12px;min-height:148px;position:relative;overflow:hidden;
   }
   .status{color:#fff;font-weight:800;font-size:14.5px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.3);line-height:1.5;}
-  .draw-card{
-    width:70px;aspect-ratio:2/3;border-radius:6px;background:var(--back) center/cover;
-    box-shadow:0 4px 12px rgba(0,0,0,.35);opacity:0;transform:scale(.6);transition:opacity .18s,transform .18s;
-  }
-  .draw-card.show{opacity:1;transform:scale(1);}
-  .draw-card.flip{background-image:var(--drawface);}
   .pile{position:absolute;top:8px;right:12px;color:#fff;font-size:11.5px;font-weight:800;opacity:.9;}
 
-  .myhand-wrap{padding-top:4px;margin-top:auto;}
+  /* pick row: spaced, tappable cards from the target's hand */
+  .pickrow{
+    display:flex;gap:7px;overflow-x:auto;max-width:100%;padding:6px 2px 10px;
+    scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+  }
+  .pickrow .pcard{
+    width:58px;aspect-ratio:2/3;border-radius:7px;background:var(--back) center/cover;flex:none;
+    box-shadow:0 3px 8px rgba(0,0,0,.4);cursor:pointer;transition:transform .12s ease;
+    border:2px solid transparent;
+  }
+  .pickrow .pcard:hover{transform:translateY(-8px);border-color:#ffffff;}
+  .pickrow .pcard:active{transform:translateY(-4px) scale(.97);}
+  .pickrow .pcard.chosen{transform:translateY(-10px);border-color:#ffd54a;}
+
+  /* animation layer for the drawn card */
+  .anim-layer{position:absolute;inset:0;pointer-events:none;}
+  .anim-card{
+    position:absolute;left:50%;top:50%;width:78px;aspect-ratio:2/3;border-radius:8px;
+    background-size:cover;background-position:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.45);
+    transform:translate(-50%,-50%);
+    transition:transform .42s cubic-bezier(.32,.72,.35,1), opacity .42s ease;
+  }
+
+  .myhand-wrap{padding-top:6px;}
   .myhand-label{font-size:11.5px;font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:4px;}
   .myhand{
     position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:96px;
@@ -111,8 +126,8 @@
     box-shadow:0 2px 6px rgba(0,0,0,.28);margin-left:-38px;flex:none;transition:transform .2s,margin .2s;
   }
   .myhand .card:first-child{margin-left:0;}
-  .myhand .card.pairflash{animation:pairflash .5s ease;}
-  @keyframes pairflash{0%{transform:translateY(0);}40%{transform:translateY(-16px) scale(1.05);}100%{transform:translateY(0);}}
+  .myhand .card.dealt{animation:dealt .38s cubic-bezier(.3,1.3,.5,1);}
+  @keyframes dealt{0%{transform:translateY(40px) scale(.7);opacity:0;}100%{transform:translateY(0) scale(1);opacity:1;}}
   .myhand.mine-target{outline:3px solid var(--accent);outline-offset:4px;border-radius:10px;}
 
   .play-actions{display:flex;gap:10px;padding:4px 6px 0;}
@@ -190,8 +205,9 @@
       <div class="opps" id="opps"></div>
       <div class="stage" id="stage">
         <div class="pile" id="pile">捨て札 0組</div>
-        <div class="draw-card" id="drawCard"></div>
         <div class="status" id="statusText">配札中…</div>
+        <div class="pickrow" id="pickrow" hidden></div>
+        <div class="anim-layer" id="animLayer"></div>
       </div>
       <div class="myhand-wrap">
         <div class="myhand-label" id="myLabel">あなたの手札</div>
@@ -315,6 +331,7 @@
     }
     const target = nextActive(p);
     shuffle(G.players[target].hand);
+    hidePickrow();
     render();
 
     if(isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0)){
@@ -330,17 +347,39 @@
     }
   }
 
+  function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
+  function hidePickrow(){ const r=document.getElementById("pickrow"); r.hidden=true; r.innerHTML=""; }
+
   function armHumanDraw(p, target){
     G.busy=false;
-    render(target);
+    render();
+    const row=document.getElementById("pickrow");
+    row.innerHTML="";
+    const t=G.players[target];
+    for(let k=0;k<t.hand.length;k++){
+      const el=document.createElement("div");
+      el.className="pcard"; el.dataset.idx=k;
+      row.appendChild(el);
+    }
+    row.hidden=false;
   }
 
+  document.getElementById("pickrow").addEventListener("click",e=>{
+    const pc=e.target.closest(".pcard");
+    if(!pc || G.busy || G.over) return;
+    const row=e.currentTarget;
+    row.querySelectorAll(".pcard").forEach(x=>x.style.pointerEvents="none");
+    pc.classList.add("chosen");
+    const idx=+pc.dataset.idx;
+    setTimeout(()=>humanPicked(G.cur, nextActive(G.cur), idx), 240);
+  });
+
   async function humanPicked(p, target, idx){
-    if(G.busy || G.over) return;
+    if(G.over) return;
     G.busy=true;
-    render();
+    hidePickrow();
     await doDraw(p, target, idx);
-    await wait(500);
+    await wait(380);
     endTurn(p);
   }
 
@@ -357,34 +396,74 @@
 
     const mi = G.players[p].hand.findIndex(c=>!c.joker && !drawn.joker && c.rank===drawn.rank);
     const willPair = mi>=0;
-    // who may see the drawn card's identity
     const reveal = (p===G.viewer) || (target===G.viewer) || willPair;
+    const matched = willPair ? G.players[p].hand[mi] : null;
 
-    const dc=document.getElementById("drawCard");
-    dc.classList.remove("flip");
-    dc.classList.add("show");
-    if(reveal){
-      dc.style.setProperty("--drawface", faceUrl(drawn));
-      await wait(150);
-      dc.classList.add("flip");
-      await wait(willPair ? 700 : 600);
-    }else{
-      await wait(650);
-    }
+    const layer=document.getElementById("animLayer");
+    layer.innerHTML="";
+    if(reveal) setStatus("");
+
+    // (1) the drawn card appears in the centre of the table
+    const c1=document.createElement("div");
+    c1.className="anim-card";
+    c1.style.backgroundImage = reveal ? faceUrl(drawn) : BACK;
+    c1.style.opacity="0";
+    c1.style.transform="translate(-50%,-50%) scale(.55)";
+    layer.appendChild(c1);
+    await nextFrame();
+    c1.style.opacity="1";
+    c1.style.transform="translate(-50%,-50%) scale(1)";
+    await wait(reveal ? 640 : 460);
 
     if(willPair){
+      setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" のペアがそろいました！");
       G.players[p].hand.splice(mi,1);
+      render();
+      // (2) the matching card rises from the hand to meet the drawn card
+      const c2=document.createElement("div");
+      c2.className="anim-card";
+      c2.style.backgroundImage=faceUrl(matched);
+      c2.style.opacity="0";
+      c2.style.transform="translate(-50%,-50%) translateY(96px) scale(.7)";
+      layer.appendChild(c2);
+      c1.style.transform="translate(calc(-50% - 46px),-50%) scale(1)";
+      await nextFrame();
+      c2.style.opacity="1";
+      c2.style.transform="translate(calc(-50% + 46px),-50%) scale(1)";
+      await wait(470);
+      // (3) snap together, then both shrink away and vanish
+      c1.style.transform="translate(calc(-50% - 46px),-50%) scale(1.14)";
+      c2.style.transform="translate(calc(-50% + 46px),-50%) scale(1.14)";
+      await wait(200);
+      c1.style.transform="translate(-50%,-50%) scale(1.05)";
+      c2.style.transform="translate(-50%,-50%) scale(1.05)";
+      await wait(180);
+      [c1,c2].forEach(c=>{ c.style.transition="transform .42s ease, opacity .42s ease"; c.style.opacity="0"; });
+      c1.style.transform="translate(-50%,-50%) scale(.1) rotate(-40deg)";
+      c2.style.transform="translate(-50%,-50%) scale(.1) rotate(40deg)";
       G.pileP++;
-      setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" のペアを捨てました");
+      document.getElementById("pile").textContent="捨て札 "+G.pileP+"組";
+      await wait(440);
     }else{
       G.players[p].hand.push(drawn);
-      if(drawn.joker && (p===G.viewer)) setStatus(name(p)+" は……ジョーカーを引きました！");
-      else if(p===G.viewer) setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" を引きました");
+      if(drawn.joker && p===G.viewer) setStatus(name(p)+" は……ジョーカーを引きました！");
+      else if(p===G.viewer) setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" を手札に入れました");
       else if(target===G.viewer) setStatus(name(p)+" は あなたの "+(drawn.joker?"ジョーカー":RANKNAME[drawn.rank])+" を引きました");
       else setStatus(name(p)+" は "+name(target)+" から1枚引きました");
+      await wait(220);
+      // drawn card slides down into the hand
+      c1.style.transform="translate(-50%,-50%) translateY(150px) scale(.4)";
+      c1.style.opacity="0";
+      await wait(360);
+      render();
+      if(p===G.viewer){
+        const cards=document.querySelectorAll("#myhand .card");
+        if(cards.length) cards[cards.length-1].classList.add("dealt");
+      }
     }
+
+    layer.innerHTML="";
     if(G.players[p].hand.length===0) G.players[p].done=true;
-    dc.classList.remove("show","flip");
     render();
   }
 
@@ -402,30 +481,27 @@
   }
 
   /* ---------- render ---------- */
-  function render(drawTargetForHuman){
+  function render(){
     const oppWrap=document.getElementById("opps");
     oppWrap.innerHTML="";
-    const target = (typeof drawTargetForHuman==="number") ? drawTargetForHuman : -1;
     for(let i=0;i<G.n;i++){
       if(i===G.viewer) continue;
       const p=G.players[i];
       const div=document.createElement("div");
-      const isNext = i===nextActive(G.cur);
-      div.className="opp"+(isNext&&!p.done?" target":"")+(p.done?" done":"");
+      const isNext = i===nextActive(G.cur) && !p.done;
+      div.className="opp"+(isNext?" target":"")+(p.done?" done":"");
       const cnt = p.hand.length;
-      const shown = Math.min(cnt, 8);
-      let fan='<div class="fan'+(i===target?' pickable':'')+'">';
-      for(let k=0;k<shown;k++) fan+='<div class="mini'+(i===target?' pick':'')+'" data-opp="'+i+'"></div>';
+      const shown = Math.min(cnt, 7);
+      let fan='<div class="fan">';
+      for(let k=0;k<shown;k++) fan+='<div class="mini"></div>';
       fan+='</div>';
       div.innerHTML='<span class="oname">'+name(i)+(p.done?'（あがり）':'（'+cnt+'枚）')+'</span>'+fan;
       oppWrap.appendChild(div);
     }
-    // my hand (viewer)
     const me=G.players[G.viewer];
     document.getElementById("myLabel").textContent = name(G.viewer)+"の手札（"+me.hand.length+"枚）";
     const hand=document.getElementById("myhand");
     hand.innerHTML="";
-    const order=me.hand.map((c,i)=>i);
     me.hand.forEach(c=>{
       const el=document.createElement("div");
       el.className="card";
@@ -437,16 +513,6 @@
 
     document.getElementById("pile").textContent = "捨て札 "+G.pileP+"組";
   }
-
-  document.getElementById("opps").addEventListener("click",e=>{
-    const mini=e.target.closest(".mini.pick"); if(!mini) return;
-    const oi=+mini.dataset.opp;
-    if(oi!==nextActive(G.cur)) return;
-    // pick a random card from that opponent (position is meaningless / shuffled)
-    const t=G.players[oi];
-    const idx=Math.random()*t.hand.length|0;
-    humanPicked(G.cur, oi, idx);
-  });
 
   function endGame(){
     G.over=true;
