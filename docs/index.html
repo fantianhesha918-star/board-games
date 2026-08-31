@@ -685,6 +685,7 @@
     const btn=document.getElementById("onlineCreate");
     const name=document.getElementById("onlineName").value.trim();
     if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    try{ localStorage.setItem("bg_nick", name); }catch(e){}
     btn.disabled=true; omsg("部屋を作成中…");
     try{
       const API=await onlineReady();
@@ -701,6 +702,7 @@
     const name=document.getElementById("onlineName").value.trim();
     const code=document.getElementById("onlineCode").value.trim();
     if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    try{ localStorage.setItem("bg_nick", name); }catch(e){}
     if(!/^[0-9]{4}$/.test(code)){ omsg("部屋番号は4桁の数字です",true); return; }
     btn.disabled=true; omsg("参加中…");
     try{
@@ -1081,6 +1083,15 @@
   // default setup visibility
   document.getElementById("fieldColor").style.display="flex";
   document.getElementById("fieldLevel").style.display="flex";
+
+  // ニックネームは一度入れたら記憶（いつでも変更可）
+  (function(){
+    const el=document.getElementById("onlineName");
+    try{ const v=localStorage.getItem("bg_nick"); if(v) el.value=v; }catch(e){}
+    const save=()=>{ try{ localStorage.setItem("bg_nick", el.value.trim()); }catch(e){} };
+    el.addEventListener("change", save);
+    el.addEventListener("blur", save);
+  })();
 })();
 </script>
 </body>
