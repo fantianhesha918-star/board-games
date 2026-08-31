@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<title>大富豪</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --felt:#2f7d55;--gold:#e9c46a;--warn:#c0392b;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --felt:#245f42;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:600px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;}
+  .back-btn{width:38px;height:38px;font-size:20px;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+  .icon-btn{height:38px;padding:0 14px;font-size:13.5px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  .setup{padding:10px 20px 24px;display:flex;flex-direction:column;gap:20px;}
+  .field{display:flex;flex-direction:column;gap:10px;}
+  .field > .label{font-weight:800;font-size:14px;}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg button{
+    flex:1 1 76px;min-width:0;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 8px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s ease;white-space:normal;
+  }
+  .seg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
+  .seg button:active{transform:scale(.96);}
+  .rules{display:flex;flex-direction:column;gap:12px;}
+  .rules .grp-lbl{font-size:11.5px;font-weight:800;color:var(--text-dim);letter-spacing:.04em;}
+  .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .rtog{
+    border:2px solid var(--line);background:var(--surface);color:var(--text-dim);
+    padding:10px 8px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+    display:flex;align-items:center;gap:7px;transition:all .12s ease;
+  }
+  .rtog::before{content:"";width:15px;height:15px;border-radius:5px;border:2px solid var(--line);flex:none;transition:all .12s ease;}
+  .rtog.on{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 10%,transparent);}
+  .rtog.on::before{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--surface);}
+  .rtog:active{transform:scale(.97);}
+  .rtog small{display:block;font-size:10px;font-weight:600;color:var(--text-dim);}
+  .start-btn{margin:6px 20px 26px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
+  .hint-text{color:var(--text-dim);font-size:12px;line-height:1.6;margin:-4px 20px 0;}
+
+  .play{flex:1;display:flex;flex-direction:column;padding:2px 10px 12px;gap:8px;}
+  .opps{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+  .opp{
+    background:var(--surface);border-radius:12px;padding:6px 9px;box-shadow:var(--shadow);
+    font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;
+    border:2px solid transparent;min-width:64px;
+  }
+  .opp.turn{border-color:var(--accent);}
+  .opp.done{opacity:.5;}
+  .opp .t{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--line);color:var(--text-dim);}
+  .opp .t.rich{background:var(--gold);color:#5b4413;}
+  .opp .t.poor{background:#d9b3ac;color:#6b241b;}
+  .opp .cnt{color:var(--text-dim);font-weight:700;font-size:10.5px;}
+  .opp .pass{color:var(--warn);font-size:9.5px;font-weight:800;}
+
+  .stage{
+    flex:none;display:flex;flex-direction:column;align-items:center;gap:9px;
+    background:var(--felt);border-radius:16px;box-shadow:var(--shadow),inset 0 0 26px rgba(0,0,0,.14);
+    padding:14px 12px;min-height:150px;position:relative;
+  }
+  .flags{position:absolute;top:8px;left:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:70%;}
+  .flag{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,.28);color:#fff;}
+  .flag.rev{background:var(--warn);}
+  .fieldcards{display:flex;gap:5px;min-height:70px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .fc{width:48px;aspect-ratio:2/3;border-radius:5px;background:#fff center/cover;box-shadow:0 3px 8px rgba(0,0,0,.34);}
+  .fc.new{animation:fcpop .3s cubic-bezier(.3,1.4,.5,1);}
+  @keyframes fcpop{0%{transform:translateY(-14px) scale(.6);opacity:.3;}100%{transform:none;}}
+  .status{color:#fff;font-weight:800;font-size:13.5px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.35);line-height:1.45;min-height:19px;}
+  .fieldempty{color:rgba(255,255,255,.6);font-size:12px;font-weight:700;}
+
+  .handwrap{margin-top:2px;}
+  .handlabel{font-size:11px;font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:4px;}
+  .hand{display:flex;justify-content:flex-start;align-items:flex-end;min-height:100px;padding:10px 8px 4px;
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
+  .hand::-webkit-scrollbar{height:5px;}
+  .hand::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .hand .card{
+    width:54px;aspect-ratio:2/3;border-radius:6px;background:#fff center/cover;flex:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.28);margin-left:-15px;transition:transform .13s,margin .13s;cursor:pointer;
+  }
+  .hand .card:first-child{margin-left:0;}
+  .hand .card.sel{transform:translateY(-16px);box-shadow:0 0 0 3px var(--accent),0 6px 12px rgba(0,0,0,.32);}
+  .hand .card.sel + .card{margin-left:-6px;}
+
+  .actions{display:flex;gap:9px;padding:2px 4px 0;}
+  .actions button,.actions a{
+    flex:1;border:none;background:var(--surface);color:var(--text);padding:13px 8px;border-radius:14px;
+    font-weight:800;font-size:14px;box-shadow:var(--shadow);cursor:pointer;text-decoration:none;text-align:center;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .actions button:active{transform:scale(.97);}
+  .actions .play-btn{background:var(--accent);color:#fff;}
+  .actions .pass-btn{background:color-mix(in srgb,#d4a017 22%,var(--surface));}
+  .actions button:disabled{opacity:.4;pointer-events:none;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:22px 20px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow);max-height:88vh;overflow-y:auto;}
+  .modal h2{font-size:20px;margin:0 0 12px;}
+  .modal .rank{list-style:none;padding:0;margin:0 0 18px;font-size:14px;text-align:left;}
+  .modal .rank li{display:flex;justify-content:space-between;padding:7px 9px;border-radius:9px;gap:8px;}
+  .modal .rank li:nth-child(odd){background:var(--surface-2);}
+  .modal .rank li .ti{font-weight:800;}
+  .modal .rank li .ti.rich{color:#a9852a;}
+  .modal .rank li .ti.poor{color:var(--warn);}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:13px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+  .pickmsg{font-size:13px;color:var(--text-dim);margin:0 0 12px;line-height:1.5;}
+  .pickhand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;}
+  .pickhand .pc{width:44px;aspect-ratio:2/3;border-radius:5px;background:#fff center/cover;box-shadow:0 2px 5px rgba(0,0,0,.3);cursor:pointer;border:2px solid transparent;}
+  .pickhand .pc.on{border-color:var(--accent);transform:translateY(-8px);}
+
+  .handoff{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:40;padding:30px;text-align:center;}
+  .handoff.show{display:flex;}
+  .handoff .big{font-size:23px;font-weight:800;}
+  .handoff .sub{color:var(--text-dim);font-size:14px;}
+  .handoff button{border:none;background:var(--accent);color:#fff;padding:15px 34px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.84);color:#fff;font-size:13.5px;font-weight:700;padding:10px 17px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="trump.html">‹</a>
+      <h1>大富豪</h1>
+    </div>
+    <div class="setup">
+      <div class="field">
+        <span class="label">対戦モード</span>
+        <div class="seg" id="segMode">
+          <button data-val="cpu" class="on">CPU対戦</button>
+          <button data-val="pvp">2人で対面</button>
+        </div>
+      </div>
+      <div class="field" id="fieldCount">
+        <span class="label">人数</span>
+        <div class="seg" id="segCount">
+          <button data-val="3" class="on">3人</button>
+          <button data-val="4">4人</button>
+          <button data-val="5">5人</button>
+        </div>
+      </div>
+      <div class="field" id="fieldLevel">
+        <span class="label">CPUの強さ</span>
+        <div class="seg" id="segLevel">
+          <button data-val="1">よわい</button>
+          <button data-val="2" class="on">ふつう</button>
+          <button data-val="3">つよい</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">進め方</span>
+        <div class="seg" id="segRensen">
+          <button data-val="on" class="on">連戦（階級＋カード交換）</button>
+          <button data-val="off">1戦ずつ</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">ローカルルール</span>
+        <div class="rules">
+          <div class="grp-lbl">定番</div>
+          <div class="rules-grid" id="rulesB"></div>
+          <div class="grp-lbl">一発系</div>
+          <div class="rules-grid" id="rulesC"></div>
+        </div>
+      </div>
+    </div>
+    <p class="hint-text">強さは 3→4→…→K→A→2、ジョーカーが最強。場と同じ枚数で、より強い数字のみ出せます。全員パスで場が流れます。</p>
+    <button class="start-btn" id="startBtn">ゲーム開始</button>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <a class="back-btn" href="#" id="toSetup">‹</a>
+      <h1 id="playTitle">大富豪</h1>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="restartBtn">最初から</button>
+    </div>
+    <div class="play">
+      <div class="opps" id="opps"></div>
+      <div class="stage">
+        <div class="flags" id="flags"></div>
+        <div class="fieldcards" id="fieldcards"></div>
+        <div class="status" id="statusText">配札中…</div>
+      </div>
+      <div class="handwrap">
+        <div class="handlabel" id="handLabel">あなたの手札</div>
+        <div class="hand" id="hand"></div>
+      </div>
+      <div class="actions">
+        <button class="play-btn" id="playBtn">出す</button>
+        <button class="pass-btn" id="passBtn">パス</button>
+        <a href="index.html">ホーム</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="handoff" id="handoff">
+  <div class="big" id="handoffName">プレイヤー2 の番</div>
+  <div class="sub">ほかの人に手札が見えないようにして、タップ</div>
+  <button id="handoffBtn">見る</button>
+</div>
+
+<div class="overlay" id="pickOverlay">
+  <div class="modal">
+    <h2 id="pickTitle">カードを選ぶ</h2>
+    <p class="pickmsg" id="pickMsg"></p>
+    <div class="pickhand" id="pickHand"></div>
+    <div class="row"><button class="primary" id="pickOk">決定</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="ovResult">結果</h2>
+    <ul class="rank" id="ovRank"></ul>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovAgain">次へ</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const SUITS=["S","H","D","C"];
+  const SUIT_SYM={S:"♠",H:"♥",D:"♦",C:"♣"};
+  const screens=document.querySelectorAll(".screen");
+  function show(id){ screens.forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+  let tt=null;
+  function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),1600); }
+  function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  function fileNum(r){ return r<=13 ? r : (r===14?1:2); }
+  function cardImg(c){ return c.joker ? "assets/cards/JB.webp" : "assets/cards/"+c.suit+fileNum(c.rank)+".webp"; }
+  function rankLabel(r){ return ({11:"J",12:"Q",13:"K",14:"A",15:"2"})[r] || (""+r); }
+  function cardLabel(c){ return c.joker ? "ジョーカー" : SUIT_SYM[c.suit]+rankLabel(c.rank); }
+  function sortKeyFresh(c){ return c.joker ? 100 : c.rank; }         // 交換の「強さ」（革命非適用）
+
+  const RULE_DEFS_B=[
+    ["yakiri","8切り","8を出すと場が流れる"],
+    ["kakumei","革命","同じ数字4枚で強さ逆転"],
+    ["kaidan","階段","同スート連番3枚以上を出せる"],
+    ["shibari","縛り","同スート2連続でそのスート縛り"],
+    ["spade3","スペ3返し","ジョーカー単騎に♠3で返せる"],
+    ["elevenback","11バック","Jで場が流れるまで強さ逆転"],
+    ["miyakoochi","都落ち","前回の大富豪が1位を逃すと即最下位"]
+  ];
+  const RULE_DEFS_C=[
+    ["watari7","7渡し","7の枚数だけ左隣にカードを渡す"],
+    ["sute10","10捨て","10の枚数だけ手札を捨てる"],
+    ["skip5","5飛ばし","5の枚数だけ次の人を飛ばす"],
+    ["rev9","9リバース","9で順番が逆回りに"],
+    ["foul","反則あがり","禁止札で上がると最下位"]
+  ];
+  const DEFAULT_ON={yakiri:1,kakumei:1,kaidan:1,shibari:1,spade3:1,elevenback:1,miyakoochi:1};
+
+  function buildRuleToggles(){
+    const mk=(defs,host)=>{
+      const h=document.getElementById(host); h.innerHTML="";
+      defs.forEach(([k,label,desc])=>{
+        const b=document.createElement("button");
+        b.className="rtog"+(DEFAULT_ON[k]?" on":"");
+        b.dataset.k=k;
+        b.innerHTML="<span><b>"+label+"</b><small>"+desc+"</small></span>";
+        b.addEventListener("click",()=>b.classList.toggle("on"));
+        h.appendChild(b);
+      });
+    };
+    mk(RULE_DEFS_B,"rulesB"); mk(RULE_DEFS_C,"rulesC");
+  }
+  function readRules(){
+    const r={};
+    document.querySelectorAll(".rtog").forEach(b=>r[b.dataset.k]=b.classList.contains("on"));
+    return r;
+  }
+
+  function seg(id,on){
+    const w=document.getElementById(id);
+    w.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+      w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
+    return ()=>w.querySelector("button.on").dataset.val;
+  }
+  const getMode=seg("segMode",v=>{ document.getElementById("fieldCount").style.display=v==="cpu"?"flex":"none";
+    document.getElementById("fieldLevel").style.display=v==="cpu"?"flex":"none"; });
+  const getCount=seg("segCount");
+  const getLevel=seg("segLevel");
+  const getRensen=seg("segRensen");
+
+  const G={
+    mode:"cpu", n:3, level:2, rensen:true, rules:{},
+    players:[], turn:0, dir:1, field:null,
+    revolution:false, ebActive:false, lockSuits:null,
+    lastPlayer:-1, passCount:0, finishers:[],
+    over:false, busy:false, viewer:0,
+    prevDaifugo:-1, gameNo:0, sel:[]
+  };
+
+  function name(i){
+    if(G.mode==="cpu") return i===0?"あなた":"CPU"+i;
+    return "プレイヤー"+(i+1);
+  }
+  function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
+  function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
+  function activeCount(){ return activeIdx().length; }
+  function nextActive(from,steps){
+    steps=steps||1; let i=from, guard=0;
+    while(steps>0 && guard++<40){
+      i=(i+G.dir+G.n)%G.n;
+      if(!G.players[i].done) steps--;
+      if(activeCount()===0) break;
+    }
+    return i;
+  }
+
+  /* ---------------- deal / start ---------------- */
+  function newDeck(){
+    const d=[]; let id=0;
+    for(const s of SUITS) for(let r=3;r<=15;r++) d.push({suit:s,rank:r,joker:false,id:id++});
+    d.push({joker:true,rank:16,id:id++});
+    return d;
+  }
+  function sortHand(h){
+    h.sort((a,b)=>{
+      if(a.joker) return 1; if(b.joker) return -1;
+      if(a.rank!==b.rank) return a.rank-b.rank;
+      return SUITS.indexOf(a.suit)-SUITS.indexOf(b.suit);
+    });
+  }
+
+  function startGame(){
+    G.mode=getMode();
+    G.n = G.mode==="pvp" ? 2 : +getCount();
+    G.level=+getLevel();
+    G.rensen = getRensen()==="on";
+    G.rules=readRules();
+    G.gameNo=0; G.prevDaifugo=-1;
+    G.players=[];
+    for(let i=0;i<G.n;i++) G.players.push({hand:[],done:false,place:0,title:"",foul:false,miyako:false});
+    document.getElementById("playTitle").textContent="大富豪";
+    document.getElementById("overlay").classList.remove("show");
+    show("play");
+    dealRound();
+  }
+
+  async function dealRound(){
+    G.gameNo++;
+    G.field=null; G.revolution=false; G.ebActive=false; G.lockSuits=null;
+    G.passCount=0; G.finishers=[]; G.over=false; G.busy=true; G.sel=[];
+    G.players.forEach(p=>{ p.hand=[]; p.done=false; p.place=0; p.foul=false; p.miyako=false; });
+    const deck=shuffle(newDeck());
+    deck.forEach((c,idx)=>G.players[idx%G.n].hand.push(c));
+    G.players.forEach(p=>sortHand(p.hand));
+
+    // カード交換（連戦の2ゲーム目以降）
+    if(G.rensen && G.gameNo>=2){
+      await doExchange();
+    }
+
+    // 最初の手番：ゲーム1はダイヤの3を持つ人／以降は前回の大貧民
+    let starter=0;
+    if(G.gameNo===1 || !G.rensen){
+      starter=G.players.findIndex(p=>p.hand.some(c=>!c.joker&&c.suit==="D"&&c.rank===3));
+      if(starter<0) starter=0;
+    }else{
+      starter=G.players.findIndex(p=>p.title==="大貧民");
+      if(starter<0) starter=0;
+    }
+    G.dir=1; G.turn=starter; G.lastPlayer=starter;
+    render();
+    setStatus(name(starter)+" の親でスタート");
+    await wait(700);
+    G.busy=false;
+    beginTurn(starter,true);
+  }
+
+  async function doExchange(){
+    const byTitle=t=>G.players.findIndex(p=>p.title===t);
+    const pairs=[]; // [giverPoor, receiverRich, count]
+    if(G.n>=4){
+      pairs.push([byTitle("大貧民"),byTitle("大富豪"),2]);
+      pairs.push([byTitle("貧民"),byTitle("富豪"),1]);
+    }else{
+      pairs.push([byTitle("大貧民"),byTitle("大富豪"),2]);
+    }
+    for(const [poor,rich,cnt] of pairs){
+      if(poor<0||rich<0) continue;
+      // 貧民側：強い順に自動で差し出す
+      const pp=G.players[poor]; sortHand(pp.hand);
+      const give=pp.hand.slice().sort((a,b)=>sortKeyFresh(b)-sortKeyFresh(a)).slice(0,cnt);
+      // 富豪側：任意のカードを返す（人間なら選択、CPUは弱い順）
+      const rp=G.players[rich];
+      let ret;
+      if(isHuman(rich) && G.mode==="cpu"){
+        setStatus("カード交換：渡すカードを選んでください");
+        render();
+        ret=await pickCards(rich,cnt,"大貧民へ渡すカードを "+cnt+" 枚選んでください",true);
+      }else if(isHuman(rich) && G.mode==="pvp"){
+        await handoff(rich);
+        ret=await pickCards(rich,cnt,name(rich)+"（大富豪）→ 大貧民へ渡すカードを "+cnt+" 枚",true);
+      }else{
+        ret=rp.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
+      }
+      // 交換実行
+      for(const c of give){ pp.hand.splice(pp.hand.findIndex(x=>x.id===c.id),1); rp.hand.push(c); }
+      for(const c of ret){ rp.hand.splice(rp.hand.findIndex(x=>x.id===c.id),1); pp.hand.push(c); }
+      sortHand(pp.hand); sortHand(rp.hand);
+    }
+    document.getElementById("pickOverlay").classList.remove("show");
+    render();
+    setStatus("カード交換が終わりました");
+    await wait(600);
+  }
+
+  /* ---------------- group classification ---------------- */
+  function classify(cards){
+    const n=cards.length; if(n===0) return null;
+    const jok=cards.filter(c=>c.joker).length;
+    const reals=cards.filter(c=>!c.joker);
+    // single
+    if(n===1){
+      const c=cards[0];
+      if(c.joker) return {type:"single",count:1,rv:16,joker:true,suits:[],has8:false,real8:false};
+      return {type:"single",count:1,rv:c.rank,joker:false,suits:[c.suit],has8:c.rank===8,real8:c.rank===8};
+    }
+    // set: pair/triple/quad
+    if(n>=2 && n<=4){
+      let ok=true,rv=16;
+      if(reals.length){ rv=reals[0].rank; ok=reals.every(c=>c.rank===rv); }
+      if(ok) return {type:"set",count:n,rv,joker:jok>0,suits:reals.map(c=>c.suit),
+        has8:reals.some(c=>c.rank===8),real8:reals.some(c=>c.rank===8)};
+    }
+    // sequence (階段)
+    if(n>=3 && reals.length){
+      const suit0=reals[0].suit;
+      if(reals.every(c=>c.suit===suit0)){
+        const rs=reals.map(c=>c.rank).sort((a,b)=>a-b);
+        if(new Set(rs).size===rs.length){
+          for(let L=Math.max(3, rs[rs.length-1]-n+1); L<=rs[0]; L++){
+            const Hi=L+n-1;
+            if(Hi>15) continue;
+            if(rs[rs.length-1]<=Hi && rs[0]>=L){
+              return {type:"seq",count:n,rv:L,seqHi:Hi,joker:jok>0,suit:suit0,suits:[suit0],
+                has8:rs.indexOf(8)>=0,real8:rs.indexOf(8)>=0};
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+  function effRev(){ return G.revolution !== G.ebActive; }
+
+  function beats(a){
+    const f=G.field;
+    if(!f) return true;
+    const b=f.meta;
+    if(a.type!==b.type || a.count!==b.count) return false;
+    if(a.type==="single"){
+      if(a.joker) return !b.joker;
+      if(b.joker) return false;
+    }
+    const av=a.type==="seq"?a.rv:a.rv;
+    const bv=b.type==="seq"?b.rv:b.rv;
+    return effRev() ? av<bv : av>bv;
+  }
+  function isSpade3Return(cards){
+    if(!G.rules.spade3) return false;
+    if(!G.field) return false;
+    const b=G.field.meta;
+    if(!(b.type==="single" && b.joker)) return false;
+    return cards.length===1 && !cards[0].joker && cards[0].suit==="S" && cards[0].rank===3;
+  }
+  function suitSig(meta){ return (meta.suits||[]).slice().sort().join(""); }
+
+  function legalPlay(cards){
+    if(!cards.length) return {ok:false,msg:"カードを選んでください"};
+    if(isSpade3Return(cards)) return {ok:true,meta:classify(cards),spade3:true};
+    const m=classify(cards);
+    if(!m) return {ok:false,msg:"出せる組み合わせではありません"};
+    if(m.type==="seq" && !G.rules.kaidan) return {ok:false,msg:"階段ルールはオフです"};
+    if(m.type==="set" && m.count===4 && !G.rules.kakumei && !G.field){ /* 4枚出しは可、革命なしなら効果なし */ }
+    if(!beats(m)) return {ok:false,msg: G.field? "場より強くありません" : "出せません"};
+    if(G.field && G.lockSuits){
+      if(suitSig(m)!==G.lockSuits.join("")) return {ok:false,msg:"縛り中：同じスートで出してください"};
+    }
+    return {ok:true,meta:m};
+  }
+
+  /* ---------------- turn flow ---------------- */
+  async function beginTurn(p,first){
+    if(G.over) return;
+    if(activeCount()<=1){ endRound(); return; }
+    if(G.players[p].done){ beginTurn(nextActive(p)); return; }
+    G.turn=p; G.viewer = G.mode==="pvp" ? p : 0;
+    G.sel=[];
+    if(G.mode==="pvp" && !first) await handoff(p);
+    render();
+
+    if(isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0)){
+      G.busy=false;
+      setStatus(G.field ? name(p)+"の番：場に出すか パス" : name(p)+"の番：好きなカードを出す（親）");
+      render();
+    }else{
+      G.busy=true;
+      setStatus(name(p)+" が考えています…");
+      render();
+      await wait(620);
+      await cpuTurn(p);
+    }
+  }
+
+  async function doPlay(p,cards,lp){
+    G.busy=true;
+    const P=G.players[p];
+    const meta=lp.meta;
+    // remove from hand
+    for(const c of cards){ const k=P.hand.findIndex(x=>x.id===c.id); if(k>=0) P.hand.splice(k,1); }
+    // shibari update (compare with previous field before replacing)
+    if(G.rules.shibari && G.field && meta.suits.length){
+      if(suitSig(meta)===suitSig(G.field.meta)) G.lockSuits=meta.suits.slice().sort();
+    }
+    let flush=false, leader=p;
+    if(lp.spade3){
+      G.field={cards:cards.slice(),meta,owner:p};
+      flush=true;
+      setStatus(name(p)+" が ♠3 でジョーカーを返した！");
+    }else{
+      G.field={cards:cards.slice(),meta,owner:p};
+      G.passCount=0; G.lastPlayer=p;
+      setStatus(name(p)+" が "+cards.map(cardLabel).join(" ")+" を出した");
+    }
+    render(true);
+    await wait(430);
+
+    // effects
+    const real8 = cards.some(c=>!c.joker&&c.rank===8);
+    const nines = cards.filter(c=>!c.joker&&c.rank===9).length;
+    const fives = cards.filter(c=>!c.joker&&c.rank===5).length;
+    const sevens= cards.filter(c=>!c.joker&&c.rank===7).length;
+    const tens  = cards.filter(c=>!c.joker&&c.rank===10).length;
+    const hasRealJ = cards.some(c=>!c.joker&&c.rank===11);
+
+    if(G.rules.kakumei && meta.type==="set" && meta.count===4){ G.revolution=!G.revolution;
+      toast(G.revolution?"革命！強さ逆転":"革命返し！元通り"); }
+    if(G.rules.kakumei && G.rules.kaidan && meta.type==="seq" && meta.count>=5){ G.revolution=!G.revolution;
+      toast(G.revolution?"階段革命！":"革命返し！"); }
+    if(G.rules.elevenback && hasRealJ){ G.ebActive=!G.ebActive; toast("11バック：この場は強さ逆転"); }
+    if(G.rules.rev9 && nines%2===1){ G.dir*=-1; toast("9リバース：順番が逆回り"); }
+    render();
+
+    // 反則あがり判定（上がった場合）
+    let foul=false;
+    if(P.hand.length===0){
+      const two = cards.some(c=>!c.joker&&c.rank===15);
+      const jk  = cards.some(c=>c.joker);
+      const three = cards.some(c=>!c.joker&&c.rank===3);
+      if(G.rules.foul){
+        if(jk) foul=true;
+        else if(two) foul=true;
+        else if(G.rules.yakiri && real8) foul=true;
+        else if(G.revolution && three) foul=true;
+        else if(lp.spade3) foul=true;
+      }
+    }
+
+    // 7渡し / 10捨て（手札が残っている場合のみ）
+    if(P.hand.length>0){
+      if(G.rules.watari7 && sevens>0){
+        const tgt=nextActive(p);
+        await transferCards(p,tgt,sevens,"7渡し");
+      }
+      if(G.rules.sute10 && tens>0){
+        await discardCards(p,tens,"10捨て");
+      }
+    }
+
+    // 上がり処理
+    if(P.hand.length===0){
+      P.done=true; P.foul=foul;
+      G.finishers.push(p);
+      const placeNo=G.finishers.length;
+      setStatus(name(p)+" があがり！"+(foul?"（反則）":"（"+placeNo+"位）"));
+      // 都落ち
+      if(G.rules.miyakoochi && G.rensen && G.prevDaifugo>=0 && placeNo===1
+         && p!==G.prevDaifugo && !G.players[G.prevDaifugo].done){
+        const d=G.players[G.prevDaifugo];
+        d.done=true; d.miyako=true;
+        G.finishers.push(G.prevDaifugo);
+        toast("都落ち！前回の大富豪が転落");
+      }
+      await wait(600);
+    }
+
+    // 8切り / スペ3返しで場を流す
+    if((G.rules.yakiri && real8) || lp.spade3){
+      flushTrick();
+      flush=true;
+      if(G.rules.yakiri && real8 && !lp.spade3) toast("8切り！場が流れる");
+      leader = G.players[p].done ? nextActive(p) : p;
+    }
+
+    if(activeCount()<=1){ endRound(); return; }
+
+    // 手番を進める
+    if(flush){
+      G.turn = leader;
+    }else{
+      let extra = (G.rules.skip5 && fives>0) ? fives : 0;
+      G.turn = nextActive(p, 1+extra);
+    }
+    render();
+    await wait(260);
+    G.busy=false;
+    beginTurn(G.turn);
+  }
+
+  async function doPass(p){
+    G.busy=true;
+    const P=G.players[p];
+    setStatus(name(p)+" はパス");
+    G.passCount++;
+    render();
+    await wait(420);
+    if(G.passCount >= Math.max(1,activeCount()-1)){
+      // 場が流れる
+      flushTrick();
+      let leader = G.lastPlayer;
+      if(G.players[leader].done) leader=nextActive(leader);
+      toast("場が流れました");
+      G.turn=leader;
+      render();
+      await wait(300);
+      G.busy=false;
+      beginTurn(leader);
+    }else{
+      G.turn=nextActive(p);
+      render();
+      await wait(150);
+      G.busy=false;
+      beginTurn(G.turn);
+    }
+  }
+
+  function flushTrick(){
+    G.field=null; G.lockSuits=null; G.ebActive=false; G.passCount=0;
+  }
+
+  /* ---------------- 7渡し / 10捨て ---------------- */
+  async function transferCards(from,to,cnt,label){
+    const P=G.players[from];
+    cnt=Math.min(cnt,P.hand.length);
+    let chosen;
+    if(isHuman(from) && (G.mode==="pvp"?from===G.viewer:from===0)){
+      chosen=await pickCards(from,cnt,label+"：左隣へ渡すカードを "+cnt+" 枚",true);
+    }else{
+      chosen=P.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
+    }
+    for(const c of chosen){ P.hand.splice(P.hand.findIndex(x=>x.id===c.id),1); G.players[to].hand.push(c); }
+    sortHand(G.players[to].hand);
+    document.getElementById("pickOverlay").classList.remove("show");
+    setStatus(label+"："+name(from)+" → "+name(to)+" に "+cnt+" 枚");
+    render();
+    await wait(500);
+  }
+  async function discardCards(from,cnt,label){
+    const P=G.players[from];
+    cnt=Math.min(cnt,P.hand.length);
+    let chosen;
+    if(isHuman(from) && (G.mode==="pvp"?from===G.viewer:from===0)){
+      chosen=await pickCards(from,cnt,label+"：捨てるカードを "+cnt+" 枚",true);
+    }else{
+      chosen=P.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
+    }
+    for(const c of chosen){ P.hand.splice(P.hand.findIndex(x=>x.id===c.id),1); }
+    document.getElementById("pickOverlay").classList.remove("show");
+    setStatus(label+"："+name(from)+" が "+cnt+" 枚 捨てた");
+    render();
+    await wait(500);
+  }
+
+  function pickCards(pi,cnt,msg){
+    return new Promise(res=>{
+      const ov=document.getElementById("pickOverlay");
+      document.getElementById("pickTitle").textContent="カードを選ぶ";
+      document.getElementById("pickMsg").textContent=msg;
+      const host=document.getElementById("pickHand");
+      const sel=new Set();
+      function draw(){
+        host.innerHTML="";
+        G.players[pi].hand.forEach(c=>{
+          const d=document.createElement("div");
+          d.className="pc"+(sel.has(c.id)?" on":"");
+          d.style.backgroundImage="url("+cardImg(c)+")";
+          d.addEventListener("click",()=>{
+            if(sel.has(c.id)) sel.delete(c.id);
+            else{ if(sel.size>=cnt) return; sel.add(c.id); }
+            draw();
+          });
+          host.appendChild(d);
+        });
+        document.getElementById("pickOk").disabled = sel.size!==cnt;
+      }
+      draw();
+      ov.classList.add("show");
+      const ok=document.getElementById("pickOk");
+      const go=()=>{ ok.removeEventListener("click",go); ov.classList.remove("show");
+        res(G.players[pi].hand.filter(c=>sel.has(c.id))); };
+      ok.addEventListener("click",go);
+    });
+  }
+
+  /* ---------------- CPU ---------------- */
+  function genGroups(hand){
+    const out=[];
+    const push=cs=>{ const m=classify(cs); if(m) out.push({cards:cs,meta:m}); };
+    hand.forEach(c=>push([c]));
+    const jokers=hand.filter(c=>c.joker);
+    const byRank={};
+    hand.filter(c=>!c.joker).forEach(c=>{ (byRank[c.rank]=byRank[c.rank]||[]).push(c); });
+    Object.values(byRank).forEach(cs=>{
+      for(let k=2;k<=cs.length;k++) push(cs.slice(0,k));
+      if(jokers.length){ for(let k=1;k<=cs.length;k++) push(cs.slice(0,k).concat([jokers[0]])); }
+    });
+    if(G.rules.kaidan){
+      const bySuit={};
+      hand.filter(c=>!c.joker).forEach(c=>{ (bySuit[c.suit]=bySuit[c.suit]||[]).push(c); });
+      Object.values(bySuit).forEach(cs=>{
+        cs.sort((a,b)=>a.rank-b.rank);
+        for(let i=0;i<cs.length;i++){
+          let run=[cs[i]];
+          for(let j=i+1;j<cs.length;j++){
+            if(cs[j].rank===run[run.length-1].rank+1){ run.push(cs[j]); if(run.length>=3) push(run.slice()); }
+            else break;
+          }
+          // 1ジョーカーで穴埋め/延長
+          if(jokers.length){
+            for(let j=i+1;j<cs.length;j++){
+              if(cs[j].rank===run[run.length-1].rank+2){ const g=run.concat([jokers[0],cs[j]]); if(g.length>=3) push(g); }
+            }
+          }
+        }
+      });
+    }
+    return out;
+  }
+  function grpStrength(g){ return g.meta.type==="seq"? g.meta.rv : g.meta.rv; }
+  function grpBad(g){ // 温存したい強札か
+    return g.cards.some(c=>c.joker || c.rank>=15) || (g.meta.type==="set"&&g.meta.count>=4);
+  }
+
+  async function cpuTurn(p){
+    const P=G.players[p];
+    const groups=genGroups(P.hand);
+    let choice=null;
+
+    if(!G.field){
+      // 親：手札を減らせて、かつ弱いものから
+      const cand=groups.filter(g=>{
+        if(g.meta.type==="seq" && !G.rules.kaidan) return false;
+        return true;
+      });
+      cand.sort((a,b)=>{
+        const ab=grpBad(a)?1:0, bb=grpBad(b)?1:0;
+        if(ab!==bb) return ab-bb;
+        if(b.cards.length!==a.cards.length) return b.cards.length-a.cards.length; // たくさん出す
+        return grpStrength(a)-grpStrength(b);
+      });
+      choice = cand[0] || groups[0];
+      // 上がり札が反則になるなら避ける
+      if(G.rules.foul && choice && choice.cards.length===P.hand.length && foulFinish(choice.cards)){
+        const alt=cand.find(g=>g.cards.length<P.hand.length);
+        if(alt) choice=alt;
+      }
+    }else{
+      const legal=groups.filter(g=>{
+        if(g.meta.type==="seq" && !G.rules.kaidan) return false;
+        if(!beats(g.meta)) return false;
+        if(G.lockSuits && suitSig(g.meta)!==G.lockSuits.join("")) return false;
+        return true;
+      });
+      // スペ3返し
+      const s3=P.hand.find(c=>!c.joker&&c.suit==="S"&&c.rank===3);
+      if(isSpade3Return(s3?[s3]:[])) legal.push({cards:[s3],meta:classify([s3]),spade3:true});
+
+      if(legal.length){
+        legal.sort((a,b)=>{
+          const ab=grpBad(a)?1:0, bb=grpBad(b)?1:0;
+          if(ab!==bb) return ab-bb;
+          return grpStrength(a)-grpStrength(b);
+        });
+        choice=legal[0];
+        // 強さ別の温存判断
+        const near = P.hand.length<=4;
+        if(!near && G.level>=2 && grpBad(choice) && legal.length===1){
+          // 唯一の合法手が強札 → レベル2以上は温存してパスすることも
+          if(G.level===3 || Math.random()<0.6) choice=null;
+        }
+        if(!near && G.level===3 && choice && grpBad(choice) && G.field.meta.rv<13 && Math.random()<0.5){
+          choice=null;
+        }
+        // 8切りで主導権 → 直後に大量に出せるなら積極的に
+        if(choice && G.rules.yakiri){
+          const eight=legal.find(g=>g.cards.some(c=>!c.joker&&c.rank===8) && !grpBad(g));
+          if(eight && P.hand.length>=4 && G.level>=2 && Math.random()<0.5) choice=eight;
+        }
+        if(choice && G.rules.foul && choice.cards.length===P.hand.length && foulFinish(choice.cards)){
+          const alt=legal.find(g=>g.cards.length<P.hand.length);
+          choice = alt || choice; // 出せる他がなければ受け入れ
+        }
+      }else choice=null;
+    }
+
+    if(choice){
+      const lp = choice.spade3 ? {ok:true,meta:choice.meta,spade3:true} : {ok:true,meta:choice.meta};
+      await doPlay(p,choice.cards,lp);
+    }else{
+      await doPass(p);
+    }
+  }
+  function foulFinish(cards){
+    if(cards.some(c=>c.joker)) return true;
+    if(cards.some(c=>!c.joker&&c.rank===15)) return true;
+    if(G.rules.yakiri && cards.some(c=>!c.joker&&c.rank===8)) return true;
+    if(G.revolution && cards.some(c=>!c.joker&&c.rank===3)) return true;
+    return false;
+  }
+
+  /* ---------------- end of round ---------------- */
+  function endRound(){
+    if(G.over) return;
+    G.over=true; G.busy=true;
+    // 残っているアクティブを最後に追加
+    activeIdx().forEach(i=>{ if(!G.finishers.includes(i)) G.finishers.push(i); });
+    G.players.forEach((_,i)=>{ if(!G.finishers.includes(i)) G.finishers.push(i); });
+    // 反則・都落ちは末尾へ
+    const good=G.finishers.filter(i=>!G.players[i].foul && !G.players[i].miyako);
+    const bad =G.finishers.filter(i=> G.players[i].foul ||  G.players[i].miyako);
+    const order=good.concat(bad);
+    order.forEach((idx,k)=>{ G.players[idx].place=k+1; });
+    // 称号
+    const n=G.n;
+    order.forEach((idx,k)=>{
+      let t="平民";
+      if(k===0) t="大富豪";
+      else if(k===n-1) t="大貧民";
+      else if(n>=4 && k===1) t="富豪";
+      else if(n>=4 && k===n-2) t="貧民";
+      if(n===2) t = k===0?"大富豪":"大貧民";
+      G.players[idx].title=t;
+    });
+    G.prevDaifugo = order[0];
+
+    // 表示
+    let title;
+    if(G.mode==="cpu"){
+      const myPlace=G.players[0].place;
+      title = G.players[0].title + "（"+myPlace+"位）";
+    }else{
+      title = name(order[0])+" の勝ち";
+    }
+    document.getElementById("ovResult").textContent=title;
+    const ul=document.getElementById("ovRank"); ul.innerHTML="";
+    order.forEach((idx,k)=>{
+      const P=G.players[idx];
+      const li=document.createElement("li");
+      const cls = P.title==="大富豪"||P.title==="富豪" ? "rich" : (P.title==="大貧民"||P.title==="貧民" ? "poor":"");
+      const tag = P.foul?"（反則）":P.miyako?"（都落ち）":"";
+      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+P.title+"</span><span>"+name(idx)+tag+"</span>";
+      ul.appendChild(li);
+    });
+    document.getElementById("ovAgain").textContent = G.rensen ? "次のゲームへ" : "もう一度";
+    render();
+    setStatus("ゲーム終了");
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  /* ---------------- render ---------------- */
+  function setStatus(t){ document.getElementById("statusText").textContent=t; }
+
+  function render(anim){
+    // opponents
+    const opps=document.getElementById("opps"); opps.innerHTML="";
+    for(let i=0;i<G.n;i++){
+      if(G.mode==="cpu" && i===0) continue;
+      if(G.mode==="pvp" && i===G.viewer) continue;
+      const P=G.players[i];
+      const d=document.createElement("div");
+      d.className="opp"+(i===G.turn&&!G.over?" turn":"")+(P.done?" done":"");
+      const tcls = P.title==="大富豪"||P.title==="富豪"?"rich":(P.title==="大貧民"||P.title==="貧民"?"poor":"");
+      let inner="<span>"+name(i)+"</span>";
+      if(P.title) inner+="<span class='t "+tcls+"'>"+P.title+"</span>";
+      inner+="<span class='cnt'>"+(P.done? (P.place+"位") : P.hand.length+"枚")+"</span>";
+      if(!P.done && i===G.turn===false){}
+      d.innerHTML=inner;
+      opps.appendChild(d);
+    }
+    // flags
+    const flags=document.getElementById("flags"); flags.innerHTML="";
+    if(G.revolution) flags.insertAdjacentHTML("beforeend","<span class='flag rev'>革命中</span>");
+    if(G.ebActive) flags.insertAdjacentHTML("beforeend","<span class='flag rev'>11バック</span>");
+    if(G.lockSuits) flags.insertAdjacentHTML("beforeend","<span class='flag'>縛り "+G.lockSuits.map(s=>SUIT_SYM[s]).join("")+"</span>");
+    if(G.dir===-1) flags.insertAdjacentHTML("beforeend","<span class='flag'>逆回り</span>");
+
+    // field
+    const fc=document.getElementById("fieldcards"); fc.innerHTML="";
+    if(G.field){
+      G.field.cards.forEach((c,k)=>{
+        const d=document.createElement("div");
+        d.className="fc"+(anim?" new":"");
+        d.style.backgroundImage="url("+cardImg(c)+")";
+        d.style.animationDelay=(k*40)+"ms";
+        fc.appendChild(d);
+      });
+    }else{
+      fc.innerHTML="<span class='fieldempty'>場は流れています（親の番）</span>";
+    }
+
+    // my hand
+    const P=G.players[G.viewer];
+    document.getElementById("handLabel").textContent=name(G.viewer)+"の手札（"+P.hand.length+"枚）";
+    const hand=document.getElementById("hand"); hand.innerHTML="";
+    const isTurn = (G.mode==="pvp"? G.turn===G.viewer : G.turn===0) && !G.over && !G.busy;
+    const many=P.hand.length;
+    P.hand.forEach(c=>{
+      const el=document.createElement("div");
+      el.className="card"+(G.sel.includes(c.id)?" sel":"");
+      el.style.backgroundImage="url("+cardImg(c)+")";
+      el.style.marginLeft = many>14 ? "-24px" : many>10 ? "-18px" : "-12px";
+      el.dataset.id=c.id;
+      hand.appendChild(el);
+    });
+    if(hand.firstChild) hand.firstChild.style.marginLeft="0";
+
+    document.getElementById("playBtn").disabled = !isTurn || G.sel.length===0;
+    document.getElementById("passBtn").disabled = !isTurn || !G.field; // 親はパス不可
+  }
+
+  /* ---------------- interaction ---------------- */
+  document.getElementById("hand").addEventListener("click",e=>{
+    if(G.busy||G.over) return;
+    const el=e.target.closest(".card"); if(!el) return;
+    const isTurn = (G.mode==="pvp"? G.turn===G.viewer : G.turn===0);
+    if(!isTurn) return;
+    const id=+el.dataset.id;
+    const k=G.sel.indexOf(id);
+    if(k>=0) G.sel.splice(k,1); else G.sel.push(id);
+    render();
+  });
+  document.getElementById("playBtn").addEventListener("click",()=>{
+    if(G.busy||G.over) return;
+    const p=G.turn;
+    const isTurn = (G.mode==="pvp"? p===G.viewer : p===0);
+    if(!isTurn) return;
+    const cards=G.players[p].hand.filter(c=>G.sel.includes(c.id));
+    const lp=legalPlay(cards);
+    if(!lp.ok){ toast(lp.msg); return; }
+    G.sel=[];
+    doPlay(p,cards,lp);
+  });
+  document.getElementById("passBtn").addEventListener("click",()=>{
+    if(G.busy||G.over) return;
+    const p=G.turn;
+    const isTurn = (G.mode==="pvp"? p===G.viewer : p===0);
+    if(!isTurn) return;
+    if(!G.field){ toast("親はパスできません"); return; }
+    G.sel=[];
+    doPass(p);
+  });
+
+  function handoff(p){
+    return new Promise(res=>{
+      const h=document.getElementById("handoff");
+      document.getElementById("handoffName").textContent=name(p)+" の番";
+      h.classList.add("show");
+      const btn=document.getElementById("handoffBtn");
+      const go=()=>{ h.classList.remove("show"); btn.removeEventListener("click",go); res(); };
+      btn.addEventListener("click",go);
+    });
+  }
+
+  document.getElementById("startBtn").addEventListener("click",startGame);
+  document.getElementById("ovAgain").addEventListener("click",()=>{
+    document.getElementById("overlay").classList.remove("show");
+    if(G.rensen) dealRound();
+    else startGame();
+  });
+  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
+  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
+
+  buildRuleToggles();
+  document.getElementById("fieldCount").style.display="flex";
+  document.getElementById("fieldLevel").style.display="flex";
+})();
+</script>
+</body>
+</html>
