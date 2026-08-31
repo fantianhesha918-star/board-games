@@ -65,6 +65,10 @@
   }
   .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
   .hint-text{color:var(--text-dim);font-size:12.5px;line-height:1.6;margin:-6px 20px 0;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
 
   .play{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:2px 10px 16px;gap:10px;}
   .opps{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:6px 4px;}
@@ -227,7 +231,12 @@
         </div>
       </div>
     </div>
-    <p class="hint-text" id="hintText">同じ数字の2枚がペア。手番では左隣の人の手札から1枚引き、ペアがそろったら捨てます。最後にジョーカーを持っていた人の負け。<br><span id="hintShuffle">ジョーカーを持っている人は、自分の手番で引く前に <b>1ゲームに1回だけ</b>「シャッフル」を使えます。サイコロで <b>➡</b>=全員の手札が右へ / <b>⬅</b>=左へ 一斉に移動、<b>☠</b>=不発。</span></p>
+    <div class="howto" id="hintText">
+      <h3>遊び方</h3>
+      <p>配られた時点で、手札にある<b>同じ数字2枚</b>は自動で捨てられます。</p>
+      <p>自分の番に<b>左隣の人</b>の手札から1枚引き、数字がそろえば捨てます。手札を先に0枚にした人からあがり。<b>最後までジョーカーを持っていた人の負け</b>です。</p>
+      <p id="hintShuffle">（シャッフルあり）ジョーカーを持っている人だけ、自分の手番で引く前に <b>1ゲームに1回だけ</b>「シャッフル」を使えます。サイコロで <b>➡</b>＝全員の手札が右へ／<b>⬅</b>＝左へ 一斉に移動、<b>☠</b>＝不発。</p>
+    </div>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 

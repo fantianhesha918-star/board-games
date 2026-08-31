@@ -66,6 +66,10 @@
   }
   .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
   .hint-text{color:var(--text-dim);font-size:12.5px;line-height:1.6;margin:-6px 20px 0;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
 
   /* play */
   .play{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 12px 24px;}
@@ -176,7 +180,11 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">同じ数字・同じ色（♠♣＝黒、♥♦＝赤）の2枚がペアです。ペアを当てるともう1回めくれます。</p>
+    <div class="howto">
+      <h3>遊び方</h3>
+      <p>裏向きのカードを1回に<b>2枚</b>めくります。<b>同じ数字＋同じ色</b>（♠♣＝黒／♥♦＝赤）ならペア成立。取り札にして、もう1回めくれます。</p>
+      <p>ペアにならなければ2枚を裏に戻して相手の番。すべて取り終わったら、取った枚数が多いほうの勝ちです。</p>
+    </div>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 

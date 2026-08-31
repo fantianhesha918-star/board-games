@@ -108,6 +108,10 @@
 
   /* ---- setup panel ---- */
   .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
   .setup .field{display:flex;flex-direction:column;gap:10px;}
   .setup .field > .label{font-weight:800;font-size:14px;}
   .seg{display:flex;gap:8px;flex-wrap:wrap;}
@@ -316,6 +320,11 @@
           <button data-val="off">表示しない</button>
         </div>
       </div>
+    </div>
+    <div class="howto">
+      <h3>遊び方</h3>
+      <p>黒が先手。自分の石で相手の石を<b>縦・横・斜め</b>のいずれかの直線ではさめる場所に置くと、はさんだ石がすべて自分の色に返ります。</p>
+      <p>置ける場所がない時は自動でパス。盤が埋まる／両者とも置けなくなったら終了し、<b>自分の色の石が多いほう</b>が勝ちです。</p>
     </div>
     <button class="start-btn" id="othelloStart">対局開始</button>
   </section>

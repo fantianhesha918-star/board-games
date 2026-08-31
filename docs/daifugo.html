@@ -70,6 +70,10 @@
   .start-btn{margin:6px 20px 26px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
   .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
   .hint-text{color:var(--text-dim);font-size:12px;line-height:1.6;margin:-4px 20px 0;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
 
   .play{flex:1;display:flex;flex-direction:column;padding:2px 10px 12px;gap:8px;}
   .opps{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
@@ -209,7 +213,12 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">強さは 3→4→…→K→A→2、ジョーカーが最強。場と同じ枚数で、より強い数字のみ出せます。全員パスで場が流れます。</p>
+    <div class="howto">
+      <h3>遊び方</h3>
+      <p>強さは <b>3→4→…→K→A→2</b>、ジョーカーが単騎最強。親は自由に出せ、以降の人は<b>場と同じ枚数</b>で<b>より強い数字</b>だけ出せます（1枚／2枚／3枚／4枚）。</p>
+      <p>出せない時は<b>パス</b>。自分以外の全員がパスすると場が流れ、最後に出した人が新しい親に。手札を先に出し切った順に順位がつきます。</p>
+      <p>上のトグルでローカルルールを個別にON/OFFできます（各ルールの効果は右上の「📖 ルール」）。</p>
+    </div>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 

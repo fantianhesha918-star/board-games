@@ -58,6 +58,10 @@
   .start-btn{margin:6px 20px 26px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
   .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
   .hint-text{color:var(--text-dim);font-size:12.5px;line-height:1.65;margin:-6px 20px 0;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
 
   .play{flex:1;display:flex;flex-direction:column;padding:2px 10px 14px;gap:9px;}
   .rowinfo{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
@@ -196,7 +200,13 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。A まで並んだら、その先は K→Q→… と反対側から折り返します（K まで並んだ時は A→2→…）。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”（1ゲームに1回きり・置いたら戻せません）。置いた位置の本物のカードを持つ人は、自分の番に必ずそのカードを出さなければならず（ジョーカーはそのカードに置き換わります）、その手番はパスできません。</span></p>
+    <div class="howto">
+      <h3>遊び方</h3>
+      <p>各スートの7の<b>隣（±1）</b>につながるカードを、自分の番に1枚ずつ出していきます。空マスは「♥5」等の簡易表示、出たマスは実際の絵柄で表示されます。</p>
+      <p>出せない・出したくない時は<b>パス</b>（回数制限あり）。使い切ってさらにパスすると<b>バースト</b>＝手札を全部その位置で場に開きます。手札を先に出し切った人が上位。</p>
+      <p><b>A まで</b>並ぶと 8 以降は置けず <b>K→Q→…</b> と折り返し。<b>K まで</b>並ぶと 6 以降は置けず <b>A→2→…</b> と折り返します。</p>
+      <p id="hintJk">（ジョーカーあり）好きな空きマスに<b>1ゲーム1回だけ</b>置けます（戻せません）。置いた位置の本物を持つ人は、次の自分の番で必ずそれを出します（パス不可・ジョーカーは置き換わり）。</p>
+    </div>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 
