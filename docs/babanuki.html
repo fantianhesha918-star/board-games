@@ -218,8 +218,15 @@
           <button data-val="4">4人<br><small>あなた+CPU3</small></button>
         </div>
       </div>
+      <div class="field">
+        <span class="label">シャッフル（ババ嵐）</span>
+        <div class="seg" id="segShuffle">
+          <button data-val="on" class="on">あり</button>
+          <button data-val="off">なし</button>
+        </div>
+      </div>
     </div>
-    <p class="hint-text">同じ数字の2枚がペア。手番では左隣の人の手札から1枚引き、ペアがそろったら捨てます。最後にジョーカーを持っていた人の負け。<br>ジョーカーを持っている人は、自分の手番で引く前に <b>1ゲームに1回だけ</b>「シャッフル」を使えます。サイコロで <b>➡</b>=全員の手札が右へ / <b>⬅</b>=左へ 一斉に移動、<b>☠</b>=不発。</p>
+    <p class="hint-text" id="hintText">同じ数字の2枚がペア。手番では左隣の人の手札から1枚引き、ペアがそろったら捨てます。最後にジョーカーを持っていた人の負け。<br><span id="hintShuffle">ジョーカーを持っている人は、自分の手番で引く前に <b>1ゲームに1回だけ</b>「シャッフル」を使えます。サイコロで <b>➡</b>=全員の手札が右へ / <b>⬅</b>=左へ 一斉に移動、<b>☠</b>=不発。</span></p>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 
@@ -306,8 +313,11 @@
     document.getElementById("fieldCount").style.display = v==="cpu" ? "flex" : "none";
   });
   const getCount=seg("segCount");
+  const getShuffle=seg("segShuffle",v=>{
+    document.getElementById("hintShuffle").style.display = v==="on" ? "" : "none";
+  });
 
-  const G={ mode:"cpu", n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[] };
+  const G={ mode:"cpu", n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[], shuffleOn:true };
 
   function faceUrl(c){ return c.joker ? "url(assets/cards/JB.webp)" : "url(assets/cards/"+c.suit+c.rank+".webp)"; }
 
@@ -351,6 +361,7 @@
   function startGame(){
     G.mode=getMode();
     G.n = G.mode==="pvp" ? 2 : +getCount();
+    G.shuffleOn = getShuffle()==="on";
     G.over=false; G.busy=false; G.pileP=0;
     const deck=buildDeck();
     G.players=[];
@@ -381,7 +392,7 @@
     render();
 
     const humanControls = isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0);
-    const canShuffle = !G.usedShuffle[p] && jokerHolder()===p;
+    const canShuffle = G.shuffleOn && !G.usedShuffle[p] && jokerHolder()===p;
 
     if(humanControls){
       const target = nextActive(p);
@@ -505,7 +516,7 @@
 
   document.getElementById("sbYes").addEventListener("click", async ()=>{
     if(G.busy || G.over) return;
-    if(G.usedShuffle[G.cur] || jokerHolder()!==G.cur){ hideShuffleBar(); return; }
+    if(!G.shuffleOn || G.usedShuffle[G.cur] || jokerHolder()!==G.cur){ hideShuffleBar(); return; }
     G.busy=true;
     hideShuffleBar();
     hidePickrow();
