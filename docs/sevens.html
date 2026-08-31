@@ -87,7 +87,6 @@
   .cell.joker{background:linear-gradient(135deg,#e9c46a,#f6dc9c);color:#6b4423;}
   .cell.seven{box-shadow:inset 0 0 0 2px var(--gold);}
   .cell.legal{box-shadow:inset 0 0 0 2px #7fe3a6;cursor:pointer;animation:legalpulse 1.3s ease-in-out infinite;}
-  .cell.swapok{box-shadow:inset 0 0 0 2px #ffd54a;cursor:pointer;}
   .cell.pop{animation:cellpop .4s cubic-bezier(.3,1.4,.5,1);}
   @keyframes cellpop{0%{transform:scale(.4);}100%{transform:scale(1);}}
   @keyframes legalpulse{0%,100%{opacity:.65;}50%{opacity:1;}}
@@ -192,7 +191,7 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”。本物のカードを持っている人は、自分の番にジョーカーと交換できます。</span></p>
+    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”（1ゲームに1回きり・置いたら戻せません）。置いた位置の本物のカードを持つ人は、自分の番に必ずそのカードを出さなければならず（ジョーカーはそのカードに置き換わります）、その手番はパスできません。</span></p>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 
@@ -266,14 +265,19 @@
   const getJoker=seg("segJoker",v=>{ document.getElementById("hintJk").style.display=v==="on"?"":"none"; });
 
   const G={ mode:"cpu", n:2, passLimit:3, jokerOn:true, players:[], B:{}, cur:0,
-            over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null };
+            over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null, forced:null };
 
   function filled(s,r){ return r>=1&&r<=13 && G.B[s][r]!=null; }
   function slotOpen(s,r){ return r>=1&&r<=13 && G.B[s][r]==null && (filled(s,r-1)||filled(s,r+1)); }
   function jokerSlots(){ const out=[]; for(const s of SUITS) for(let r=1;r<=13;r++) if(slotOpen(s,r)) out.push([s,r]); return out; }
   function playable(hand){ return hand.filter(c=>!c.joker && slotOpen(c.suit,c.rank)); }
-  function swapSlots(hand){ const out=[]; for(const s of SUITS) for(let r=1;r<=13;r++)
-      if(G.B[s][r]==="J" && hand.some(c=>!c.joker&&c.suit===s&&c.rank===r)) out.push([s,r]); return out; }
+  // ジョーカーが置かれた位置の本物カードを、その持ち主は自分の手番で必ず出す
+  function forcedIdx(p){
+    if(!G.forced) return -1;
+    const {suit:s,rank:r}=G.forced;
+    if(G.B[s][r]!=="J") return -1;
+    return G.players[p].hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
+  }
 
   function name(i){ if(G.mode==="cpu") return i===0?"あなた":"CPU"+i; return "プレイヤー"+(i+1); }
   function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
@@ -285,7 +289,7 @@
     G.n = G.mode==="pvp" ? 2 : +getCount();
     G.passLimit = +getPass();
     G.jokerOn = getJoker()==="on";
-    G.over=false; G.busy=false; G.jokerMode=false; G.finishers=[]; G.bustSeq=0; G.last=null;
+    G.over=false; G.busy=false; G.jokerMode=false; G.finishers=[]; G.bustSeq=0; G.last=null; G.forced=null;
     G.B={}; for(const s of SUITS){ G.B[s]=new Array(14).fill(null); G.B[s][7]="C"; }
     const deck=[];
     for(const s of SUITS) for(let r=1;r<=13;r++){ if(r!==7) deck.push({suit:s,rank:r,joker:false}); }
@@ -318,9 +322,13 @@
     const human = isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0);
     if(human){
       const P=G.players[p];
-      const canPlay = playable(P.hand).length>0;
-      setStatus(canPlay ? name(p)+"の番：出せるカードを選んでください"
-                        : name(p)+"の番：出せるカードがありません（パス）");
+      if(forcedIdx(p)>=0){
+        setStatus(name(p)+"の番：ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください");
+      }else{
+        const canPlay = playable(P.hand).length>0;
+        setStatus(canPlay ? name(p)+"の番：出せるカードを選んでください"
+                          : name(p)+"の番：出せるカードがありません（パス）");
+      }
       G.busy=false;
       render();
     }else{
@@ -350,32 +358,21 @@
       const ji=P.hand.findIndex(c=>c.joker);
       P.hand.splice(ji,1);
       G.B[s][r]="J";
+      G.forced={suit:s,rank:r};
       G.last={suit:s,rank:r,joker:true};
-      setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" の位置にジョーカーを置きました");
+      setStatus(name(p)+" がジョーカーを "+SUIT_SYM[s]+RANKNAME[r]+" の位置に置きました（そのカードの持ち主は次の手番で出します）");
     }else{
       const ci=P.hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
       P.hand.splice(ci,1);
+      const wasJoker = G.B[s][r]==="J";
       G.B[s][r]="C";
+      if(G.forced && G.forced.suit===s && G.forced.rank===r) G.forced=null;
       G.last={suit:s,rank:r,joker:false};
-      setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" を出しました");
+      setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+(wasJoker?" を出しました（ジョーカーと置き換え）":" を出しました"));
     }
     render();
     popCell(s,r);
     await wait(260);
-  }
-
-  async function doSwap(p, s, r){
-    const P=G.players[p];
-    const ci=P.hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
-    P.hand.splice(ci,1);
-    G.B[s][r]="C";
-    P.hand.push({joker:true,rank:0});
-    P.hand.sort(sortCard);
-    G.last={suit:s,rank:r,joker:false};
-    setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" とジョーカーを交換しました");
-    render();
-    popCell(s,r);
-    await wait(300);
   }
 
   async function doPass(p){
@@ -399,13 +396,19 @@
     for(const c of P.hand.slice()){
       if(c.joker){
         const js=jokerSlots();
-        if(js.length){ G.B[js[0][0]][js[0][1]]="J"; }
+        if(js.length){ G.B[js[0][0]][js[0][1]]="J"; G.forced={suit:js[0][0],rank:js[0][1]}; }
       }else{
         G.B[c.suit][c.rank]="C";
       }
     }
     P.hand=[];
     P.place=0;
+    // ジョーカー位置の本物カードを持つ人がいなくなったら強制は解除
+    if(G.forced){
+      const s=G.forced.suit, r=G.forced.rank;
+      const held=G.players.some(pp=>pp.hand.some(c=>!c.joker&&c.suit===s&&c.rank===r));
+      if(G.B[s][r]!=="J" || !held) G.forced=null;
+    }
     render();
     await wait(700);
   }
@@ -413,23 +416,26 @@
   /* ---------- CPU ---------- */
   function cpuTurn(p){
     const P=G.players[p];
+    const fi=forcedIdx(p);
+    if(fi>=0){
+      const c=P.hand[fi];
+      return (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(500); endTurn(p); })();
+    }
     const pl=playable(P.hand);
     if(pl.length){
       pl.sort((a,b)=>Math.abs(b.rank-7)-Math.abs(a.rank-7));
       const c=pl[0];
       return (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(500); endTurn(p); })();
     }
-    // stuck
-    const sw=swapSlots(P.hand);
+    // 詰まった：ジョーカーがあれば、自分の本物を持たない空きマスへ置く
     const jk=P.hand.find(c=>c.joker);
     return (async()=>{
       if(jk){
-        const slots=jokerSlots();
+        const slots=jokerSlots().filter(([s,r])=>!P.hand.some(c=>!c.joker&&c.suit===s&&c.rank===r));
         const unblock=slots.find(([s,r])=>P.hand.some(c=>!c.joker&&c.suit===s&&(c.rank===r-1||c.rank===r+1)));
         if(unblock){ await playCardData(p,unblock[0],unblock[1],true); await wait(500); return endTurn(p); }
         if(P.passLeft<=0 && slots.length){ await playCardData(p,slots[0][0],slots[0][1],true); await wait(500); return endTurn(p); }
       }
-      if(sw.length && P.passLeft<=1){ await doSwap(p,sw[0][0],sw[0][1]); await wait(400); return endTurn(p); }
       await doPass(p);
       endTurn(p);
     })();
@@ -442,6 +448,13 @@
     const p=G.cur, P=G.players[p];
     const i=+el.dataset.i, c=P.hand[i];
     if(!c) return;
+    const fi=forcedIdx(p);
+    if(fi>=0){
+      if(i!==fi){ toast("ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください"); return; }
+      G.busy=true; G.jokerMode=false;
+      (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(220); endTurn(p); })();
+      return;
+    }
     if(c.joker){
       if(!jokerSlots().length){ toast("ジョーカーを置ける場所がありません"); return; }
       G.jokerMode=!G.jokerMode;
@@ -463,15 +476,10 @@
     const cell=e.target.closest(".cell"); if(!cell) return;
     const s=cell.dataset.s, r=+cell.dataset.r;
     if(!s) return;
-    const p=G.cur, P=G.players[p];
+    const p=G.cur;
     if(G.jokerMode && slotOpen(s,r)){
       G.busy=true; G.jokerMode=false;
       (async()=>{ await playCardData(p,s,r,true); await wait(220); endTurn(p); })();
-      return;
-    }
-    if(G.B[s][r]==="J" && P.hand.some(c=>!c.joker&&c.suit===s&&c.rank===r)){
-      G.busy=true; G.jokerMode=false;
-      (async()=>{ await doSwap(p,s,r); await wait(220); endTurn(p); })();
       return;
     }
   });
@@ -480,6 +488,7 @@
     if(G.busy||G.over) return;
     const p=G.cur;
     if(!isHuman(p)) return;
+    if(forcedIdx(p)>=0){ toast("ジョーカーの位置の "+SUIT_SYM[G.forced.suit]+RANKNAME[G.forced.rank]+" を出してください"); return; }
     G.busy=true; G.jokerMode=false;
     (async()=>{ await doPass(p); endTurn(p); })();
   });
@@ -509,11 +518,8 @@
     b.appendChild(cellDiv("hd",""));
     for(let r=1;r<=13;r++) b.appendChild(cellDiv("hd",RANKNAME[r]));
     const P=G.players[G.viewer];
-    const isViewerTurn0 = (G.mode==="pvp" ? G.cur===G.viewer : G.cur===0) && !G.over && !G.busy;
     const legalSet = new Set();
     if(G.jokerMode) jokerSlots().forEach(([s,r])=>legalSet.add(s+r));
-    const swapSet = new Set();
-    if(!G.jokerMode && isViewerTurn0) swapSlots(P.hand).forEach(([s,r])=>swapSet.add(s+r));
     for(const s of SUITS){
       const rl=document.createElement("div");
       rl.className="rl"+(isRed(s)?" red":"");
@@ -528,7 +534,6 @@
         else cls+=" empty";
         if(r===7) cls+=" seven";
         if(legalSet.has(s+r)) cls+=" legal";
-        if(swapSet.has(s+r)) cls+=" swapok";
         cell.className=cls;
         cell.dataset.s=s; cell.dataset.r=r;
         cell.textContent = v==="J" ? "★" : RANKNAME[r];
@@ -550,6 +555,7 @@
     hand.innerHTML="";
     const baseOverlap = P.hand.length>13 ? -22 : P.hand.length>9 ? -16 : -8;
     let prevPlay=false;
+    const fIdx = forcedIdx(G.viewer);
     P.hand.forEach((c,i)=>{
       const el=document.createElement("div");
       el.className="card"+(c.joker?" jk":"");
@@ -557,7 +563,11 @@
       el.dataset.i=i;
       let play=false;
       if(isViewerTurn){
-        if(c.joker){ if(jokerSlots().length){ el.classList.add("playable"); play=true; } if(G.jokerMode) el.classList.add("armed"); }
+        if(fIdx>=0){
+          if(i===fIdx){ el.classList.add("playable"); play=true; }
+          else el.classList.add("dim");
+        }
+        else if(c.joker){ if(jokerSlots().length){ el.classList.add("playable"); play=true; } if(G.jokerMode) el.classList.add("armed"); }
         else if(slotOpen(c.suit,c.rank)){ el.classList.add("playable"); play=true; }
         else el.classList.add("dim");
       }
@@ -566,7 +576,7 @@
       hand.appendChild(el);
     });
     // pass button
-    document.getElementById("passBtn").disabled = !isViewerTurn;
+    document.getElementById("passBtn").disabled = !isViewerTurn || fIdx>=0;
   }
   function cellDiv(cls,txt){ const d=document.createElement("div"); d.className=cls; d.textContent=txt; return d; }
 
