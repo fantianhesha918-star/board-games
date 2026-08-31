@@ -73,9 +73,9 @@
 
   /* play */
   .play{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 12px 24px;}
-  .scoreboard{display:flex;gap:10px;width:100%;max-width:460px;}
+  .scoreboard{display:flex;gap:8px;width:100%;max-width:520px;flex-wrap:wrap;justify-content:center;}
   .score{
-    flex:1;background:var(--surface);border-radius:16px;padding:9px 12px;box-shadow:var(--shadow);
+    flex:1 1 calc(50% - 4px);min-width:0;background:var(--surface);border-radius:16px;padding:9px 12px;box-shadow:var(--shadow);
     display:flex;align-items:center;gap:9px;border:2px solid transparent;transition:border-color .15s ease;
   }
   .score.active{border-color:var(--accent);}
@@ -150,19 +150,24 @@
     </div>
     <div class="setup">
       <div class="field">
-        <span class="label">対戦モード</span>
-        <div class="seg" id="segMode">
-          <button data-val="cpu" class="on">CPU対戦</button>
-          <button data-val="pvp">2人で対面</button>
+        <span class="label">人間（この端末で交代プレイ）</span>
+        <div class="seg" id="segHumans">
+          <button data-val="1" class="on">1人</button>
+          <button data-val="2">2人</button>
+          <button data-val="3">3人</button>
+          <button data-val="4">4人</button>
         </div>
       </div>
-      <div class="field" id="fieldFirst">
-        <span class="label">先攻</span>
-        <div class="seg" id="segFirst">
-          <button data-val="you" class="on">あなた</button>
-          <button data-val="cpu">CPU</button>
+      <div class="field">
+        <span class="label">CPU</span>
+        <div class="seg" id="segCpu">
+          <button data-val="0">なし</button>
+          <button data-val="1" class="on">1人</button>
+          <button data-val="2">2人</button>
+          <button data-val="3">3人</button>
         </div>
       </div>
+      <p class="hint-text" id="countNote"></p>
       <div class="field" id="fieldLevel">
         <span class="label">CPUの記憶力</span>
         <div class="seg" id="segLevel">
@@ -196,16 +201,7 @@
       <button class="icon-btn" id="restartBtn">最初から</button>
     </div>
     <div class="play">
-      <div class="scoreboard">
-        <div class="score" id="scoreA">
-          <span class="ava" id="avaA"></span>
-          <span class="meta"><span class="who" id="whoA">あなた</span><span class="num" id="numA">0<small>組</small></span></span>
-        </div>
-        <div class="score" id="scoreB">
-          <span class="ava" id="avaB"></span>
-          <span class="meta"><span class="who" id="whoB">CPU</span><span class="num" id="numB">0<small>組</small></span></span>
-        </div>
-      </div>
+      <div class="scoreboard" id="scoreboard"></div>
       <div class="status" id="statusText">あなたの番</div>
       <div class="board" id="board"></div>
       <div class="play-actions">
@@ -247,21 +243,31 @@
       w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
     return ()=>w.querySelector("button.on").dataset.val;
   }
-  const getMode=seg("segMode",v=>{
-    const cpu=v==="cpu";
-    document.getElementById("fieldFirst").style.display=cpu?"flex":"none";
-    document.getElementById("fieldLevel").style.display=cpu?"flex":"none";
-  });
-  const getFirst=seg("segFirst");
+  function updateCountNote(){
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    const el=document.getElementById("countNote");
+    if(tot<2) el.textContent="⚠ 合計2人以上にしてください（今 "+tot+"人）";
+    else if(tot>4) el.textContent="⚠ 合計4人までです（今 "+tot+"人）";
+    else el.textContent="合計 "+tot+"人（"+(hu===1?"あなた":"プレイヤー"+hu+"人")+(cp>0?" ＋ CPU"+cp+"人":"")+"）";
+    document.getElementById("fieldLevel").style.display = cp>0 ? "flex" : "none";
+  }
+  const getHumans=seg("segHumans",updateCountNote);
+  const getCpu=seg("segCpu",updateCountNote);
   const getLevel=seg("segLevel");
   const getSize=seg("segSize");
 
   const boardEl=document.getElementById("board");
   const G={
-    mode:"cpu", level:2, cards:[], cols:4, turn:0, // 0 = player A, 1 = player B
-    score:[0,0], busy:false, first:[], over:false,
-    cpuMem:{}, pLevel:0.72
+    humans:1, n:2, level:2, cards:[], cols:4, turn:0,
+    score:[], busy:false, first:[], over:false,
+    cpuMems:{}, pLevel:0.72
   };
+  function isHuman(i){ return i<G.humans; }
+  function pname(i){ return i<G.humans ? (G.humans===1?"あなた":"プレイヤー"+(i+1)) : "CPU"+(i-G.humans+1); }
+  function avaImg(i){
+    const imgs=["S1","H1","D1","C1"];
+    return i<G.humans ? "url(assets/cards/"+imgs[i%4]+".webp)" : "url(assets/othello/white.webp)";
+  }
 
   function buildDeck(pairs){
     // 26 possible pairs: rank(0..12) x color(0=black,1=red). black => S+C, red => H+D
@@ -285,31 +291,42 @@
   }
 
   function startGame(){
-    G.mode=getMode();
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    if(tot<2){ toast("合計2人以上にしてください"); return; }
+    if(tot>4){ toast("合計4人までにしてください"); return; }
+    G.humans=hu; G.n=tot;
     G.level=+getLevel();
     G.pLevel = G.level===1?0.34 : G.level===2?0.72 : 0.95;
     const total=+getSize();
     const pairs=total/2;
     G.cards = buildDeck(pairs).map((c,i)=>({...c, pos:i, up:false, matched:false}));
     G.cols = total<=12?4 : total<=20?4 : 5;
-    G.score=[0,0];
+    G.score=new Array(G.n).fill(0);
     G.first=[];
     G.busy=false;
     G.over=false;
-    G.cpuMem={};
-    // first mover
-    if(G.mode==="cpu") G.turn = getFirst()==="cpu" ? 1 : 0;
-    else G.turn = 0;
+    G.cpuMems={};
+    for(let i=G.humans;i<G.n;i++) G.cpuMems[i]={};
+    G.turn=0;
 
-    document.getElementById("whoA").textContent = G.mode==="cpu" ? "あなた" : "プレイヤー1";
-    document.getElementById("whoB").textContent = G.mode==="cpu" ? "CPU" : "プレイヤー2";
-    document.getElementById("avaA").style.backgroundImage = G.mode==="cpu" ? "url(assets/othello/black.webp)" : "url(assets/cards/S1.webp)";
-    document.getElementById("avaB").style.backgroundImage = G.mode==="cpu" ? "url(assets/othello/white.webp)" : "url(assets/cards/H1.webp)";
-
+    buildScoreboard();
     renderBoard();
     updateHud();
     show("play");
     if(isCpuTurn()) setTimeout(cpuTurn, 700);
+  }
+
+  function buildScoreboard(){
+    const sb=document.getElementById("scoreboard");
+    sb.innerHTML="";
+    for(let i=0;i<G.n;i++){
+      const d=document.createElement("div");
+      d.className="score"; d.id="score"+i;
+      d.innerHTML='<span class="ava"></span><span class="meta"><span class="who">'+pname(i)
+        +'</span><span class="num">0<small>組</small></span></span>';
+      d.querySelector(".ava").style.backgroundImage=avaImg(i);
+      sb.appendChild(d);
+    }
   }
 
   function renderBoard(){
@@ -328,19 +345,18 @@
     });
   }
 
-  function isCpuTurn(){ return G.mode==="cpu" && G.turn===1; }
+  function isCpuTurn(){ return !isHuman(G.turn); }
 
   function updateHud(){
-    document.getElementById("numA").innerHTML = G.score[0]+'<small>組</small>';
-    document.getElementById("numB").innerHTML = G.score[1]+'<small>組</small>';
-    document.getElementById("scoreA").classList.toggle("active", !G.over && G.turn===0);
-    document.getElementById("scoreB").classList.toggle("active", !G.over && G.turn===1);
+    for(let i=0;i<G.n;i++){
+      const d=document.getElementById("score"+i);
+      if(!d) continue;
+      d.querySelector(".num").innerHTML = G.score[i]+'<small>組</small>';
+      d.classList.toggle("active", !G.over && G.turn===i);
+    }
     const st=document.getElementById("statusText");
     if(G.over){ st.textContent="ゲーム終了"; return; }
-    const nameA = G.mode==="cpu"?"あなた":"プレイヤー1";
-    const nameB = G.mode==="cpu"?"CPU":"プレイヤー2";
-    if(isCpuTurn()) st.textContent = "CPUが選んでいます…";
-    else st.textContent = (G.turn===0?nameA:nameB)+"の番";
+    st.textContent = isCpuTurn() ? pname(G.turn)+"が選んでいます…" : pname(G.turn)+"の番";
   }
 
   function flipVisual(card, toUp){
@@ -351,17 +367,20 @@
     });
   }
 
-  function observe(card, byCpuOwn){
-    // CPU memorises which pair is at this position
-    const p = byCpuOwn ? 1 : G.pLevel;
-    if(Math.random()<p) G.cpuMem[card.pos]=card.key;
-    else if(!byCpuOwn && G.pLevel<0.9 && Math.random()<0.12) delete G.cpuMem[card.pos];
+  function observe(card, actingCpu){
+    // すべてのCPUがめくられたカードを見る（手番のCPUは確実に記憶）
+    for(let c=G.humans;c<G.n;c++){
+      const mem=G.cpuMems[c];
+      const p = (c===actingCpu) ? 1 : G.pLevel;
+      if(Math.random()<p) mem[card.pos]=card.key;
+      else if(c!==actingCpu && G.pLevel<0.9 && Math.random()<0.12) delete mem[card.pos];
+    }
   }
 
-  async function reveal(card, byCpuOwn){
+  async function reveal(card, actingCpu){
     card.up=true;
     await flipVisual(card,true);
-    observe(card, !!byCpuOwn);
+    observe(card, (typeof actingCpu==="number") ? actingCpu : -1);
   }
   async function hide(card){
     card.up=false;
@@ -378,7 +397,7 @@
       a.el.classList.add("matched");
       b.el.classList.add("matched");
       G.score[G.turn]++;
-      delete G.cpuMem[a.pos]; delete G.cpuMem[b.pos];
+      for(const c in G.cpuMems){ delete G.cpuMems[c][a.pos]; delete G.cpuMems[c][b.pos]; }
       updateHud();
       if(G.cards.every(c=>c.matched)){ endGame(); return; }
       // same player continues
@@ -389,7 +408,7 @@
       await wait(780);
       a.el.classList.remove("nudge"); b.el.classList.remove("nudge");
       await Promise.all([hide(a),hide(b)]);
-      G.turn = G.turn===0?1:0;
+      G.turn = (G.turn+1)%G.n;
       updateHud();
       G.busy=false;
       if(isCpuTurn()){ G.busy=true; await wait(500); cpuTurn(); }
@@ -413,18 +432,16 @@
   });
 
   /* ---------- CPU ---------- */
-  function cpuChoose(){
+  function cpuChoose(mem){
     const avail = G.cards.filter(c=>!c.matched);
     const availPos = new Set(avail.map(c=>c.pos));
-    // clean stale memory
-    for(const k of Object.keys(G.cpuMem)) if(!availPos.has(+k)) delete G.cpuMem[+k];
+    for(const k of Object.keys(mem)) if(!availPos.has(+k)) delete mem[+k];
 
     const sometimesDumb = G.level===1 && Math.random()<0.25;
 
-    // known pair?
     if(!sometimesDumb){
       const byKey={};
-      for(const [pos,key] of Object.entries(G.cpuMem)){
+      for(const [pos,key] of Object.entries(mem)){
         (byKey[key]=byKey[key]||[]).push(+pos);
       }
       for(const key in byKey){
@@ -433,41 +450,39 @@
         }
       }
     }
-    // first: prefer an unknown card
-    const unknown = avail.filter(c=>!(c.pos in G.cpuMem));
+    const unknown = avail.filter(c=>!(c.pos in mem));
     const firstPool = unknown.length?unknown:avail;
     const first = firstPool[Math.random()*firstPool.length|0];
-
-    // second decided after first is revealed (see cpuTurn)
     return [first, null];
   }
 
   async function cpuTurn(){
     if(G.over) return;
+    const me=G.turn;
+    const mem=G.cpuMems[me];
     G.busy=true;
     updateHud();
-    let [c1,c2]=cpuChoose();
+    let [c1,c2]=cpuChoose(mem);
     await wait(260);
-    await reveal(c1,true);
+    await reveal(c1,me);
     G.first.push(c1);
     await wait(420);
 
     if(!c2){
       const avail=G.cards.filter(c=>!c.matched && c.pos!==c1.pos && !c.up);
-      // try to match from memory
       let match=null;
-      for(const [pos,key] of Object.entries(G.cpuMem)){
+      for(const [pos,key] of Object.entries(mem)){
         if(+pos!==c1.pos && key===c1.key && avail.some(c=>c.pos===+pos)){ match=G.cards[+pos]; break; }
       }
       if(match && !(G.level===1 && Math.random()<0.3)){
         c2=match;
       }else{
-        const unknown=avail.filter(c=>!(c.pos in G.cpuMem));
+        const unknown=avail.filter(c=>!(c.pos in mem));
         const pool=unknown.length?unknown:avail;
         c2=pool[Math.random()*pool.length|0];
       }
     }
-    await reveal(c2,true);
+    await reveal(c2,me);
     G.first.push(c2);
     await wait(260);
     await resolveTurn();
@@ -476,17 +491,19 @@
   function endGame(){
     G.over=true;
     updateHud();
-    const nameA = G.mode==="cpu"?"あなた":"プレイヤー1";
-    const nameB = G.mode==="cpu"?"CPU":"プレイヤー2";
+    const best=Math.max(...G.score);
+    const winners=[]; for(let i=0;i<G.n;i++) if(G.score[i]===best) winners.push(i);
     let title;
-    if(G.score[0]===G.score[1]) title="引き分け";
-    else{
-      const w = G.score[0]>G.score[1]?0:1;
-      if(G.mode==="cpu") title = w===0 ? "あなたの勝ち！" : "CPUの勝ち";
-      else title = (w===0?nameA:nameB)+"の勝ち";
+    if(winners.length>1){
+      title="引き分け（"+winners.map(pname).join("・")+"）";
+    }else{
+      const w=winners[0];
+      title = (G.humans===1 && w!==0) ? pname(w)+"の勝ち"
+            : (G.humans===1 ? "あなたの勝ち！" : pname(w)+"の勝ち");
     }
     document.getElementById("ovResult").textContent=title;
-    document.getElementById("ovDetail").textContent = nameA+" "+G.score[0]+"組 ー "+G.score[1]+"組 "+nameB;
+    document.getElementById("ovDetail").textContent =
+      G.score.map((s,i)=>pname(i)+" "+s+"組").join(" ／ ");
     document.getElementById("overlay").classList.add("show");
   }
 
@@ -498,8 +515,7 @@
   document.getElementById("restartBtn2").addEventListener("click",()=>{ if(!G.busy||G.over) startGame(); });
   document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
 
-  document.getElementById("fieldFirst").style.display="flex";
-  document.getElementById("fieldLevel").style.display="flex";
+  updateCountNote();
 })();
 </script>
 </body>

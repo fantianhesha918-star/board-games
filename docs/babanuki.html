@@ -209,20 +209,24 @@
     </div>
     <div class="setup">
       <div class="field">
-        <span class="label">対戦モード</span>
-        <div class="seg" id="segMode">
-          <button data-val="cpu" class="on">CPU対戦</button>
-          <button data-val="pvp">2人で対面</button>
+        <span class="label">人間（この端末で交代プレイ）</span>
+        <div class="seg" id="segHumans">
+          <button data-val="1" class="on">1人</button>
+          <button data-val="2">2人</button>
+          <button data-val="3">3人</button>
+          <button data-val="4">4人</button>
         </div>
       </div>
-      <div class="field" id="fieldCount">
-        <span class="label">人数</span>
-        <div class="seg" id="segCount">
-          <button data-val="2" class="on">2人<br><small>あなた+CPU1</small></button>
-          <button data-val="3">3人<br><small>あなた+CPU2</small></button>
-          <button data-val="4">4人<br><small>あなた+CPU3</small></button>
+      <div class="field">
+        <span class="label">CPU</span>
+        <div class="seg" id="segCpu">
+          <button data-val="0">なし</button>
+          <button data-val="1" class="on">1人</button>
+          <button data-val="2">2人</button>
+          <button data-val="3">3人</button>
         </div>
       </div>
+      <p class="hint-text" id="countNote"></p>
       <div class="field">
         <span class="label">シャッフル（ババ嵐）</span>
         <div class="seg" id="segShuffle">
@@ -319,15 +323,21 @@
       w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
     return ()=>w.querySelector("button.on").dataset.val;
   }
-  const getMode=seg("segMode",v=>{
-    document.getElementById("fieldCount").style.display = v==="cpu" ? "flex" : "none";
-  });
-  const getCount=seg("segCount");
+  function updateCountNote(){
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    const el=document.getElementById("countNote");
+    if(tot<2) el.textContent="⚠ 合計2人以上にしてください（今 "+tot+"人）";
+    else if(tot>4) el.textContent="⚠ 合計4人までです（今 "+tot+"人）";
+    else el.textContent="合計 "+tot+"人（"+(hu===1?"あなた":"プレイヤー"+hu+"人")+(cp>0?" ＋ CPU"+cp+"人":"")+"）"
+      +(hu>=2?"／人間の手番ごとに端末を回します":"");
+  }
+  const getHumans=seg("segHumans",updateCountNote);
+  const getCpu=seg("segCpu",updateCountNote);
   const getShuffle=seg("segShuffle",v=>{
     document.getElementById("hintShuffle").style.display = v==="on" ? "" : "none";
   });
 
-  const G={ mode:"cpu", n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[], shuffleOn:true };
+  const G={ humans:1, n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[], shuffleOn:true };
 
   function faceUrl(c){ return c.joker ? "url(assets/cards/JB.webp)" : "url(assets/cards/"+c.suit+c.rank+".webp)"; }
 
@@ -356,10 +366,10 @@
   }
 
   function name(i){
-    if(G.mode==="cpu") return i===0 ? "あなた" : "CPU"+i;
-    return "プレイヤー"+(i+1);
+    if(i<G.humans) return G.humans===1 ? "あなた" : "プレイヤー"+(i+1);
+    return "CPU"+(i-G.humans+1);
   }
-  function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
+  function isHuman(i){ return i<G.humans; }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
   function jokerHolder(){ for(let i=0;i<G.n;i++) if(G.players[i].hand.some(c=>c.joker)) return i; return -1; }
   function nextActive(from){
@@ -369,8 +379,10 @@
   }
 
   function startGame(){
-    G.mode=getMode();
-    G.n = G.mode==="pvp" ? 2 : +getCount();
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    if(tot<2){ toast("合計2人以上にしてください"); return; }
+    if(tot>4){ toast("合計4人までにしてください"); return; }
+    G.humans=hu; G.n=tot; G.viewer=0;
     G.shuffleOn = getShuffle()==="on";
     G.over=false; G.busy=false; G.pileP=0;
     const deck=buildDeck();
@@ -392,16 +404,15 @@
     if(activeIdx().length<=1){ endGame(); return; }
     if(G.players[p].done){ beginTurn(nextActive(p)); return; }
     G.cur=p;
-    G.viewer = G.mode==="pvp" ? p : 0;
-
-    if(G.mode==="pvp" && !first){
-      await handoff(p);
+    if(isHuman(p)){
+      if(G.humans>=2 && !first && p!==G.viewer) await handoff(p);
+      G.viewer=p;
     }
     hidePickrow();
     hideShuffleBar();
     render();
 
-    const humanControls = isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0);
+    const humanControls = isHuman(p);
     const canShuffle = G.shuffleOn && !G.usedShuffle[p] && jokerHolder()===p;
 
     if(humanControls){
@@ -689,7 +700,7 @@
     for(let i=0;i<G.n;i++) if(G.players[i].hand.some(c=>c.joker)) loser=i;
     let title, detail;
     if(loser<0){ title="引き分け"; detail=""; }
-    else if(G.mode==="cpu"){
+    else if(G.humans===1){
       title = loser===0 ? "あなたの負け…" : "あなたの勝ち！";
       detail = "ジョーカーを持っていたのは "+name(loser);
     }else{
@@ -707,7 +718,7 @@
   document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
   document.getElementById("restartBtn2").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
   document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
-  document.getElementById("fieldCount").style.display="flex";
+  updateCountNote();
 })();
 </script>
 </body>

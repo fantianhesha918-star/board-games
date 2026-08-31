@@ -174,20 +174,24 @@
     </div>
     <div class="setup">
       <div class="field">
-        <span class="label">対戦モード</span>
-        <div class="seg" id="segMode">
-          <button data-val="cpu" class="on">CPU対戦</button>
-          <button data-val="pvp">2人で対面</button>
-        </div>
-      </div>
-      <div class="field" id="fieldCount">
-        <span class="label">人数</span>
-        <div class="seg" id="segCount">
-          <button data-val="3" class="on">3人</button>
+        <span class="label">人間（この端末で交代プレイ）</span>
+        <div class="seg" id="segHumans">
+          <button data-val="1" class="on">1人</button>
+          <button data-val="2">2人</button>
+          <button data-val="3">3人</button>
           <button data-val="4">4人</button>
-          <button data-val="5">5人</button>
         </div>
       </div>
+      <div class="field">
+        <span class="label">CPU</span>
+        <div class="seg" id="segCpu">
+          <button data-val="0">なし</button>
+          <button data-val="1">1人</button>
+          <button data-val="2" class="on">2人</button>
+          <button data-val="3">3人</button>
+        </div>
+      </div>
+      <p class="hint-text" id="countNote"></p>
       <div class="field" id="fieldLevel">
         <span class="label">CPUの強さ</span>
         <div class="seg" id="segLevel">
@@ -339,14 +343,22 @@
       w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
     return ()=>w.querySelector("button.on").dataset.val;
   }
-  const getMode=seg("segMode",v=>{ document.getElementById("fieldCount").style.display=v==="cpu"?"flex":"none";
-    document.getElementById("fieldLevel").style.display=v==="cpu"?"flex":"none"; });
-  const getCount=seg("segCount");
+  function updateCountNote(){
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    const el=document.getElementById("countNote");
+    if(tot<2) el.textContent="⚠ 合計2人以上にしてください（今 "+tot+"人）";
+    else if(tot>4) el.textContent="⚠ 合計4人までです（今 "+tot+"人）";
+    else el.textContent="合計 "+tot+"人（"+(hu===1?"あなた":"プレイヤー"+hu+"人")+(cp>0?" ＋ CPU"+cp+"人":"")+"）"
+      +(hu>=2?"／人間の手番ごとに端末を回します":"");
+    document.getElementById("fieldLevel").style.display = cp>0 ? "flex" : "none";
+  }
+  const getHumans=seg("segHumans",updateCountNote);
+  const getCpu=seg("segCpu",updateCountNote);
   const getLevel=seg("segLevel");
   const getRensen=seg("segRensen");
 
   const G={
-    mode:"cpu", n:3, level:2, rensen:true, rules:{},
+    humans:1, n:3, level:2, rensen:true, rules:{},
     players:[], turn:0, dir:1, field:null,
     revolution:false, ebActive:false, lockSuits:null,
     lastPlayer:-1, passCount:0, finishers:[],
@@ -355,10 +367,10 @@
   };
 
   function name(i){
-    if(G.mode==="cpu") return i===0?"あなた":"CPU"+i;
-    return "プレイヤー"+(i+1);
+    if(i<G.humans) return G.humans===1?"あなた":"プレイヤー"+(i+1);
+    return "CPU"+(i-G.humans+1);
   }
-  function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
+  function isHuman(i){ return i<G.humans; }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
   function activeCount(){ return activeIdx().length; }
   function nextActive(from,steps){
@@ -387,8 +399,10 @@
   }
 
   function startGame(){
-    G.mode=getMode();
-    G.n = G.mode==="pvp" ? 2 : +getCount();
+    const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
+    if(tot<2){ toast("合計2人以上にしてください"); return; }
+    if(tot>4){ toast("合計4人までにしてください"); return; }
+    G.humans=hu; G.n=tot; G.viewer=0;
     G.level=+getLevel();
     G.rensen = getRensen()==="on";
     G.rules=readRules();
@@ -449,13 +463,12 @@
       // 富豪側：任意のカードを返す（人間なら選択、CPUは弱い順）
       const rp=G.players[rich];
       let ret;
-      if(isHuman(rich) && G.mode==="cpu"){
-        setStatus("カード交換：渡すカードを選んでください");
+      if(isHuman(rich)){
+        if(G.humans>=2) await handoff(rich);
+        G.viewer=rich;
+        setStatus(name(rich)+" → 大貧民へ渡すカードを "+cnt+" 枚選んでください");
         render();
         ret=await pickCards(rich,cnt,"大貧民へ渡すカードを "+cnt+" 枚選んでください",true);
-      }else if(isHuman(rich) && G.mode==="pvp"){
-        await handoff(rich);
-        ret=await pickCards(rich,cnt,name(rich)+"（大富豪）→ 大貧民へ渡すカードを "+cnt+" 枚",true);
       }else{
         ret=rp.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
       }
@@ -550,12 +563,15 @@
     if(G.over) return;
     if(activeCount()<=1){ endRound(); return; }
     if(G.players[p].done){ beginTurn(nextActive(p)); return; }
-    G.turn=p; G.viewer = G.mode==="pvp" ? p : 0;
+    G.turn=p;
     G.sel=[];
-    if(G.mode==="pvp" && !first) await handoff(p);
+    if(isHuman(p)){
+      if(G.humans>=2 && p!==G.viewer) await handoff(p);
+      G.viewer=p;
+    }
     render();
 
-    if(isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0)){
+    if(isHuman(p)){
       G.busy=false;
       setStatus(G.field ? name(p)+"の番：場に出すか パス" : name(p)+"の番：好きなカードを出す（親）");
       render();
@@ -709,7 +725,7 @@
     const P=G.players[from];
     cnt=Math.min(cnt,P.hand.length);
     let chosen;
-    if(isHuman(from) && (G.mode==="pvp"?from===G.viewer:from===0)){
+    if(isHuman(from)){
       chosen=await pickCards(from,cnt,label+"：左隣へ渡すカードを "+cnt+" 枚",true);
     }else{
       chosen=P.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
@@ -725,7 +741,7 @@
     const P=G.players[from];
     cnt=Math.min(cnt,P.hand.length);
     let chosen;
-    if(isHuman(from) && (G.mode==="pvp"?from===G.viewer:from===0)){
+    if(isHuman(from)){
       chosen=await pickCards(from,cnt,label+"：捨てるカードを "+cnt+" 枚",true);
     }else{
       chosen=P.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
@@ -911,7 +927,7 @@
 
     // 表示
     let title;
-    if(G.mode==="cpu"){
+    if(G.humans===1){
       const myPlace=G.players[0].place;
       title = G.players[0].title + "（"+myPlace+"位）";
     }else{
@@ -940,8 +956,7 @@
     // opponents
     const opps=document.getElementById("opps"); opps.innerHTML="";
     for(let i=0;i<G.n;i++){
-      if(G.mode==="cpu" && i===0) continue;
-      if(G.mode==="pvp" && i===G.viewer) continue;
+      if(i===G.viewer) continue;
       const P=G.players[i];
       const d=document.createElement("div");
       d.className="opp"+(i===G.turn&&!G.over?" turn":"")+(P.done?" done":"");
@@ -978,7 +993,7 @@
     const P=G.players[G.viewer];
     document.getElementById("handLabel").textContent=name(G.viewer)+"の手札（"+P.hand.length+"枚）";
     const hand=document.getElementById("hand"); hand.innerHTML="";
-    const isTurn = (G.mode==="pvp"? G.turn===G.viewer : G.turn===0) && !G.over && !G.busy;
+    const isTurn = G.turn===G.viewer && isHuman(G.viewer) && !G.over && !G.busy;
     const many=P.hand.length;
     P.hand.forEach(c=>{
       const el=document.createElement("div");
@@ -998,7 +1013,7 @@
   document.getElementById("hand").addEventListener("click",e=>{
     if(G.busy||G.over) return;
     const el=e.target.closest(".card"); if(!el) return;
-    const isTurn = (G.mode==="pvp"? G.turn===G.viewer : G.turn===0);
+    const isTurn = G.turn===G.viewer && isHuman(G.viewer);
     if(!isTurn) return;
     const id=+el.dataset.id;
     const k=G.sel.indexOf(id);
@@ -1008,8 +1023,7 @@
   document.getElementById("playBtn").addEventListener("click",()=>{
     if(G.busy||G.over) return;
     const p=G.turn;
-    const isTurn = (G.mode==="pvp"? p===G.viewer : p===0);
-    if(!isTurn) return;
+    if(!(p===G.viewer && isHuman(p))) return;
     const cards=G.players[p].hand.filter(c=>G.sel.includes(c.id));
     const lp=legalPlay(cards);
     if(!lp.ok){ toast(lp.msg); return; }
@@ -1019,8 +1033,7 @@
   document.getElementById("passBtn").addEventListener("click",()=>{
     if(G.busy||G.over) return;
     const p=G.turn;
-    const isTurn = (G.mode==="pvp"? p===G.viewer : p===0);
-    if(!isTurn) return;
+    if(!(p===G.viewer && isHuman(p))) return;
     if(!G.field){ toast("親はパスできません"); return; }
     G.sel=[];
     doPass(p);
@@ -1047,8 +1060,7 @@
   document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
 
   buildRuleToggles();
-  document.getElementById("fieldCount").style.display="flex";
-  document.getElementById("fieldLevel").style.display="flex";
+  updateCountNote();
 })();
 </script>
 </body>
