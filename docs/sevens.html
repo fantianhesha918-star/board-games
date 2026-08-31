@@ -78,24 +78,28 @@
   .board .rl.red{color:#ff9a90;}
   .cell{
     aspect-ratio:2/3;border-radius:3px;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:8.5px;color:rgba(255,255,255,.9);
-    background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+    font-weight:800;font-size:7.5px;letter-spacing:-.02em;color:rgba(255,255,255,.42);
+    background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+    background-size:cover;background-position:center;overflow:hidden;
   }
-  .cell.empty{color:rgba(255,255,255,.28);}
-  .cell.filled.black{background:#20232a;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4);color:#fff;}
-  .cell.filled.red{background:#b03a2e;color:#fff;}
-  .cell.joker{background:linear-gradient(135deg,#e9c46a,#f6dc9c);color:#6b4423;}
+  .cell.empty.red{color:#ff9a90;}
+  .cell.cardimg{background-color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);color:transparent;}
+  .cell.joker{box-shadow:0 0 0 2px var(--gold),0 1px 3px rgba(0,0,0,.4);}
   .cell.seven{box-shadow:inset 0 0 0 2px var(--gold);}
+  .cell.cardimg.seven{box-shadow:0 0 0 2px var(--gold),0 1px 3px rgba(0,0,0,.35);}
   .cell.legal{box-shadow:inset 0 0 0 2px #7fe3a6;cursor:pointer;animation:legalpulse 1.3s ease-in-out infinite;}
+  .cell.cardimg.legal{box-shadow:0 0 0 2px #7fe3a6;}
   .cell.pop{animation:cellpop .4s cubic-bezier(.3,1.4,.5,1);}
   @keyframes cellpop{0%{transform:scale(.4);}100%{transform:scale(1);}}
   @keyframes legalpulse{0%,100%{opacity:.65;}50%{opacity:1;}}
 
   .stage{
-    display:flex;align-items:center;justify-content:center;gap:10px;min-height:40px;
+    display:flex;align-items:center;justify-content:center;gap:12px;min-height:64px;
     color:var(--text);font-weight:800;font-size:13.5px;text-align:center;padding:2px 6px;line-height:1.5;
   }
-  .stage .lastcard{width:34px;aspect-ratio:2/3;border-radius:4px;background-size:cover;background-position:center;box-shadow:0 2px 5px rgba(0,0,0,.3);flex:none;}
+  .stage .lastcard{width:50px;aspect-ratio:2/3;border-radius:6px;background-size:cover;background-position:center;box-shadow:0 3px 9px rgba(0,0,0,.34);flex:none;}
+  .stage .lastcard.lcpop{animation:lcpop .34s ease;}
+  @keyframes lcpop{0%{transform:scale(.5);opacity:.35;}60%{transform:scale(1.13);opacity:1;}100%{transform:scale(1);}}
 
   .hand-wrap{margin-top:14px;padding-top:4px;}
   .hand-label{font-size:11.5px;font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:6px;}
@@ -191,7 +195,7 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”（1ゲームに1回きり・置いたら戻せません）。置いた位置の本物のカードを持つ人は、自分の番に必ずそのカードを出さなければならず（ジョーカーはそのカードに置き換わります）、その手番はパスできません。</span></p>
+    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。A まで並んだら、その先は K→Q→… と反対側から折り返します（K まで並んだ時は A→2→…）。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”（1ゲームに1回きり・置いたら戻せません）。置いた位置の本物のカードを持つ人は、自分の番に必ずそのカードを出さなければならず（ジョーカーはそのカードに置き換わります）、その手番はパスできません。</span></p>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 
@@ -268,7 +272,34 @@
             over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null, forced:null };
 
   function filled(s,r){ return r>=1&&r<=13 && G.B[s][r]!=null; }
-  function slotOpen(s,r){ return r>=1&&r<=13 && G.B[s][r]==null && (filled(s,r-1)||filled(s,r+1)); }
+  // そのスートで今おけるランク一覧。A(1)またはK(13)まで並ぶと逆側から折り返す変則ルール。
+  function openRanks(s){
+    const F=r=>filled(s,r);
+    let hi=7; while(hi+1<=13 && F(hi+1)) hi++;   // 7から上へ連続する先端
+    let lo=7; while(lo-1>=1 && F(lo-1)) lo--;    // 7から下へ連続する先端
+    const aP=F(1), kP=F(13);
+    const out=[];
+    if(!aP && !kP){
+      // 通常：置いてあるカードの隣（バーストの飛び地も隣接なら可）
+      for(let r=1;r<=13;r++) if(!F(r) && (F(r-1)||F(r+1))) out.push(r);
+    }else if(aP && !kP){
+      // Aまで到達 → 上側(8〜)は凍結。K→Q→… と上から折り返して埋める
+      let f; if(!F(13)) f=13; else { let w=13; while(w-1>=1 && F(w-1)) w--; f=w-1; }
+      if(f>hi) out.push(f);
+    }else if(kP && !aP){
+      // Kまで到達 → 下側(6〜)は凍結。A→2→… と下から折り返して埋める
+      let f; if(!F(1)) f=1; else { let w=1; while(w+1<=13 && F(w+1)) w++; f=w+1; }
+      if(f<lo) out.push(f);
+    }else{
+      // A・K両方到達済み：折り返しの残りを埋める
+      let gapHi=false; for(let r=hi+1;r<=12;r++) if(!F(r)) gapHi=true;
+      let gapLo=false; for(let r=2;r<=lo-1;r++) if(!F(r)) gapLo=true;
+      if(gapHi){ let w=13; while(w-1>=1 && F(w-1)) w--; if(w-1>hi) out.push(w-1); }
+      if(gapLo){ let w=1;  while(w+1<=13 && F(w+1)) w++; if(w+1<lo) out.push(w+1); }
+    }
+    return out;
+  }
+  function slotOpen(s,r){ return r>=1&&r<=13 && G.B[s][r]==null && openRanks(s).indexOf(r)>=0; }
   function jokerSlots(){ const out=[]; for(const s of SUITS) for(let r=1;r<=13;r++) if(slotOpen(s,r)) out.push([s,r]); return out; }
   function playable(hand){ return hand.filter(c=>!c.joker && slotOpen(c.suit,c.rank)); }
   // ジョーカーが置かれた位置の本物カードを、その持ち主は自分の手番で必ず出す
@@ -529,24 +560,29 @@
         const v=G.B[s][r];
         const cell=document.createElement("div");
         let cls="cell";
-        if(v==="C") cls+=" filled "+(isRed(s)?"red":"black");
-        else if(v==="J") cls+=" joker";
-        else cls+=" empty";
+        if(v==="C"||v==="J"){ cls+=" cardimg"; if(v==="J") cls+=" joker"; }
+        else cls+=" empty "+(isRed(s)?"red":"black");
         if(r===7) cls+=" seven";
         if(legalSet.has(s+r)) cls+=" legal";
         cell.className=cls;
         cell.dataset.s=s; cell.dataset.r=r;
-        cell.textContent = v==="J" ? "★" : RANKNAME[r];
+        if(v==="C") cell.style.backgroundImage="url(assets/cards/"+s+r+".webp)";
+        else if(v==="J"){ cell.style.backgroundImage="url(assets/cards/JB.webp)"; cell.textContent=""; }
+        else cell.textContent = SUIT_SYM[s]+RANKNAME[r];
         b.appendChild(cell);
       }
     }
-    // stage last card
+    // stage last card（その手番で出したカードの絵柄）
     const stg=document.getElementById("stage");
     let lc=stg.querySelector(".lastcard");
     if(G.last){
       if(!lc){ lc=document.createElement("div"); lc.className="lastcard"; stg.insertBefore(lc,stg.firstChild); }
-      lc.style.backgroundImage = G.last.joker ? "url(assets/cards/JB.webp)"
-        : "url(assets/cards/"+G.last.suit+G.last.rank+".webp)";
+      const key = G.last.joker ? "JB" : (G.last.suit+G.last.rank);
+      if(lc.dataset.key!==key){
+        lc.dataset.key=key;
+        lc.style.backgroundImage="url(assets/cards/"+key+".webp)";
+        lc.classList.remove("lcpop"); void lc.offsetWidth; lc.classList.add("lcpop");
+      }
     }else if(lc){ lc.remove(); }
     // hand
     const isViewerTurn = (G.mode==="pvp" ? G.cur===G.viewer : G.cur===0) && !G.over;
