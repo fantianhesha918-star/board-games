@@ -161,6 +161,16 @@
     opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* online */
+  .txt-in{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--text);padding:12px 14px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;}
+  .txt-in:focus{outline:none;border-color:var(--accent);}
+  .or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-dim);font-size:12px;font-weight:700;}
+  .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}
+  .join-row{display:flex;gap:8px;}
+  .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
+  .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
+  .mini-msg.err{color:var(--accent-press);}
 </style>
 </head>
 <body>
@@ -174,6 +184,41 @@
     </div>
     <div class="setup">
       <div class="field">
+        <span class="label">対戦モード</span>
+        <div class="seg" id="segMode">
+          <button data-val="local" class="on">この端末で</button>
+          <button data-val="online">オンライン</button>
+        </div>
+      </div>
+      <div class="field" id="fieldOnline" style="display:none">
+        <span class="label">オンライン対戦（別々の端末から2〜4人）</span>
+        <input id="onlineName" class="txt-in" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="off">
+        <div class="field" style="margin-top:6px">
+          <span class="label" style="font-size:13px">合計人数（部屋を作る人が設定）</span>
+          <div class="seg" id="segNetTotal">
+            <button data-val="2" class="on">2人</button>
+            <button data-val="3">3人</button>
+            <button data-val="4">4人</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <span class="label" style="font-size:13px">うち CPU</span>
+          <div class="seg" id="segNetCpu">
+            <button data-val="0" class="on">なし</button>
+            <button data-val="1">1人</button>
+            <button data-val="2">2人</button>
+          </div>
+          <p class="hint-text" id="netCountNote" style="margin:2px 0 0"></p>
+        </div>
+        <button class="start-btn" id="onlineCreate" style="margin:12px 0 0">部屋を作る</button>
+        <div class="or-sep"><span>または</span></div>
+        <div class="join-row">
+          <input id="onlineCode" class="txt-in" type="tel" inputmode="numeric" maxlength="4" placeholder="部屋番号（4桁）">
+          <button class="icon-btn" id="onlineJoin" style="height:auto;padding:0 20px;">参加</button>
+        </div>
+        <p class="mini-msg" id="onlineMsg"></p>
+      </div>
+      <div class="field local-only">
         <span class="label">人間（この端末で交代プレイ）</span>
         <div class="seg" id="segHumans">
           <button data-val="1" class="on">1人</button>
@@ -182,7 +227,7 @@
           <button data-val="4">4人</button>
         </div>
       </div>
-      <div class="field">
+      <div class="field local-only">
         <span class="label">CPU</span>
         <div class="seg" id="segCpu">
           <button data-val="0">なし</button>
@@ -191,7 +236,7 @@
           <button data-val="3">3人</button>
         </div>
       </div>
-      <p class="hint-text" id="countNote"></p>
+      <p class="hint-text local-only" id="countNote"></p>
       <div class="field" id="fieldLevel">
         <span class="label">CPUの強さ</span>
         <div class="seg" id="segLevel">
@@ -280,6 +325,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script type="module" src="online.js"></script>
 <script>
 "use strict";
 (function(){
@@ -356,6 +402,26 @@
   const getCpu=seg("segCpu",updateCountNote);
   const getLevel=seg("segLevel");
   const getRensen=seg("segRensen");
+  const getMode=seg("segMode",onModeChange);
+  const getNetTotal=seg("segNetTotal",onNetCountChange);
+  const getNetCpu=seg("segNetCpu",onNetCountChange);
+  function onModeChange(){
+    const online=getMode()==="online";
+    document.querySelectorAll(".local-only").forEach(el=>{ el.style.display=online?"none":""; });
+    document.getElementById("fieldOnline").style.display=online?"flex":"none";
+    document.getElementById("startBtn").style.display=online?"none":"";
+    document.getElementById("fieldLevel").style.display=online?"flex":(+getCpu()>0?"flex":"none");
+    if(online) onNetCountChange(); else updateCountNote();
+  }
+  function onNetCountChange(){
+    const tot=+getNetTotal(), maxCpu=Math.max(0,tot-2);
+    document.querySelectorAll("#segNetCpu button").forEach(b=>{
+      const dis=(+b.dataset.val)>maxCpu; b.disabled=dis; b.style.opacity=dis?.4:"";
+      if(dis&&b.classList.contains("on")){ b.classList.remove("on"); document.querySelector('#segNetCpu button[data-val="0"]').classList.add("on"); }
+    });
+    const cpu=Math.min(+getNetCpu(),maxCpu), hu=tot-cpu;
+    document.getElementById("netCountNote").textContent="人間 "+hu+"人（自分＋"+(hu-1)+"人）"+(cpu>0?" ＋ CPU "+cpu+"人":"");
+  }
 
   const G={
     humans:1, n:3, level:2, rensen:true, rules:{},
@@ -363,14 +429,19 @@
     revolution:false, ebActive:false, lockSuits:null,
     lastPlayer:-1, passCount:0, finishers:[],
     over:false, busy:false, viewer:0,
-    prevDaifugo:-1, gameNo:0, sel:[]
+    prevDaifugo:-1, gameNo:0, sel:[],
+    net:false, online:null
   };
 
   function name(i){
+    if(G.net && G.online){
+      if(i<G.online.cap) return (G.online.seatNames[i]||("プレイヤー"+(i+1)))+(i===G.online.myIdx?"(あなた)":"");
+      return "CPU"+(i-G.online.cap+1);
+    }
     if(i<G.humans) return G.humans===1?"あなた":"プレイヤー"+(i+1);
     return "CPU"+(i-G.humans+1);
   }
-  function isHuman(i){ return i<G.humans; }
+  function isHuman(i){ return (G.net && G.online) ? i<G.online.cap : i<G.humans; }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
   function activeCount(){ return activeIdx().length; }
   function nextActive(from,steps){
@@ -399,6 +470,9 @@
   }
 
   function startGame(){
+    if(getMode()==="online") return;
+    if(G.online) teardownNet();
+    G.net=false;
     const hu=+getHumans(), cp=+getCpu(), tot=hu+cp;
     if(tot<2){ toast("合計2人以上にしてください"); return; }
     if(tot>4){ toast("合計4人までにしてください"); return; }
@@ -1027,6 +1101,7 @@
     const cards=G.players[p].hand.filter(c=>G.sel.includes(c.id));
     const lp=legalPlay(cards);
     if(!lp.ok){ toast(lp.msg); return; }
+    if(G.net){ const sel=cards.map(c=>c.id); G.sel=[]; netAct({type:"play",codes:sel,spade3:!!lp.spade3}); return; }
     G.sel=[];
     doPlay(p,cards,lp);
   });
@@ -1036,6 +1111,7 @@
     if(!(p===G.viewer && isHuman(p))) return;
     if(!G.field){ toast("親はパスできません"); return; }
     G.sel=[];
+    if(G.net){ netAct({type:"pass"}); return; }
     doPass(p);
   });
 
@@ -1050,14 +1126,690 @@
     });
   }
 
+  /* ==================== オンライン対戦 ==================== */
+  function onlineReady(){
+    if(window.BGOnline) return Promise.resolve(window.BGOnline);
+    return new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error("オンライン機能の読み込みに失敗しました")),8000);
+      window.addEventListener("bgonline-ready",()=>{ clearTimeout(to); res(window.BGOnline); },{once:true}); });
+  }
+  function omsg(t,isErr){ const el=document.getElementById("onlineMsg"); el.textContent=t||""; el.classList.toggle("err",!!isErr); }
+
+  // ---- カードid(0..52) ⇔ カードオブジェクト ----
+  function idCard(id){
+    id=+id;
+    if(id===52) return {suit:null,rank:16,joker:true,id:52};
+    const si=(id/13)|0, ri=id%13;
+    return {suit:SUITS[si], rank:ri+3, joker:false, id};
+  }
+  function handArr(str){ return str ? String(str).split(",").map(Number) : []; }
+  function handStr(ids){ return ids.join(","); }
+  function sortIds(ids){
+    ids.sort((a,b)=>{
+      const ca=idCard(a), cb=idCard(b);
+      if(ca.joker) return 1; if(cb.joker) return -1;
+      if(ca.rank!==cb.rank) return ca.rank-cb.rank;
+      return SUITS.indexOf(ca.suit)-SUITS.indexOf(cb.suit);
+    });
+    return ids;
+  }
+  function autoPick(ids,cnt,mode){
+    const arr=ids.slice().sort((a,b)=>{
+      const ka=idCard(a).joker?100:idCard(a).rank, kb=idCard(b).joker?100:idCard(b).rank;
+      return mode==="strong" ? kb-ka : ka-kb;
+    });
+    return arr.slice(0, Math.min(cnt, arr.length));
+  }
+  function nextActiveSeat(done,dir,n,from,steps){
+    let i=from, guard=0;
+    while(steps>0 && guard++<60){ i=(i+dir+n)%n; if(!done[i]) steps--; }
+    return i;
+  }
+  const activeCountS=ns=>ns.done.filter(d=>!d).length;
+  const activeIdxS=ns=>ns.done.map((d,i)=>i).filter(i=>!ns.done[i]);
+
+  // ---- 純粋バリデーション（G非依存） ----
+  function beatsP(ns,a){
+    const f=ns.field; if(!f) return true;
+    const b=f.meta;
+    if(a.type!==b.type || a.count!==b.count) return false;
+    if(a.type==="single"){ if(a.joker) return !b.joker; if(b.joker) return false; }
+    const rev = ns.revolution !== ns.ebActive;
+    return rev ? a.rv<b.rv : a.rv>b.rv;
+  }
+  function sp3P(ns,codes){
+    if(!ns.cfg.rules.spade3 || !ns.field) return false;
+    const b=ns.field.meta;
+    if(!(b.type==="single" && b.joker)) return false;
+    if(codes.length!==1) return false;
+    const c=idCard(codes[0]);
+    return !c.joker && c.suit==="S" && c.rank===3;
+  }
+  function legalP(ns,codes){
+    if(!codes.length) return {ok:false};
+    if(sp3P(ns,codes)) return {ok:true,meta:classify(codes.map(idCard)),spade3:true};
+    const m=classify(codes.map(idCard));
+    if(!m) return {ok:false};
+    if(m.type==="seq" && !ns.cfg.rules.kaidan) return {ok:false};
+    if(!beatsP(ns,m)) return {ok:false};
+    if(ns.field && ns.lockSuits && suitSig(m)!==ns.lockSuits.join("")) return {ok:false};
+    return {ok:true,meta:m};
+  }
+
+  function cloneDState(st){
+    return {
+      cfg:st.cfg, n:st.n, gameNo:st.gameNo,
+      hands:st.hands.map(handArr),
+      done:st.done.slice(), place:st.place.slice(),
+      foul:st.foul.slice(), miyako:st.miyako.slice(), title:st.title.slice(),
+      finishers:st.finishers.slice(),
+      turn:st.turn, dir:st.dir,
+      field: st.field ? {cards:st.field.cards.slice(), meta:st.field.meta, owner:st.field.owner} : null,
+      revolution:st.revolution, ebActive:st.ebActive,
+      lockSuits: st.lockSuits ? st.lockSuits.slice() : null,
+      lastPlayer:st.lastPlayer, passCount:st.passCount,
+      prevDaifugo:st.prevDaifugo,
+      phase:st.phase, pending: st.pending ? JSON.parse(JSON.stringify(st.pending)) : null,
+      order: st.order ? st.order.slice() : null,
+      aborted: !!st.aborted, last:null, over:!!st.over, seq:(st.seq||0)+1,
+      _pl: st._pl ? JSON.parse(JSON.stringify(st._pl)) : null
+    };
+  }
+  function packDState(ns){
+    ns.hands=ns.hands.map(handStr);
+    delete ns._pl;
+    return ns;
+  }
+
+  function flushTrickS(ns){ ns.field=null; ns.lockSuits=null; ns.ebActive=false; ns.passCount=0; }
+
+  function finishSeat(ns,seat){
+    ns.done[seat]=true;
+    let foul=false;
+    if(ns.cfg.rules.foul && ns._pl){
+      const cw=ns._pl.cardsWere.map(idCard);
+      if(cw.some(c=>c.joker)) foul=true;
+      else if(cw.some(c=>!c.joker&&c.rank===15)) foul=true;
+      else if(ns.cfg.rules.yakiri && ns._pl.real8) foul=true;
+      else if(ns.revolution && cw.some(c=>!c.joker&&c.rank===3)) foul=true;
+      else if(ns._pl.spade3) foul=true;
+    }
+    ns.foul[seat]=foul;
+    ns.finishers.push(seat);
+    const placeNo=ns.finishers.length;
+    if(ns.cfg.rules.miyakoochi && ns.cfg.rensen && ns.prevDaifugo>=0 && placeNo===1
+       && seat!==ns.prevDaifugo && !ns.done[ns.prevDaifugo]){
+      ns.done[ns.prevDaifugo]=true; ns.miyako[ns.prevDaifugo]=true;
+      ns.finishers.push(ns.prevDaifugo);
+      ns.last=Object.assign(ns.last||{},{miyako:true});
+    }
+  }
+
+  function finalizeRound(ns){
+    activeIdxS(ns).forEach(i=>{ if(ns.finishers.indexOf(i)<0) ns.finishers.push(i); });
+    for(let i=0;i<ns.n;i++) if(ns.finishers.indexOf(i)<0) ns.finishers.push(i);
+    const good=ns.finishers.filter(i=>!ns.foul[i] && !ns.miyako[i]);
+    const bad=ns.finishers.filter(i=>ns.foul[i] || ns.miyako[i]);
+    const order=good.concat(bad);
+    order.forEach((idx,k)=>{ ns.place[idx]=k+1; });
+    const n=ns.n;
+    order.forEach((idx,k)=>{
+      let t="平民";
+      if(k===0) t="大富豪"; else if(k===n-1) t="大貧民";
+      else if(n>=4 && k===1) t="富豪"; else if(n>=4 && k===n-2) t="貧民";
+      if(n===2) t = k===0?"大富豪":"大貧民";
+      ns.title[idx]=t;
+    });
+    ns.prevDaifugo=order[0];
+    ns.order=order.slice();
+    ns.phase="roundover";
+    ns.last=Object.assign(ns.last||{},{ev:"roundover"});
+  }
+
+  function runPipeline(ns,seat,steps){
+    while(steps.length){
+      const step=steps.shift();
+      if(step==="transfer7"){
+        if(ns.hands[seat].length>0 && ns.cfg.rules.watari7 && ns._pl.sevens>0){
+          const to=nextActiveSeat(ns.done,ns.dir,ns.n,seat,1);
+          ns.phase="transfer";
+          ns.pending={from:seat,to,cnt:Math.min(ns._pl.sevens,ns.hands[seat].length),label:"7渡し",resumeSeat:seat,steps,pl:ns._pl};
+          ns.last={ev:"phase",kind:"transfer",from:seat,to,cnt:ns.pending.cnt};
+          return ns;
+        }
+      }else if(step==="discard10"){
+        if(ns.hands[seat].length>0 && ns.cfg.rules.sute10 && ns._pl.tens>0){
+          ns.phase="discard";
+          ns.pending={from:seat,cnt:Math.min(ns._pl.tens,ns.hands[seat].length),label:"10捨て",resumeSeat:seat,steps,pl:ns._pl};
+          ns.last={ev:"phase",kind:"discard",from:seat,cnt:ns.pending.cnt};
+          return ns;
+        }
+      }else if(step==="finish"){
+        if(ns.hands[seat].length===0){
+          finishSeat(ns,seat);
+          if(activeCountS(ns)<=1){ finalizeRound(ns); return ns; }
+        }
+      }else if(step==="flush8"){
+        if((ns.cfg.rules.yakiri && ns._pl.real8) || ns._pl.spade3){
+          flushTrickS(ns);
+          ns._pl.flushed=true;
+          ns._pl.leader = ns.done[seat] ? nextActiveSeat(ns.done,ns.dir,ns.n,seat,1) : seat;
+        }
+      }else if(step==="advance"){
+        if(activeCountS(ns)<=1){ finalizeRound(ns); return ns; }
+        if(ns._pl && ns._pl.flushed) ns.turn=ns._pl.leader;
+        else {
+          const extra=(ns.cfg.rules.skip5 && ns._pl.fives>0)? ns._pl.fives : 0;
+          ns.turn=nextActiveSeat(ns.done,ns.dir,ns.n,seat,1+extra);
+        }
+        ns.phase="play";
+      }
+    }
+    return ns;
+  }
+
+  function doPlayPure(ns,seat,codes,lp){
+    const meta=lp.meta;
+    const cards=codes.map(idCard);
+    codes.forEach(id=>{ const k=ns.hands[seat].indexOf(id); if(k>=0) ns.hands[seat].splice(k,1); });
+    if(ns.cfg.rules.shibari && ns.field && meta.suits.length){
+      if(suitSig(meta)===suitSig(ns.field.meta)) ns.lockSuits=meta.suits.slice().sort();
+    }
+    ns.field={cards:codes.slice(),meta,owner:seat};
+    if(!lp.spade3){ ns.passCount=0; ns.lastPlayer=seat; }
+    const real8=cards.some(c=>!c.joker&&c.rank===8);
+    const nines=cards.filter(c=>!c.joker&&c.rank===9).length;
+    const fives=cards.filter(c=>!c.joker&&c.rank===5).length;
+    const sevens=cards.filter(c=>!c.joker&&c.rank===7).length;
+    const tens=cards.filter(c=>!c.joker&&c.rank===10).length;
+    const hasRealJ=cards.some(c=>!c.joker&&c.rank===11);
+    const fx=[];
+    if(ns.cfg.rules.kakumei && meta.type==="set" && meta.count===4){ ns.revolution=!ns.revolution; fx.push(ns.revolution?"革命！強さ逆転":"革命返し"); }
+    if(ns.cfg.rules.kakumei && ns.cfg.rules.kaidan && meta.type==="seq" && meta.count>=5){ ns.revolution=!ns.revolution; fx.push(ns.revolution?"階段革命！":"革命返し"); }
+    if(ns.cfg.rules.elevenback && hasRealJ){ ns.ebActive=!ns.ebActive; fx.push("11バック：強さ逆転"); }
+    if(ns.cfg.rules.rev9 && nines%2===1){ ns.dir*=-1; fx.push("9リバース：逆回り"); }
+    ns.last={ev:"play",by:seat,codes:codes.slice(),spade3:!!lp.spade3,fx};
+    ns._pl={real8,fives,sevens,tens,spade3:!!lp.spade3,cardsWere:codes.slice(),flushed:false,leader:seat};
+    return runPipeline(ns,seat,["transfer7","discard10","finish","flush8","advance"]);
+  }
+
+  function doPassPure(ns,seat){
+    ns.passCount++;
+    if(ns.passCount >= Math.max(1,activeCountS(ns)-1)){
+      flushTrickS(ns);
+      let leader=ns.lastPlayer;
+      if(ns.done[leader]) leader=nextActiveSeat(ns.done,ns.dir,ns.n,leader,1);
+      ns.turn=leader;
+      ns.last={ev:"pass",by:seat,flush:true,leader};
+    }else{
+      ns.turn=nextActiveSeat(ns.done,ns.dir,ns.n,seat,1);
+      ns.last={ev:"pass",by:seat,flush:false};
+    }
+    return ns;
+  }
+
+  function resolveTransfer(ns,codes){
+    const pend=ns.pending;
+    let chosen=codes.filter(id=>ns.hands[pend.from].indexOf(+id)>=0).map(Number);
+    if(chosen.length!==pend.cnt) chosen=autoPick(ns.hands[pend.from],pend.cnt,"weak");
+    chosen.forEach(id=>{ ns.hands[pend.from].splice(ns.hands[pend.from].indexOf(id),1); ns.hands[pend.to].push(id); });
+    sortIds(ns.hands[pend.to]);
+    const steps=pend.steps, pl=pend.pl, rs=pend.resumeSeat;
+    ns.pending=null; ns._pl=pl;
+    ns.last={ev:"transfer",from:pend.from,to:pend.to,cnt:chosen.length};
+    return runPipeline(ns,rs,steps);
+  }
+  function resolveDiscard(ns,codes){
+    const pend=ns.pending;
+    let chosen=codes.filter(id=>ns.hands[pend.from].indexOf(+id)>=0).map(Number);
+    if(chosen.length!==pend.cnt) chosen=autoPick(ns.hands[pend.from],pend.cnt,"weak");
+    chosen.forEach(id=>{ ns.hands[pend.from].splice(ns.hands[pend.from].indexOf(id),1); });
+    const steps=pend.steps, pl=pend.pl, rs=pend.resumeSeat;
+    ns.pending=null; ns._pl=pl;
+    ns.last={ev:"discard",from:pend.from,cnt:chosen.length};
+    return runPipeline(ns,rs,steps);
+  }
+
+  function buildExchangePairs(ns){
+    const byT=t=>ns.title.indexOf(t);
+    let pairs=[];
+    if(ns.n>=4){ pairs.push({poor:byT("大貧民"),rich:byT("大富豪"),cnt:2}); pairs.push({poor:byT("貧民"),rich:byT("富豪"),cnt:1}); }
+    else pairs.push({poor:byT("大貧民"),rich:byT("大富豪"),cnt:2});
+    return pairs.filter(p=>p.poor>=0 && p.rich>=0);
+  }
+  function advanceExchange(ns){
+    const pend=ns.pending;
+    while(pend.qi < pend.queue.length){
+      const q=pend.queue[pend.qi];
+      if(pend.gaveFor!==pend.qi){
+        const give=autoPick(ns.hands[q.poor],q.cnt,"strong");
+        give.forEach(id=>{ ns.hands[q.poor].splice(ns.hands[q.poor].indexOf(id),1); ns.hands[q.rich].push(id); });
+        sortIds(ns.hands[q.rich]);
+        pend.gaveFor=pend.qi;
+      }
+      pend.awaitRich=q.rich; pend.poor=q.poor; pend.cnt=q.cnt;
+      ns.last={ev:"exchange-wait",rich:q.rich,poor:q.poor,cnt:q.cnt};
+      return ns;
+    }
+    ns.pending=null;
+    ns.phase="play";
+    setStarterS(ns);
+    ns.dir=1; ns.lastPlayer=ns.turn;
+    ns.last={ev:"round",gameNo:ns.gameNo};
+    return ns;
+  }
+  function resolveExchange(ns,codes){
+    const pend=ns.pending;
+    const rich=pend.awaitRich, poor=pend.poor, cnt=pend.cnt;
+    let chosen=codes.filter(id=>ns.hands[rich].indexOf(+id)>=0).map(Number);
+    if(chosen.length!==cnt) chosen=autoPick(ns.hands[rich],cnt,"weak");
+    chosen.forEach(id=>{ ns.hands[rich].splice(ns.hands[rich].indexOf(id),1); ns.hands[poor].push(id); });
+    sortIds(ns.hands[poor]); sortIds(ns.hands[rich]);
+    pend.qi++; pend.gaveFor=-1; pend.awaitRich=-1;
+    ns.last={ev:"exchange",rich,poor,cnt:chosen.length};
+    return advanceExchange(ns);
+  }
+
+  function setStarterS(ns){
+    let starter=0;
+    if(ns.gameNo===1 || !ns.cfg.rensen){
+      starter=ns.hands.findIndex(h=>h.some(id=>{ const c=idCard(id); return !c.joker&&c.suit==="D"&&c.rank===3; }));
+      if(starter<0) starter=0;
+    }else{
+      starter=ns.title.indexOf("大貧民");
+      if(starter<0) starter=0;
+    }
+    ns.turn=starter;
+  }
+
+  function dealHands(ns){
+    const deck=shuffle(newDeck());
+    const hands=Array.from({length:ns.n},()=>[]);
+    deck.forEach((c,idx)=>hands[idx%ns.n].push(c.id));
+    hands.forEach(sortIds);
+    ns.hands=hands;
+  }
+
+  function startNextRound(ns){
+    if(!ns.cfg.rensen){ ns.gameNo=1; for(let i=0;i<ns.n;i++) ns.title[i]=""; ns.prevDaifugo=-1; }
+    else ns.gameNo++;
+    ns.field=null; ns.revolution=false; ns.ebActive=false; ns.lockSuits=null;
+    ns.passCount=0; ns.finishers=[]; ns.order=null;
+    ns.done=new Array(ns.n).fill(false);
+    ns.place=new Array(ns.n).fill(0);
+    ns.foul=new Array(ns.n).fill(false);
+    ns.miyako=new Array(ns.n).fill(false);
+    dealHands(ns);
+    if(ns.cfg.rensen && ns.gameNo>=2){
+      const pairs=buildExchangePairs(ns);
+      if(pairs.length){
+        ns.phase="exchange";
+        ns.pending={queue:pairs,qi:0,gaveFor:-1,awaitRich:-1,poor:-1,cnt:0};
+        return advanceExchange(ns);
+      }
+    }
+    ns.phase="play";
+    setStarterS(ns);
+    ns.dir=1; ns.lastPlayer=ns.turn;
+    ns.last={ev:"round",gameNo:ns.gameNo};
+    return ns;
+  }
+
+  function actorSeatFor(act,s){
+    if(act.type==="play"||act.type==="pass") return s.phase==="play" ? s.turn : -1;
+    if(act.type==="transfer") return (s.phase==="transfer"&&s.pending) ? s.pending.from : -1;
+    if(act.type==="discard") return (s.phase==="discard"&&s.pending) ? s.pending.from : -1;
+    if(act.type==="exchange") return (s.phase==="exchange"&&s.pending) ? s.pending.awaitRich : -1;
+    if(act.type==="next") return s.phase==="roundover" ? 0 : -1;
+    if(act.type==="abort") return 0<=1 ? -2 : -2; // handled separately
+    return -1;
+  }
+
+  function applyDaifugo(st,seat,act){
+    const ns=cloneDState(st);
+    if(act.type==="next"){ if(ns.phase!=="roundover") return st; return packDState(startNextRound(ns)); }
+    if(act.type==="abort"){ ns.phase="roundover"; ns.aborted=true; if(!ns.order){ finalizeRound(ns); } return packDState(ns); }
+    if(act.type==="play"){
+      if(ns.phase!=="play" || ns.turn!==seat) return st;
+      const codes=(act.codes||[]).map(Number);
+      if(!codes.every(id=>ns.hands[seat].indexOf(id)>=0)) return st;
+      const lp=legalP(ns,codes);
+      if(!lp.ok) return st;
+      lp.spade3 = lp.spade3 || (!!act.spade3 && sp3P(ns,codes));
+      return packDState(doPlayPure(ns,seat,codes,lp));
+    }
+    if(act.type==="pass"){
+      if(ns.phase!=="play" || ns.turn!==seat || !ns.field) return st;
+      return packDState(doPassPure(ns,seat));
+    }
+    if(act.type==="transfer"){
+      if(ns.phase!=="transfer" || !ns.pending || ns.pending.from!==seat) return st;
+      return packDState(resolveTransfer(ns,act.codes||[]));
+    }
+    if(act.type==="discard"){
+      if(ns.phase!=="discard" || !ns.pending || ns.pending.from!==seat) return st;
+      return packDState(resolveDiscard(ns,act.codes||[]));
+    }
+    if(act.type==="exchange"){
+      if(ns.phase!=="exchange" || !ns.pending || ns.pending.awaitRich!==seat) return st;
+      return packDState(resolveExchange(ns,act.codes||[]));
+    }
+    return st;
+  }
+
+  function buildInitialDaifugoState(n,cfg){
+    const st={
+      cfg, n, gameNo:1,
+      hands:[], done:new Array(n).fill(false), place:new Array(n).fill(0),
+      foul:new Array(n).fill(false), miyako:new Array(n).fill(false), title:new Array(n).fill(""),
+      finishers:[], turn:0, dir:1, field:null,
+      revolution:false, ebActive:false, lockSuits:null,
+      lastPlayer:0, passCount:0, prevDaifugo:-1,
+      phase:"play", pending:null, order:null, aborted:false, last:null, over:false, seq:0
+    };
+    dealHands(st);
+    setStarterS(st);
+    st.lastPlayer=st.turn;
+    st.hands=st.hands.map(handStr);
+    return st;
+  }
+
+  /* ---- クライアント側の同期・描画 ---- */
+  function applyNetSnapshot(s){
+    G.net=true;
+    G.n=s.n;
+    G.viewer=G.online.myIdx;
+    G.level=s.cfg.level; G.rensen=s.cfg.rensen; G.rules=s.cfg.rules;
+    G.turn=(s.phase==="exchange" && s.pending)? s.pending.awaitRich : s.turn;
+    G.dir=s.dir;
+    G.revolution=s.revolution; G.ebActive=s.ebActive;
+    G.lockSuits=s.lockSuits? s.lockSuits.slice():null;
+    G.lastPlayer=s.lastPlayer; G.passCount=s.passCount;
+    G.finishers=s.finishers.slice();
+    G.prevDaifugo=s.prevDaifugo; G.gameNo=s.gameNo;
+    G.over=(s.phase==="roundover");
+    G.field=s.field? {cards:s.field.cards.map(idCard), meta:s.field.meta, owner:s.field.owner} : null;
+    G.players=s.hands.map((str,i)=>({
+      hand:handArr(str).map(idCard),
+      done:!!s.done[i], place:s.place[i], title:s.title[i]||"",
+      foul:!!s.foul[i], miyako:!!s.miyako[i]
+    }));
+    const mine=G.players[G.online.myIdx]?G.players[G.online.myIdx].hand:[];
+    G.sel=G.sel.filter(id=>mine.some(c=>c.id===id));
+    G.busy = !(s.phase==="play" && s.turn===G.online.myIdx);
+  }
+
+  function pushNet(ns){ return onlineReady().then(API=>API.pushRoom(G.online.code,{state:ns})); }
+
+  async function netAct(act){
+    if(!G.online || G.online.pending) return;
+    const s=G.online.roomState && G.online.roomState.state;
+    if(!s) return;
+    if(act.type==="next" && G.online.myIdx!==0) return;
+    const seat=actorSeatFor(act,s);
+    if(seat<0 && act.type!=="abort") return;
+    G.online.pending=true; G.busy=true;
+    try{
+      const ns=applyDaifugo(s, seat<0?0:seat, act);
+      if(ns && ns.seq>s.seq) await pushNet(ns);
+    }catch(e){ toast("送信に失敗しました"); }
+    finally{ G.online.pending=false; }
+  }
+
+  // CPU手番（ホスト=席0が代行）
+  function cpuChoose(p){
+    const P=G.players[p];
+    const groups=genGroups(P.hand);
+    let choice=null;
+    if(!G.field){
+      const cand=groups.filter(g=>!(g.meta.type==="seq" && !G.rules.kaidan));
+      cand.sort((a,b)=>{ const ab=grpBad(a)?1:0,bb=grpBad(b)?1:0; if(ab!==bb) return ab-bb;
+        if(b.cards.length!==a.cards.length) return b.cards.length-a.cards.length; return grpStrength(a)-grpStrength(b); });
+      choice=cand[0]||groups[0];
+      if(G.rules.foul && choice && choice.cards.length===P.hand.length && foulFinish(choice.cards)){
+        const alt=cand.find(g=>g.cards.length<P.hand.length); if(alt) choice=alt;
+      }
+    }else{
+      const legal=groups.filter(g=>{
+        if(g.meta.type==="seq" && !G.rules.kaidan) return false;
+        if(!beats(g.meta)) return false;
+        if(G.lockSuits && suitSig(g.meta)!==G.lockSuits.join("")) return false;
+        return true;
+      });
+      const s3=P.hand.find(c=>!c.joker&&c.suit==="S"&&c.rank===3);
+      if(isSpade3Return(s3?[s3]:[])) legal.push({cards:[s3],meta:classify([s3]),spade3:true});
+      if(legal.length){
+        legal.sort((a,b)=>{ const ab=grpBad(a)?1:0,bb=grpBad(b)?1:0; if(ab!==bb) return ab-bb; return grpStrength(a)-grpStrength(b); });
+        choice=legal[0];
+        const near=P.hand.length<=4;
+        if(!near && G.level>=2 && grpBad(choice) && legal.length===1){ if(G.level===3 || Math.random()<0.6) choice=null; }
+        if(!near && G.level===3 && choice && grpBad(choice) && G.field.meta.rv<13 && Math.random()<0.5) choice=null;
+        if(choice && G.rules.yakiri){
+          const eight=legal.find(g=>g.cards.some(c=>!c.joker&&c.rank===8) && !grpBad(g));
+          if(eight && P.hand.length>=4 && G.level>=2 && Math.random()<0.5) choice=eight;
+        }
+        if(choice && G.rules.foul && choice.cards.length===P.hand.length && foulFinish(choice.cards)){
+          const alt=legal.find(g=>g.cards.length<P.hand.length); choice=alt||choice;
+        }
+      }
+    }
+    if(choice) return {type:"play",codes:choice.cards.map(c=>c.id),spade3:!!choice.spade3};
+    return {type:"pass"};
+  }
+
+  async function netCpuDrive(s){
+    if(G.online.myIdx!==0 || G.online.cpuActing) return;
+    let actor=-1, kind=null;
+    if(s.phase==="play" && s.turn>=G.online.cap){ actor=s.turn; kind="play"; }
+    else if(s.phase==="transfer" && s.pending && s.pending.from>=G.online.cap){ actor=s.pending.from; kind="transfer"; }
+    else if(s.phase==="discard" && s.pending && s.pending.from>=G.online.cap){ actor=s.pending.from; kind="discard"; }
+    else if(s.phase==="exchange" && s.pending && s.pending.awaitRich>=G.online.cap){ actor=s.pending.awaitRich; kind="exchange"; }
+    if(actor<0) return;
+    G.online.cpuActing=true;
+    try{
+      await wait(kind==="play"?640:420);
+      const cur=G.online.roomState.state;
+      if(!cur) return;
+      if(kind==="play"){
+        if(cur.phase!=="play" || cur.turn!==actor) return;
+        const ch=cpuChoose(actor);
+        await netAct(ch);
+      }else if(kind==="transfer"){
+        if(cur.phase!=="transfer" || !cur.pending || cur.pending.from!==actor) return;
+        await netAct({type:"transfer",codes:autoPick(handArr(cur.hands[actor]),cur.pending.cnt,"weak")});
+      }else if(kind==="discard"){
+        if(cur.phase!=="discard" || !cur.pending || cur.pending.from!==actor) return;
+        await netAct({type:"discard",codes:autoPick(handArr(cur.hands[actor]),cur.pending.cnt,"weak")});
+      }else if(kind==="exchange"){
+        if(cur.phase!=="exchange" || !cur.pending || cur.pending.awaitRich!==actor) return;
+        await netAct({type:"exchange",codes:autoPick(handArr(cur.hands[actor]),cur.pending.cnt,"weak")});
+      }
+    }catch(e){ /* 次のスナップショットで再試行 */ }
+    finally{ G.online.cpuActing=false; }
+  }
+
+  function netStatus(s){
+    if(s.phase==="roundover") return;
+    if(s.phase==="exchange"){
+      const r=s.pending?s.pending.awaitRich:-1;
+      setStatus(r===G.online.myIdx ? "カード交換：大貧民へ返すカードを選んでください" : "カード交換中…");
+      return;
+    }
+    if(s.phase==="transfer"){
+      const f=s.pending?s.pending.from:-1;
+      setStatus(f===G.online.myIdx ? "7渡し：左隣へ渡すカードを選んでください" : name(f)+" が7渡し中…");
+      return;
+    }
+    if(s.phase==="discard"){
+      const f=s.pending?s.pending.from:-1;
+      setStatus(f===G.online.myIdx ? "10捨て：捨てるカードを選んでください" : name(f)+" が10捨て中…");
+      return;
+    }
+    if(s.turn===G.online.myIdx) setStatus(s.field ? "あなたの番：場に出すか パス" : "あなたの番：好きなカードを出す（親）");
+    else if(s.turn>=G.online.cap) setStatus("CPU"+(s.turn-G.online.cap+1)+" が考えています…");
+    else setStatus(name(s.turn)+" の番");
+  }
+
+  let _fxSeq=-1, _pickSeq=-1;
+  function onRoomUpdate(data){
+    if(!G.online) return;
+    if(!data){
+      if(!G.online.ended){ G.online.ended=true; G.over=true;
+        document.getElementById("ovResult").textContent="部屋が閉じられました";
+        document.getElementById("ovRank").innerHTML="<li><span>だれかが退出したか、部屋が削除されました</span></li>";
+        document.getElementById("ovAgain").style.display="none";
+        document.getElementById("overlay").classList.add("show"); }
+      return;
+    }
+    G.online.roomState=data;
+    const names=[]; (data.seats||[]).forEach((st,i)=>{ names[i]=st&&st.name; });
+    G.online.seatNames=names;
+    if(data.status==="playing" && G.online.prevStatus==="waiting") toast("全員そろいました！");
+    G.online.prevStatus=data.status;
+    if(data.status!=="playing"){
+      setStatus((data.seats?data.seats.length:1)+"/"+G.online.cap+"人 参加待ち…（部屋番号 "+G.online.code+"）");
+      return;
+    }
+    const s=data.state; if(!s || !s.hands) return;
+
+    if(s.last && s.last.ev==="play" && Array.isArray(s.last.fx) && s.last.fx.length && s.seq!==_fxSeq){
+      _fxSeq=s.seq; if(s.last.by!==G.online.myIdx) s.last.fx.forEach(t=>toast(t));
+    }
+    applyNetSnapshot(s);
+    render(s.last && s.last.ev==="play");
+    if(s.phase!=="roundover") document.getElementById("overlay").classList.remove("show");
+
+    if(s.aborted){
+      if(!G.online.ended){ G.online.ended=true; G.over=true;
+        showRoundOverlay(s, "中断されました（だれかが退出）"); }
+      return;
+    }
+    if(s.phase==="roundover"){
+      showRoundOverlay(s, null);
+    }else{
+      netStatus(s);
+      // 自分が選択する場面（交換 / 7渡し / 10捨て）
+      const needMe =
+        (s.phase==="transfer" && s.pending && s.pending.from===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"transfer", msg:"左隣へ渡すカードを "+s.pending.cnt+" 枚"} :
+        (s.phase==="discard" && s.pending && s.pending.from===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"discard", msg:"捨てるカードを "+s.pending.cnt+" 枚"} :
+        (s.phase==="exchange" && s.pending && s.pending.awaitRich===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"exchange", msg:"大貧民へ返すカードを "+s.pending.cnt+" 枚"} : null;
+      if(needMe && !G.online.pickBusy && s.seq!==_pickSeq){
+        _pickSeq=s.seq; G.online.pickBusy=true;
+        pickCards(G.online.myIdx, needMe.cnt, needMe.msg).then(chosen=>{
+          G.online.pickBusy=false;
+          document.getElementById("pickOverlay").classList.remove("show");
+          netAct({type:needMe.kind, codes:chosen.map(c=>c.id)});
+        });
+      }
+    }
+    netCpuDrive(s);
+  }
+
+  function showRoundOverlay(s, note){
+    G.over=true;
+    const order = s.order && s.order.length ? s.order : s.hands.map((_,i)=>i);
+    document.getElementById("ovResult").textContent = note ? note : (name(order[0])+" の勝ち");
+    const ul=document.getElementById("ovRank"); ul.innerHTML="";
+    order.forEach((idx,k)=>{
+      const t=s.title[idx]||"";
+      const cls = (t==="大富豪"||t==="富豪")?"rich":(t==="大貧民"||t==="貧民")?"poor":"";
+      const tag = s.foul[idx]?"（反則）":s.miyako[idx]?"（都落ち）":"";
+      const li=document.createElement("li");
+      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+t+"</span><span>"+name(idx)+tag+"</span>";
+      ul.appendChild(li);
+    });
+    const ov=document.getElementById("ovAgain");
+    ov.style.display="";
+    if(note){ ov.style.display="none"; }
+    else if(G.online.myIdx===0){ ov.disabled=false; ov.textContent = s.cfg.rensen ? "次のゲームへ" : "もう一度"; }
+    else { ov.disabled=true; ov.textContent="ホストの操作を待っています…"; }
+    setStatus("ゲーム終了");
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  function enterOnlineGame(code, myIdx, cap, cpu){
+    teardownNet();
+    G.net=true; G.over=false; G.busy=true; G.sel=[];
+    G.online={ code, myIdx, cap, cpu, total:cap+cpu, roomState:null, unsub:null, hbTimer:null,
+      prevStatus:"waiting", ended:false, cpuActing:false, pending:false, pickBusy:false, seatNames:[] };
+    _fxSeq=-1; _pickSeq=-1;
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("pickOverlay").classList.remove("show");
+    document.getElementById("restartBtn").textContent="やめる";
+    document.getElementById("playTitle").textContent="大富豪（オンライン）";
+    document.getElementById("opps").innerHTML="";
+    document.getElementById("hand").innerHTML="";
+    setStatus("接続中…（部屋番号 "+code+"）");
+    show("play");
+    onlineReady().then(API=>{
+      G.online.unsub=API.watchRoom(code, onRoomUpdate);
+      G.online.hbTimer=setInterval(()=>{ if(G.online) API.heartbeatN(code); }, 5000);
+      API.heartbeatN(code);
+    });
+  }
+
+  function teardownNet(){
+    const o=G.online; G.online=null; G.net=false;
+    if(!o) return;
+    try{ o.unsub && o.unsub(); }catch(e){}
+    clearInterval(o.hbTimer);
+    const rs=o.roomState;
+    const finished=o.ended || (rs && rs.state && rs.state.phase==="roundover") || (rs && rs.status!=="playing");
+    onlineReady().then(API=>{
+      if(o.myIdx===0) API.closeRoom(o.code).catch(()=>{});
+      else if(!finished && rs && rs.state) API.pushRoom(o.code,{ state:Object.assign({},rs.state,{aborted:true,phase:"roundover",seq:(rs.state.seq||0)+1}) }).catch(()=>{});
+    }).catch(()=>{});
+  }
+
+  function backToSetup(){ if(G.online) teardownNet(); document.getElementById("overlay").classList.remove("show"); document.getElementById("pickOverlay").classList.remove("show"); show("setup"); }
+
+  document.getElementById("onlineCreate").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineCreate");
+    const nm=document.getElementById("onlineName").value.trim();
+    if(nm.length<1){ omsg("ニックネームを入力してください",true); return; }
+    try{ localStorage.setItem("bg_nick", nm); }catch(e){}
+    const total=+getNetTotal(), cpu=Math.min(+getNetCpu(),Math.max(0,total-2)), cap=total-cpu;
+    const cfg={ level:+getLevel(), rensen:getRensen()==="on", rules:readRules() };
+    btn.disabled=true; omsg("部屋を作成中…");
+    try{
+      const API=await onlineReady();
+      const state=buildInitialDaifugoState(total, cfg);
+      const code=await API.createRoomN("daifugo", nm, cap, cpu, state);
+      enterOnlineGame(code, 0, cap, cpu);
+    }catch(e){ omsg((e&&e.message)||"部屋を作れませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+  document.getElementById("onlineJoin").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineJoin");
+    const nm=document.getElementById("onlineName").value.trim();
+    const code=document.getElementById("onlineCode").value.trim();
+    if(nm.length<1){ omsg("ニックネームを入力してください",true); return; }
+    if(!/^[0-9]{4}$/.test(code)){ omsg("部屋番号は4桁の数字です",true); return; }
+    try{ localStorage.setItem("bg_nick", nm); }catch(e){}
+    btn.disabled=true; omsg("参加中…");
+    try{
+      const API=await onlineReady();
+      const {index,data}=await API.joinRoomN(code, nm);
+      enterOnlineGame(code, index, data.cap, data.cpu);
+    }catch(e){ omsg((e&&e.message)||"参加できませんでした",true); }
+    finally{ btn.disabled=false; }
+  });
+  window.addEventListener("pagehide",(e)=>{ if(!e.persisted && G.online) teardownNet(); });
+  (function(){
+    const el=document.getElementById("onlineName");
+    try{ const v=localStorage.getItem("bg_nick"); if(v) el.value=v; }catch(e){}
+    const save=()=>{ try{ localStorage.setItem("bg_nick", el.value.trim()); }catch(e){} };
+    el.addEventListener("change",save); el.addEventListener("blur",save);
+  })();
+
   document.getElementById("startBtn").addEventListener("click",startGame);
   document.getElementById("ovAgain").addEventListener("click",()=>{
+    if(G.net||G.online){ if(G.online && !G.online.ended && G.online.myIdx===0) netAct({type:"next"}); return; }
     document.getElementById("overlay").classList.remove("show");
     if(G.rensen) dealRound();
     else startGame();
   });
-  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
-  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
+  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.net||G.online){ backToSetup(); return; } if(G.over||!G.busy) startGame(); });
+  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); if(G.online){ teardownNet(); } show("setup"); });
 
   buildRuleToggles();
   updateCountNote();

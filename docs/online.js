@@ -178,29 +178,45 @@ export async function createRoomN(game, name, cap, cpu, state) {
 export async function joinRoomN(code, name) {
   const uid = await getUid();
   const ref = doc(db, "rooms", clip(code, 8));
-  return runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error("その部屋番号は見つかりません。");
-    const d = snap.data();
-    if (!Array.isArray(d.seats)) throw new Error("この部屋には参加できません。");
-    const mine = d.seats.findIndex((s) => s && s.uid === uid);
-    if (mine >= 0) {
-      tx.update(ref, { ["seen." + uid]: serverTimestamp() });
-      return { index: mine, data: d };
-    }
-    if (d.status !== "waiting") throw new Error("その部屋はすでに始まっています。");
-    if (d.seats.length >= d.cap) throw new Error("その部屋は満員です。");
-    const myIndex = d.seats.length;
-    const seats = d.seats.concat([{ uid, name: clip(name, 12) || "プレイヤー" }]);
-    const full = seats.length === d.cap;
-    tx.update(ref, {
-      seats,
-      status: full ? "playing" : "waiting",
-      ["seen." + uid]: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+  const attempt = () =>
+    runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) throw new Error("その部屋番号は見つかりません。");
+      const d = snap.data();
+      if (!Array.isArray(d.seats)) throw new Error("この部屋には参加できません。");
+      const mine = d.seats.findIndex((s) => s && s.uid === uid);
+      if (mine >= 0) {
+        tx.update(ref, { ["seen." + uid]: serverTimestamp() });
+        return { index: mine, data: d };
+      }
+      if (d.status !== "waiting") throw new Error("その部屋はすでに始まっています。");
+      if (d.seats.length >= d.cap) throw new Error("その部屋は満員です。");
+      const myIndex = d.seats.length;
+      const seats = d.seats.concat([{ uid, name: clip(name, 12) || "プレイヤー" }]);
+      const full = seats.length === d.cap;
+      tx.update(ref, {
+        seats,
+        status: full ? "playing" : "waiting",
+        ["seen." + uid]: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return { index: myIndex, data: { ...d, seats, status: full ? "playing" : "waiting" } };
     });
-    return { index: myIndex, data: { ...d, seats, status: full ? "playing" : "waiting" } };
-  });
+  // 複数人が同時に参加すると、席番号を先に読んだ側の書き込みが
+  // ルール評価で弾かれることがある（席が既に埋まっているため）。
+  // その場合は最新状態を読み直して数回まで再試行する。
+  let lastErr;
+  for (let i = 0; i < 6; i++) {
+    try {
+      return await attempt();
+    } catch (e) {
+      lastErr = e;
+      const msg = (e && e.message) || "";
+      if (msg.includes("見つかりません") || msg.includes("満員") || msg.includes("すでに始まっています")) throw e;
+      await new Promise((r) => setTimeout(r, 150 + Math.random() * 300));
+    }
+  }
+  throw lastErr || new Error("参加できませんでした。もう一度お試しください。");
 }
 
 // 複数人部屋の生存通知。seen[自分のuid] を更新。
