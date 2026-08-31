@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<title>遊び方・ルール</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --gold:#b8860b;--warn:#c0392b;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --gold:#e9c46a;--warn:#e07a6a;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+    line-height:1.7;
+  }
+  .app{width:100%;max-width:640px;margin:0 auto;padding:env(safe-area-inset-top) 0 40px;}
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;position:sticky;top:0;background:var(--bg);z-index:5;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .back-btn{
+    border:none;background:var(--surface);color:var(--text);width:38px;height:38px;border-radius:12px;font-size:20px;
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);cursor:pointer;flex:none;text-decoration:none;
+  }
+  .back-btn:active{transform:scale(.94);}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;padding:6px 16px 14px;}
+  .toc a{
+    text-decoration:none;background:var(--surface);color:var(--text);font-weight:700;font-size:13px;
+    padding:8px 13px;border-radius:999px;box-shadow:var(--shadow);
+  }
+  .toc a:active{transform:scale(.96);}
+
+  section.game{
+    background:var(--surface);border-radius:20px;margin:12px 14px;padding:18px 18px 20px;box-shadow:var(--shadow);
+    scroll-margin-top:70px;
+  }
+  section.game > h2{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+  section.game > .tag{color:var(--text-dim);font-size:12.5px;margin:0 0 12px;}
+  h3{font-size:15px;margin:16px 0 6px;padding-left:10px;border-left:4px solid var(--accent);}
+  h4{font-size:13.5px;margin:12px 0 4px;color:var(--text-dim);}
+  p{margin:4px 0;font-size:13.5px;}
+  ul{margin:4px 0 4px;padding-left:20px;font-size:13.5px;}
+  li{margin:3px 0;}
+  .note{background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--text-dim);margin:8px 0;}
+  b.k{color:var(--accent);}
+  .rt{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 4px;}
+  .rt th,.rt td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;}
+  .rt th{background:var(--surface-2);font-weight:800;white-space:nowrap;}
+  .rt td:first-child{white-space:nowrap;font-weight:700;}
+  .foul{color:var(--warn);font-weight:700;}
+  .home-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;margin:18px 14px 0;padding:14px;border-radius:16px;
+    text-decoration:none;background:var(--accent);color:#fff;font-weight:800;font-size:15px;box-shadow:var(--shadow);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="back-btn" href="index.html">‹</a>
+    <h1>遊び方・ルール</h1>
+  </div>
+
+  <nav class="toc">
+    <a href="#othello">オセロ</a>
+    <a href="#memory">神経衰弱</a>
+    <a href="#babanuki">ババ抜き</a>
+    <a href="#sevens">七並べ</a>
+    <a href="#daifugo">大富豪</a>
+  </nav>
+
+  <!-- ========== オセロ ========== -->
+  <section class="game" id="othello">
+    <h2>♟ オセロ</h2>
+    <p class="tag">2人対戦。CPU対戦（強さ3段階）／ 2人で対面。</p>
+
+    <h3>目的</h3>
+    <p>盤（8×8）が石で埋まった時、自分の色の石が多いほうが勝ち。打てる場所が両者ともなくなった時点でも終了します。</p>
+
+    <h3>打ち方</h3>
+    <ul>
+      <li>黒が先手。自分の石で相手の石を「縦・横・斜め」いずれかの直線ではさめる場所にだけ置けます。</li>
+      <li>置くと、はさんだ相手の石がすべて自分の色にひっくり返ります。</li>
+      <li>置ける場所が1つもない時は自動的にパスになります。</li>
+    </ul>
+
+    <h3>CPUの強さ</h3>
+    <ul>
+      <li><b class="k">よわい</b>：1手先だけ読みます。</li>
+      <li><b class="k">ふつう</b>：3手先まで読みます。</li>
+      <li><b class="k">つよい</b>：5手先まで読み、角やへりを重視します。</li>
+    </ul>
+  </section>
+
+  <!-- ========== 神経衰弱 ========== -->
+  <section class="game" id="memory">
+    <h2>🃏 神経衰弱</h2>
+    <p class="tag">CPU対戦（記憶力3段階）／ 2人で対面。カード枚数 12 / 20 / 30 枚。</p>
+
+    <h3>目的</h3>
+    <p>裏向きに並んだカードを2枚ずつめくり、ペアを多く取ったほうが勝ち。</p>
+
+    <h3>進め方</h3>
+    <ul>
+      <li>自分の番に2枚めくります。<b class="k">ペア</b>なら取り札にして、もう一度めくれます。</li>
+      <li>ペアにならなければ2枚を裏に戻し、相手の番になります。</li>
+      <li>すべてのカードが取られたら終了。取った枚数で勝敗を決めます。</li>
+    </ul>
+
+    <h3>ペアの条件</h3>
+    <p><b class="k">同じ数字 かつ 同じ色</b>（♠♣＝黒、♥♦＝赤）。例：♠5 と ♣5 はペア／♠5 と ♥5 はペアになりません。</p>
+
+    <h3>CPUの記憶力</h3>
+    <ul>
+      <li><b class="k">よわい</b>：見たカードを約1/3しか覚えていません。</li>
+      <li><b class="k">ふつう</b>：約7割を覚えています。</li>
+      <li><b class="k">つよい</b>：ほぼ確実に覚えています。</li>
+    </ul>
+  </section>
+
+  <!-- ========== ババ抜き ========== -->
+  <section class="game" id="babanuki">
+    <h2>🂿 ババ抜き</h2>
+    <p class="tag">CPU対戦 2〜4人 ／ 2人で対面。ジョーカー1枚入りの53枚を使用。</p>
+
+    <h3>目的</h3>
+    <p>手札のペアを捨てていき、いちばん早く手札を0枚にすれば勝ち。最後まで<b class="k">ジョーカーを持っていた人が負け（ババ）</b>。</p>
+
+    <h3>進め方</h3>
+    <ul>
+      <li>配られた時点で、手札にある<b class="k">同じ数字2枚</b>はすべて自動で捨てられます。</li>
+      <li>自分の番に、<b class="k">左隣の人</b>の手札から1枚引きます。引いたカードで数字がそろえば捨てられます。</li>
+      <li>手札が0枚になった人は「あがり」。残り1人になるまで続けます。</li>
+      <li>相手の手札は選びやすいように、間隔をあけた一覧で表示されます。</li>
+    </ul>
+
+    <h3>シャッフル機能（ババ嵐風・設定でON/OFF）</h3>
+    <p>「シャッフルあり」で始めると、<b class="k">ジョーカーを持っている人だけ</b>が、自分が引く前に1回だけシャッフルを仕掛けられます（各プレイヤー1ゲーム1回）。</p>
+    <ul>
+      <li>サイコロは6面：<b class="k">➡×2 / ⬅×2 / ☠×2</b>。</li>
+      <li><b class="k">➡</b>：全員の手札が一斉に<b>右隣へ1つずつ</b>移動。<b class="k">⬅</b>：左隣へ移動。</li>
+      <li><b class="k">☠</b>：不発（何も起こりません）。</li>
+      <li>移動後、各手札で新しくそろったペアは自動で捨てられます。</li>
+      <li>対人戦では、順番の人が引くまでの間だけ「シャッフルする／しない」ボタンが出ます。引いた（進んだ）時点で押せなくなります。</li>
+    </ul>
+  </section>
+
+  <!-- ========== 七並べ ========== -->
+  <section class="game" id="sevens">
+    <h2>🂷 七並べ</h2>
+    <p class="tag">CPU対戦 2〜4人 ／ 2人で対面。設定：人数・パス回数（3/4/5）・ジョーカー（あり/なし）。</p>
+
+    <h3>目的</h3>
+    <p>手札をいちばん早く場に出し切れば1位。上がった順に順位がつきます。</p>
+
+    <h3>進め方</h3>
+    <ul>
+      <li>各スートの7は最初から場に置かれています。自分の番に、場に置いてあるカードの<b class="k">隣（±1）</b>につながるカードを1枚出します。</li>
+      <li>出せない、または出したくない時は<b class="k">パス</b>。パスできる回数には上限があります（設定した回数）。</li>
+      <li>盤の空マスは「♥5」のような簡易表示、カードが出たマスは実際の絵柄で表示されます。</li>
+    </ul>
+
+    <h3>A／K の折り返し</h3>
+    <ul>
+      <li>あるスートが<b class="k">A まで</b>並ぶと、その先は 8 以降が置けなくなり、<b class="k">K → Q → J → …</b> と反対の端から折り返して埋めていきます。</li>
+      <li><b class="k">K まで</b>並んだ時は逆に、6 以降が置けなくなり、<b class="k">A → 2 → 3 → …</b> と折り返します。</li>
+    </ul>
+
+    <h3>バースト</h3>
+    <p>パス回数を使い切ってさらにパスすると<b class="foul">バースト</b>。手札を全部その位置で場に開き、そのゲームは最下位側の扱いになります（開かれたカードは他の人がつなげられます）。</p>
+
+    <h3>ジョーカー（あり の時）</h3>
+    <ul>
+      <li>自分の番に、盤の好きな空きマス（置ける位置）にジョーカーを1枚置けます。<b class="k">1ゲームに1回きり</b>で、置いたら戻せません。</li>
+      <li>ジョーカーを置いた位置の<b class="k">本物のカードを持っている人</b>は、次の自分の番で必ずそのカードを出さなければなりません（その手番はパス不可）。出すとジョーカーはそのカードに置き換わります。</li>
+    </ul>
+  </section>
+
+  <!-- ========== 大富豪 ========== -->
+  <section class="game" id="daifugo">
+    <h2>👑 大富豪</h2>
+    <p class="tag">CPU対戦 3〜5人 ／ 2人で対面。ジョーカー1枚入りの53枚。ローカルルールは設定画面で個別にON/OFFできます。</p>
+
+    <h3>基本ルール（常時）</h3>
+    <ul>
+      <li><b class="k">強さ</b>：3 → 4 → 5 → … → 10 → J → Q → K → A → <b class="k">2</b>（最強）。ジョーカーは単騎で最強。</li>
+      <li>親（最初の人）は好きなカードを出せます。以降の人は<b class="k">場と同じ枚数</b>で、<b class="k">より強い数字</b>だけ出せます。</li>
+      <li>出し方：1枚 ／ 2枚（同じ数字）／ 3枚 ／ 4枚。</li>
+      <li>出せない・出したくない時は<b class="k">パス</b>。自分以外の全員がパスすると場が流れ、最後に出した人が新しい親になります。</li>
+      <li>手札を先に出し切った順に順位がつきます。</li>
+    </ul>
+
+    <h4>階級（連戦の時）</h4>
+    <p>1位＝大富豪 ／ 2位＝富豪 ／ 中間＝平民 ／ 下から2番＝貧民 ／ 最下位＝大貧民（3人戦は富豪・貧民なし、2人戦は大富豪／大貧民のみ）。</p>
+    <h4>カード交換（連戦の2ゲーム目以降）</h4>
+    <p>大貧民は<b class="k">いちばん強い2枚</b>を大富豪へ、大富豪は<b class="k">好きな2枚</b>を大貧民へ渡します（富豪⇔貧民は1枚ずつ）。次のゲームは大貧民が親から始めます。</p>
+
+    <h3>定番ルール（B・初期値ON）</h3>
+    <table class="rt">
+      <tr><th>ルール</th><th>効果</th></tr>
+      <tr><td>8切り</td><td>8 を含めて出すと、その場が流れて<b class="k">同じ人がもう一度</b>親として出します。</td></tr>
+      <tr><td>革命</td><td>同じ数字を<b class="k">4枚</b>出すと、以降カードの強さが逆転（3 が最強、2 が最弱に）。もう一度4枚出すと元に戻ります。階段5枚以上でも革命（階段革命）。</td></tr>
+      <tr><td>階段</td><td>同じスートで数字が3枚以上連続していれば、まとめて出せます（例：♥5♥6♥7）。以降は同じ枚数の階段で、より強いものだけ出せます。</td></tr>
+      <tr><td>縛り</td><td>同じスートの組み合わせが2回続けて場に出ると、以降その場は<b class="k">同じスートしか出せません</b>。場が流れると解除されます。</td></tr>
+      <tr><td>スペ3返し</td><td>場が<b class="k">ジョーカー1枚</b>の時だけ、<b class="k">♠の3</b>単騎で返せます。返すと場が流れます。</td></tr>
+      <tr><td>11バック</td><td>J を出すと、その場が流れるまで<b class="k">一時的に強さが逆転</b>します（革命と重なると打ち消し合います）。</td></tr>
+      <tr><td>都落ち</td><td>前回の大富豪が今回1位を取れないと、その瞬間に<b class="foul">即・大貧民</b>へ転落します（連戦時のみ）。</td></tr>
+    </table>
+
+    <h3>一発系ルール（C・初期値OFF）</h3>
+    <table class="rt">
+      <tr><th>ルール</th><th>効果</th></tr>
+      <tr><td>7渡し</td><td>7 を出した枚数だけ、手札から選んで<b class="k">左隣の人</b>に渡します。</td></tr>
+      <tr><td>10捨て</td><td>10 を出した枚数だけ、手札を選んで捨てます。</td></tr>
+      <tr><td>5飛ばし</td><td>5 を出した枚数だけ、次のプレイヤーを飛ばします。</td></tr>
+      <tr><td>9リバース</td><td>9 を出すと順番が逆回りになります（奇数枚で反転）。</td></tr>
+      <tr><td>反則あがり</td><td>最後の1手が <b class="foul">ジョーカー / 2 / 8切り / 革命中の3 / スペ3返し</b> だと反則負けになり、最下位に回されます。</td></tr>
+    </table>
+
+    <div class="note">画面上部には「革命中」「11バック」「縛り ♠♥」「逆回り」などの状態が表示されます。親の番（場が流れている時）はパスできません。</div>
+  </section>
+
+  <a class="home-link" href="index.html">🏠 ゲーム選択にもどる</a>
+</div>
+</body>
+</html>

@@ -233,6 +233,13 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   .footer-note{text-align:center;color:var(--text-dim);font-size:11px;padding:10px 20px 20px;}
+  .rules-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin:4px 16px 0;padding:14px;border-radius:16px;text-decoration:none;
+    background:var(--surface);color:var(--text);font-weight:800;font-size:15px;box-shadow:var(--shadow);
+  }
+  .rules-link:active{transform:scale(.98);}
+  .rules-link .ic{font-size:18px;}
 </style>
 </head>
 <body>
@@ -268,7 +275,8 @@
         <span class="desc">3×4のミニ将棋</span>
       </button>
     </div>
-    <p class="footer-note">まずはオセロから。他のゲームは順次追加予定です。</p>
+    <a class="rules-link" href="rules.html"><span class="ic">📖</span>遊び方・ルール説明</a>
+    <p class="footer-note">収録：オセロ／トランプ（神経衰弱・ババ抜き・七並べ・大富豪）。将棋・どうぶつしょうぎは順次追加予定です。</p>
   </section>
 
   <!-- ============ OTHELLO SETUP ============ -->

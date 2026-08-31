@@ -54,6 +54,12 @@
     position:absolute;top:12px;right:12px;font-size:10px;font-weight:800;letter-spacing:.04em;
     background:var(--line);color:var(--text-dim);padding:4px 8px;border-radius:999px;
   }
+  .rules-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin:0 16px 24px;padding:14px;border-radius:16px;text-decoration:none;
+    background:var(--surface);color:var(--text);font-weight:800;font-size:15px;box-shadow:var(--shadow);
+  }
+  .rules-link:active{transform:scale(.98);}
   .toast{
     position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
     background:rgba(0,0,0,.82);color:#fff;font-size:14px;font-weight:700;padding:11px 18px;border-radius:999px;
@@ -98,6 +104,7 @@
       <span class="desc">ソリティア（クロンダイク）など</span>
     </button>
   </div>
+  <a class="rules-link" href="rules.html#daifugo">📖 遊び方・ルール説明</a>
 </div>
 <div class="toast" id="toast"></div>
 <script>
