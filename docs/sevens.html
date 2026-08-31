@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<title>七並べ</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --felt:#2f7d55;--gold:#e9c46a;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --felt:#245f42;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:600px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;}
+  .back-btn{width:38px;height:38px;font-size:20px;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+  .icon-btn{height:38px;padding:0 14px;font-size:14px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  .setup{padding:10px 20px 24px;display:flex;flex-direction:column;gap:22px;}
+  .field{display:flex;flex-direction:column;gap:10px;}
+  .field > .label{font-weight:800;font-size:14px;}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg button{
+    flex:1 1 76px;min-width:0;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 8px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s ease;white-space:normal;
+  }
+  .seg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
+  .seg button:active{transform:scale(.96);}
+  .seg button small{display:block;font-size:10.5px;font-weight:600;color:var(--text-dim);margin-top:2px;}
+  .start-btn{margin:6px 20px 26px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
+  .hint-text{color:var(--text-dim);font-size:12.5px;line-height:1.65;margin:-6px 20px 0;}
+
+  .play{flex:1;display:flex;flex-direction:column;padding:2px 10px 14px;gap:9px;}
+  .rowinfo{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .pchip{
+    background:var(--surface);border-radius:12px;padding:6px 10px;box-shadow:var(--shadow);
+    font-size:11.5px;font-weight:800;display:flex;gap:6px;align-items:center;border:2px solid transparent;
+  }
+  .pchip.turn{border-color:var(--accent);}
+  .pchip.out{opacity:.5;}
+  .pchip .cnt{color:var(--text-dim);font-weight:700;}
+
+  .board{
+    display:grid;grid-template-columns:18px repeat(13,1fr);gap:2px;
+    background:var(--felt);padding:8px 6px;border-radius:14px;box-shadow:var(--shadow),inset 0 0 22px rgba(0,0,0,.14);
+  }
+  .board .hd{color:#fff;opacity:.7;text-align:center;font-weight:800;font-size:8.5px;align-self:end;padding-bottom:3px;}
+  .board .rl{color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;}
+  .board .rl.red{color:#ff9a90;}
+  .cell{
+    aspect-ratio:2/3;border-radius:3px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:8.5px;color:rgba(255,255,255,.9);
+    background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);
+  }
+  .cell.empty{color:rgba(255,255,255,.28);}
+  .cell.filled.black{background:#20232a;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4);color:#fff;}
+  .cell.filled.red{background:#b03a2e;color:#fff;}
+  .cell.joker{background:linear-gradient(135deg,#e9c46a,#f6dc9c);color:#6b4423;}
+  .cell.seven{box-shadow:inset 0 0 0 2px var(--gold);}
+  .cell.legal{box-shadow:inset 0 0 0 2px #7fe3a6;cursor:pointer;animation:legalpulse 1.3s ease-in-out infinite;}
+  .cell.swapok{box-shadow:inset 0 0 0 2px #ffd54a;cursor:pointer;}
+  .cell.pop{animation:cellpop .4s cubic-bezier(.3,1.4,.5,1);}
+  @keyframes cellpop{0%{transform:scale(.4);}100%{transform:scale(1);}}
+  @keyframes legalpulse{0%,100%{opacity:.65;}50%{opacity:1;}}
+
+  .stage{
+    display:flex;align-items:center;justify-content:center;gap:10px;min-height:40px;
+    color:var(--text);font-weight:800;font-size:13.5px;text-align:center;padding:2px 6px;line-height:1.5;
+  }
+  .stage .lastcard{width:34px;aspect-ratio:2/3;border-radius:4px;background-size:cover;background-position:center;box-shadow:0 2px 5px rgba(0,0,0,.3);flex:none;}
+
+  .hand-wrap{margin-top:14px;padding-top:4px;}
+  .hand-label{font-size:11.5px;font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:6px;}
+  .hand{display:flex;justify-content:flex-start;align-items:flex-end;min-height:104px;padding:8px 10px 4px;
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+  .hand::-webkit-scrollbar{height:5px;}
+  .hand::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .hand .card{
+    width:58px;aspect-ratio:2/3;border-radius:6px;background-size:cover;background-position:center;flex:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.28);margin-left:-16px;transition:transform .15s,margin .15s;scroll-snap-align:center;
+  }
+  .hand .card:first-child{margin-left:0;}
+  .hand .card.playable{cursor:pointer;box-shadow:0 0 0 3px var(--accent),0 4px 10px rgba(0,0,0,.32);transform:translateY(-12px);margin-left:-6px;}
+  .hand .card.playable + .card{margin-left:-6px;}
+  .hand .card.jk.playable{box-shadow:0 0 0 3px var(--gold),0 4px 10px rgba(0,0,0,.32);}
+  .hand .card.dim{opacity:.5;filter:grayscale(.35);}
+  .hand .card.armed{transform:translateY(-18px) scale(1.05);box-shadow:0 0 0 3px var(--gold),0 8px 16px rgba(0,0,0,.35);}
+
+  .actions{display:flex;gap:10px;padding:2px 6px 0;}
+  .actions button,.actions a{
+    flex:1;border:none;background:var(--surface);color:var(--text);padding:12px;border-radius:14px;
+    font-weight:800;font-size:14px;box-shadow:var(--shadow);cursor:pointer;text-decoration:none;text-align:center;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .actions button:active{transform:scale(.97);}
+  .actions .pass{background:color-mix(in srgb,#d4a017 20%,var(--surface));}
+  .actions button:disabled{opacity:.4;pointer-events:none;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:24px 22px;width:100%;max-width:360px;text-align:center;box-shadow:var(--shadow);}
+  .modal .result{font-size:23px;font-weight:800;margin:0 0 10px;}
+  .modal .rank{list-style:none;padding:0;margin:0 0 20px;font-size:14px;text-align:left;}
+  .modal .rank li{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;}
+  .modal .rank li:nth-child(odd){background:var(--surface-2);}
+  .modal .rank li b{font-weight:800;}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:14px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+
+  .handoff{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:40;padding:30px;text-align:center;}
+  .handoff.show{display:flex;}
+  .handoff .big{font-size:24px;font-weight:800;}
+  .handoff .sub{color:var(--text-dim);font-size:14px;}
+  .handoff button{border:none;background:var(--accent);color:#fff;padding:15px 34px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.82);color:#fff;font-size:14px;font-weight:700;padding:11px 18px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="trump.html">‹</a>
+      <h1>七並べ</h1>
+    </div>
+    <div class="setup">
+      <div class="field">
+        <span class="label">対戦モード</span>
+        <div class="seg" id="segMode">
+          <button data-val="cpu" class="on">CPU対戦</button>
+          <button data-val="pvp">2人で対面</button>
+        </div>
+      </div>
+      <div class="field" id="fieldCount">
+        <span class="label">人数</span>
+        <div class="seg" id="segCount">
+          <button data-val="2" class="on">2人</button>
+          <button data-val="3">3人</button>
+          <button data-val="4">4人</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">パスできる回数</span>
+        <div class="seg" id="segPass">
+          <button data-val="3" class="on">3回</button>
+          <button data-val="4">4回</button>
+          <button data-val="5">5回</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">ジョーカー（ワイルド）</span>
+        <div class="seg" id="segJoker">
+          <button data-val="on" class="on">あり</button>
+          <button data-val="off">なし</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint-text">各スートの7から順に、置いてあるカードの隣（±1）につなげて出します。出せない時はパス（回数制限あり、超えるとバースト＝手札が全部場に開かれます）。手札を最初に出し切った人が1位。<br><span id="hintJk"><b>ジョーカー</b>は好きな空きマスに置ける“ワイルド”。本物のカードを持っている人は、自分の番にジョーカーと交換できます。</span></p>
+    <button class="start-btn" id="startBtn">ゲーム開始</button>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <a class="back-btn" href="#" id="toSetup">‹</a>
+      <h1>七並べ</h1>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="restartBtn">最初から</button>
+    </div>
+    <div class="play">
+      <div class="rowinfo" id="rowinfo"></div>
+      <div class="board" id="board"></div>
+      <div class="stage" id="stage"><span id="statusText">配札中…</span></div>
+      <div class="hand-wrap">
+        <div class="hand-label" id="handLabel">あなたの手札</div>
+        <div class="hand" id="hand"></div>
+      </div>
+      <div class="actions">
+        <button class="pass" id="passBtn">パス</button>
+        <button id="restartBtn2">最初から</button>
+        <a href="index.html">ホームへ</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="handoff" id="handoff">
+  <div class="big" id="handoffName">プレイヤー2 の番</div>
+  <div class="sub">ほかの人に手札が見えないようにして、準備ができたらタップ</div>
+  <button id="handoffBtn">見る</button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="result" id="ovResult">結果</p>
+    <ul class="rank" id="ovRank"></ul>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovAgain">もう一度</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const SUITS=["S","H","D","C"];
+  const SUIT_SYM={S:"♠",H:"♥",D:"♦",C:"♣"};
+  const isRed=s=>s==="H"||s==="D";
+  const RANKNAME=["","A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  const screens=document.querySelectorAll(".screen");
+  function show(id){ screens.forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+  let tt=null;
+  function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),1500); }
+  function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function faceUrl(c){ return c.joker ? "url(assets/cards/JB.webp)" : "url(assets/cards/"+c.suit+c.rank+".webp)"; }
+
+  function seg(id,on){
+    const w=document.getElementById(id);
+    w.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+      w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
+    return ()=>w.querySelector("button.on").dataset.val;
+  }
+  const getMode=seg("segMode",v=>{ document.getElementById("fieldCount").style.display=v==="cpu"?"flex":"none"; });
+  const getCount=seg("segCount");
+  const getPass=seg("segPass");
+  const getJoker=seg("segJoker",v=>{ document.getElementById("hintJk").style.display=v==="on"?"":"none"; });
+
+  const G={ mode:"cpu", n:2, passLimit:3, jokerOn:true, players:[], B:{}, cur:0,
+            over:false, busy:false, viewer:0, jokerMode:false, finishers:[], bustSeq:0, last:null };
+
+  function filled(s,r){ return r>=1&&r<=13 && G.B[s][r]!=null; }
+  function slotOpen(s,r){ return r>=1&&r<=13 && G.B[s][r]==null && (filled(s,r-1)||filled(s,r+1)); }
+  function jokerSlots(){ const out=[]; for(const s of SUITS) for(let r=1;r<=13;r++) if(slotOpen(s,r)) out.push([s,r]); return out; }
+  function playable(hand){ return hand.filter(c=>!c.joker && slotOpen(c.suit,c.rank)); }
+  function swapSlots(hand){ const out=[]; for(const s of SUITS) for(let r=1;r<=13;r++)
+      if(G.B[s][r]==="J" && hand.some(c=>!c.joker&&c.suit===s&&c.rank===r)) out.push([s,r]); return out; }
+
+  function name(i){ if(G.mode==="cpu") return i===0?"あなた":"CPU"+i; return "プレイヤー"+(i+1); }
+  function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
+  function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
+  function nextActive(from){ let q=from; do{ q=(q+1)%G.n; }while(G.players[q].done && q!==from); return q; }
+
+  function startGame(){
+    G.mode=getMode();
+    G.n = G.mode==="pvp" ? 2 : +getCount();
+    G.passLimit = +getPass();
+    G.jokerOn = getJoker()==="on";
+    G.over=false; G.busy=false; G.jokerMode=false; G.finishers=[]; G.bustSeq=0; G.last=null;
+    G.B={}; for(const s of SUITS){ G.B[s]=new Array(14).fill(null); G.B[s][7]="C"; }
+    const deck=[];
+    for(const s of SUITS) for(let r=1;r<=13;r++){ if(r!==7) deck.push({suit:s,rank:r,joker:false}); }
+    if(G.jokerOn) deck.push({joker:true,rank:0});
+    shuffle(deck);
+    G.players=[];
+    for(let i=0;i<G.n;i++) G.players.push({hand:[], done:false, busted:false, passLeft:G.passLimit, place:0, bustSeq:0});
+    deck.forEach((c,idx)=>G.players[idx%G.n].hand.push(c));
+    G.players.forEach(p=>p.hand.sort(sortCard));
+    G.cur=0;
+    document.getElementById("overlay").classList.remove("show");
+    show("play");
+    beginTurn(0,true);
+  }
+  function sortCard(a,b){
+    if(a.joker) return 1; if(b.joker) return -1;
+    if(a.suit!==b.suit) return SUITS.indexOf(a.suit)-SUITS.indexOf(b.suit);
+    return a.rank-b.rank;
+  }
+
+  async function beginTurn(p, first){
+    if(G.over) return;
+    if(activeIdx().length<=1){ endGame(); return; }
+    if(G.players[p].done){ beginTurn(nextActive(p)); return; }
+    G.cur=p; G.viewer = G.mode==="pvp" ? p : 0;
+    G.jokerMode=false;
+    if(G.mode==="pvp" && !first) await handoff(p);
+    render();
+
+    const human = isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0);
+    if(human){
+      const P=G.players[p];
+      const canPlay = playable(P.hand).length>0;
+      setStatus(canPlay ? name(p)+"の番：出せるカードを選んでください"
+                        : name(p)+"の番：出せるカードがありません（パス）");
+      G.busy=false;
+      render();
+    }else{
+      setStatus(name(p)+" が考えています…");
+      G.busy=true;
+      await wait(850);
+      await cpuTurn(p);
+    }
+  }
+
+  /* ---------- moves ---------- */
+  function endTurn(p){
+    if(G.over) return;
+    const P=G.players[p];
+    if(P.hand.length===0 && !P.done){
+      P.done=true; P.place=G.finishers.length+1; G.finishers.push(p);
+      setStatus(name(p)+" が上がり！ （"+ordinal(P.place)+"）");
+    }
+    if(activeIdx().length<=1){ endGame(); return; }
+    beginTurn(nextActive(p));
+  }
+  function ordinal(n){ return n+"位"; }
+
+  async function playCardData(p, s, r, asJoker){
+    const P=G.players[p];
+    if(asJoker){
+      const ji=P.hand.findIndex(c=>c.joker);
+      P.hand.splice(ji,1);
+      G.B[s][r]="J";
+      G.last={suit:s,rank:r,joker:true};
+      setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" の位置にジョーカーを置きました");
+    }else{
+      const ci=P.hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
+      P.hand.splice(ci,1);
+      G.B[s][r]="C";
+      G.last={suit:s,rank:r,joker:false};
+      setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" を出しました");
+    }
+    render();
+    popCell(s,r);
+    await wait(260);
+  }
+
+  async function doSwap(p, s, r){
+    const P=G.players[p];
+    const ci=P.hand.findIndex(c=>!c.joker&&c.suit===s&&c.rank===r);
+    P.hand.splice(ci,1);
+    G.B[s][r]="C";
+    P.hand.push({joker:true,rank:0});
+    P.hand.sort(sortCard);
+    G.last={suit:s,rank:r,joker:false};
+    setStatus(name(p)+" が "+SUIT_SYM[s]+RANKNAME[r]+" とジョーカーを交換しました");
+    render();
+    popCell(s,r);
+    await wait(300);
+  }
+
+  async function doPass(p){
+    const P=G.players[p];
+    P.passLeft--;
+    if(P.passLeft<0){
+      await bust(p);
+    }else{
+      setStatus(name(p)+" はパス（残り "+P.passLeft+" 回）");
+      render();
+      await wait(500);
+    }
+  }
+
+  async function bust(p){
+    const P=G.players[p];
+    P.busted=true; P.done=true; P.bustSeq=++G.bustSeq;
+    setStatus(name(p)+" はバースト！ 手札を場に開きます");
+    render();
+    await wait(650);
+    for(const c of P.hand.slice()){
+      if(c.joker){
+        const js=jokerSlots();
+        if(js.length){ G.B[js[0][0]][js[0][1]]="J"; }
+      }else{
+        G.B[c.suit][c.rank]="C";
+      }
+    }
+    P.hand=[];
+    P.place=0;
+    render();
+    await wait(700);
+  }
+
+  /* ---------- CPU ---------- */
+  function cpuTurn(p){
+    const P=G.players[p];
+    const pl=playable(P.hand);
+    if(pl.length){
+      pl.sort((a,b)=>Math.abs(b.rank-7)-Math.abs(a.rank-7));
+      const c=pl[0];
+      return (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(500); endTurn(p); })();
+    }
+    // stuck
+    const sw=swapSlots(P.hand);
+    const jk=P.hand.find(c=>c.joker);
+    return (async()=>{
+      if(jk){
+        const slots=jokerSlots();
+        const unblock=slots.find(([s,r])=>P.hand.some(c=>!c.joker&&c.suit===s&&(c.rank===r-1||c.rank===r+1)));
+        if(unblock){ await playCardData(p,unblock[0],unblock[1],true); await wait(500); return endTurn(p); }
+        if(P.passLeft<=0 && slots.length){ await playCardData(p,slots[0][0],slots[0][1],true); await wait(500); return endTurn(p); }
+      }
+      if(sw.length && P.passLeft<=1){ await doSwap(p,sw[0][0],sw[0][1]); await wait(400); return endTurn(p); }
+      await doPass(p);
+      endTurn(p);
+    })();
+  }
+
+  /* ---------- interaction ---------- */
+  document.getElementById("hand").addEventListener("click",e=>{
+    if(G.busy||G.over) return;
+    const el=e.target.closest(".card"); if(!el) return;
+    const p=G.cur, P=G.players[p];
+    const i=+el.dataset.i, c=P.hand[i];
+    if(!c) return;
+    if(c.joker){
+      if(!jokerSlots().length){ toast("ジョーカーを置ける場所がありません"); return; }
+      G.jokerMode=!G.jokerMode;
+      setStatus(G.jokerMode ? "ジョーカーを置くマスをタップ（もう一度カードでキャンセル）"
+                            : G.players[p]&&(playable(P.hand).length?"出せるカードを選んでください":"出せるカードがありません（パス）"));
+      render();
+      return;
+    }
+    if(slotOpen(c.suit,c.rank)){
+      G.busy=true; G.jokerMode=false;
+      (async()=>{ await playCardData(p,c.suit,c.rank,false); await wait(220); endTurn(p); })();
+    }else{
+      toast("そのカードはまだ出せません");
+    }
+  });
+
+  document.getElementById("board").addEventListener("click",e=>{
+    if(G.busy||G.over) return;
+    const cell=e.target.closest(".cell"); if(!cell) return;
+    const s=cell.dataset.s, r=+cell.dataset.r;
+    if(!s) return;
+    const p=G.cur, P=G.players[p];
+    if(G.jokerMode && slotOpen(s,r)){
+      G.busy=true; G.jokerMode=false;
+      (async()=>{ await playCardData(p,s,r,true); await wait(220); endTurn(p); })();
+      return;
+    }
+    if(G.B[s][r]==="J" && P.hand.some(c=>!c.joker&&c.suit===s&&c.rank===r)){
+      G.busy=true; G.jokerMode=false;
+      (async()=>{ await doSwap(p,s,r); await wait(220); endTurn(p); })();
+      return;
+    }
+  });
+
+  document.getElementById("passBtn").addEventListener("click",()=>{
+    if(G.busy||G.over) return;
+    const p=G.cur;
+    if(!isHuman(p)) return;
+    G.busy=true; G.jokerMode=false;
+    (async()=>{ await doPass(p); endTurn(p); })();
+  });
+
+  /* ---------- render ---------- */
+  function popCell(s,r){
+    const c=document.querySelector('.cell[data-s="'+s+'"][data-r="'+r+'"]');
+    if(c){ c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop"); }
+  }
+  function setStatus(t){ document.getElementById("statusText").textContent=t; }
+
+  function render(){
+    // player chips
+    const ri=document.getElementById("rowinfo");
+    ri.innerHTML="";
+    for(let i=0;i<G.n;i++){
+      const P=G.players[i];
+      const d=document.createElement("div");
+      d.className="pchip"+(i===G.cur&&!G.over?" turn":"")+(P.done?" out":"");
+      let st = P.busted ? "バースト" : P.done ? ordinal(P.place) : (P.hand.length+"枚 / パス"+P.passLeft);
+      d.innerHTML="<span>"+name(i)+"</span><span class='cnt'>"+st+"</span>";
+      ri.appendChild(d);
+    }
+    // board
+    const b=document.getElementById("board");
+    b.innerHTML="";
+    b.appendChild(cellDiv("hd",""));
+    for(let r=1;r<=13;r++) b.appendChild(cellDiv("hd",RANKNAME[r]));
+    const P=G.players[G.viewer];
+    const isViewerTurn0 = (G.mode==="pvp" ? G.cur===G.viewer : G.cur===0) && !G.over && !G.busy;
+    const legalSet = new Set();
+    if(G.jokerMode) jokerSlots().forEach(([s,r])=>legalSet.add(s+r));
+    const swapSet = new Set();
+    if(!G.jokerMode && isViewerTurn0) swapSlots(P.hand).forEach(([s,r])=>swapSet.add(s+r));
+    for(const s of SUITS){
+      const rl=document.createElement("div");
+      rl.className="rl"+(isRed(s)?" red":"");
+      rl.textContent=SUIT_SYM[s];
+      b.appendChild(rl);
+      for(let r=1;r<=13;r++){
+        const v=G.B[s][r];
+        const cell=document.createElement("div");
+        let cls="cell";
+        if(v==="C") cls+=" filled "+(isRed(s)?"red":"black");
+        else if(v==="J") cls+=" joker";
+        else cls+=" empty";
+        if(r===7) cls+=" seven";
+        if(legalSet.has(s+r)) cls+=" legal";
+        if(swapSet.has(s+r)) cls+=" swapok";
+        cell.className=cls;
+        cell.dataset.s=s; cell.dataset.r=r;
+        cell.textContent = v==="J" ? "★" : RANKNAME[r];
+        b.appendChild(cell);
+      }
+    }
+    // stage last card
+    const stg=document.getElementById("stage");
+    let lc=stg.querySelector(".lastcard");
+    if(G.last){
+      if(!lc){ lc=document.createElement("div"); lc.className="lastcard"; stg.insertBefore(lc,stg.firstChild); }
+      lc.style.backgroundImage = G.last.joker ? "url(assets/cards/JB.webp)"
+        : "url(assets/cards/"+G.last.suit+G.last.rank+".webp)";
+    }else if(lc){ lc.remove(); }
+    // hand
+    const isViewerTurn = (G.mode==="pvp" ? G.cur===G.viewer : G.cur===0) && !G.over;
+    document.getElementById("handLabel").textContent = name(G.viewer)+"の手札（"+P.hand.length+"枚）";
+    const hand=document.getElementById("hand");
+    hand.innerHTML="";
+    const baseOverlap = P.hand.length>13 ? -22 : P.hand.length>9 ? -16 : -8;
+    let prevPlay=false;
+    P.hand.forEach((c,i)=>{
+      const el=document.createElement("div");
+      el.className="card"+(c.joker?" jk":"");
+      el.style.backgroundImage=faceUrl(c);
+      el.dataset.i=i;
+      let play=false;
+      if(isViewerTurn){
+        if(c.joker){ if(jokerSlots().length){ el.classList.add("playable"); play=true; } if(G.jokerMode) el.classList.add("armed"); }
+        else if(slotOpen(c.suit,c.rank)){ el.classList.add("playable"); play=true; }
+        else el.classList.add("dim");
+      }
+      el.style.marginLeft = i===0 ? "0" : ((play||prevPlay) ? "-4px" : baseOverlap+"px");
+      prevPlay=play;
+      hand.appendChild(el);
+    });
+    // pass button
+    document.getElementById("passBtn").disabled = !isViewerTurn;
+  }
+  function cellDiv(cls,txt){ const d=document.createElement("div"); d.className=cls; d.textContent=txt; return d; }
+
+  function handoff(p){
+    return new Promise(res=>{
+      const h=document.getElementById("handoff");
+      document.getElementById("handoffName").textContent=name(p)+" の番";
+      h.classList.add("show");
+      const btn=document.getElementById("handoffBtn");
+      const go=()=>{ h.classList.remove("show"); btn.removeEventListener("click",go); res(); };
+      btn.addEventListener("click",go);
+    });
+  }
+
+  function endGame(){
+    G.over=true;
+    const ranked=[...G.finishers];
+    activeIdx().forEach(i=>{ if(!ranked.includes(i)) ranked.push(i); });
+    const busted=G.players.map((_,i)=>i).filter(i=>G.players[i].busted).sort((a,b)=>G.players[b].bustSeq-G.players[a].bustSeq);
+    busted.forEach(i=>{ if(!ranked.includes(i)) ranked.push(i); });
+    ranked.forEach((idx,k)=>{ G.players[idx].place=k+1; });
+
+    let title;
+    if(G.mode==="cpu"){
+      const myPlace = ranked.indexOf(0)+1;
+      title = myPlace===1 ? "あなたの勝ち！（1位）"
+            : myPlace===G.n ? "あなたの負け…（最下位）"
+            : "あなたは "+myPlace+"位";
+    }else{
+      title = name(ranked[0])+" の勝ち";
+    }
+    document.getElementById("ovResult").textContent=title;
+    const ul=document.getElementById("ovRank");
+    ul.innerHTML="";
+    ranked.forEach((idx,k)=>{
+      const li=document.createElement("li");
+      const tag = G.players[idx].busted ? "（バースト）" : "";
+      li.innerHTML="<b>"+(k+1)+"位</b><span>"+name(idx)+" "+tag+"</span>";
+      ul.appendChild(li);
+    });
+    render();
+    setStatus("ゲーム終了");
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  document.getElementById("startBtn").addEventListener("click",startGame);
+  document.getElementById("ovAgain").addEventListener("click",startGame);
+  document.getElementById("restartBtn").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
+  document.getElementById("restartBtn2").addEventListener("click",()=>{ if(G.over||!G.busy) startGame(); });
+  document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); show("setup"); });
+  document.getElementById("fieldCount").style.display="flex";
+})();
+</script>
+</body>
+</html>
