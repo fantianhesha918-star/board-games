@@ -84,7 +84,8 @@
   .mini-msg.err{color:var(--accent-press);}
 
   /* play */
-  .play{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 12px 24px;}
+  #play.active{height:100dvh;overflow:hidden;}
+  .play{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 12px 14px;}
   .scoreboard{display:flex;gap:8px;width:100%;max-width:520px;flex-wrap:wrap;justify-content:center;}
   .score{
     flex:1 1 calc(50% - 4px);min-width:0;background:var(--surface);border-radius:16px;padding:9px 12px;box-shadow:var(--shadow);
@@ -99,10 +100,11 @@
   .status{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14.5px;min-height:22px;text-align:center;}
 
   .board{
-    width:100%;max-width:460px;display:grid;gap:2.4vw;padding:12px;border-radius:16px;
+    width:100%;max-width:460px;display:grid;gap:2.0vw;padding:10px;border-radius:16px;
     background:var(--felt);box-shadow:var(--shadow),inset 0 0 24px rgba(0,0,0,.14);
+    margin:auto 0;flex:none;
   }
-  @media(min-width:480px){ .board{gap:11px;} }
+  @media(min-width:480px){ .board{gap:10px;} }
   .card{
     aspect-ratio:2/3;border-radius:7px;cursor:pointer;position:relative;
     box-shadow:0 2px 5px rgba(0,0,0,.28);
@@ -389,7 +391,33 @@
       boardEl.appendChild(el);
       card.el=el;
     });
+    requestAnimationFrame(fitBoard);
   }
+
+  // 盤全体がスクロールなしで見えるよう、画面の高さに合わせてカードの大きさを決める
+  function fitBoard(){
+    if(!G.cards.length) return;
+    const rect=boardEl.getBoundingClientRect();
+    if(rect.width===0) return;                 // まだ表示されていない
+    const cols=G.cols, rows=Math.ceil(G.cards.length/cols);
+    const cs=getComputedStyle(boardEl);
+    const gap=parseFloat(cs.gap)||8;
+    const pad=parseFloat(cs.paddingTop)||10;
+    const wrap=boardEl.parentElement;
+    const availW=Math.min(wrap.clientWidth, 460);
+    const actions=document.querySelector("#play .play-actions");
+    const aH=actions ? actions.getBoundingClientRect().height : 44;
+    const availH=window.innerHeight - rect.top - aH - 32;
+    const cwByW=(availW - pad*2 - gap*(cols-1))/cols;
+    const cwByH=((availH - pad*2 - gap*(rows-1))/rows)*(2/3);   // カードは 2:3
+    let cw=Math.floor(Math.min(cwByW, cwByH));
+    if(!isFinite(cw) || cw<20) cw=Math.floor(cwByW);
+    const bw=Math.round(cw*cols + gap*(cols-1) + pad*2);
+    boardEl.style.width=bw+"px";
+    boardEl.style.maxWidth="none";
+  }
+  window.addEventListener("resize", fitBoard);
+  window.addEventListener("orientationchange", ()=>setTimeout(fitBoard,200));
 
   function isCpuTurn(){ return !G.net && !isHuman(G.turn); }
 
