@@ -108,6 +108,17 @@
 
   /* ---- setup panel ---- */
   .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px;}
+  .txt-in{
+    width:100%;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 14px;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;
+  }
+  .txt-in:focus{outline:none;border-color:var(--accent);}
+  .or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-dim);font-size:12px;font-weight:700;}
+  .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--line);}
+  .join-row{display:flex;gap:8px;}
+  .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
+  .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
+  .mini-msg.err{color:var(--warn,#c0392b);}
   .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:2px 20px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
   .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
   .howto p{margin:4px 0;}
@@ -296,7 +307,19 @@
         <div class="seg" id="segMode">
           <button data-val="cpu" class="on">CPU対戦</button>
           <button data-val="pvp">2人で対面</button>
+          <button data-val="online">オンライン</button>
         </div>
+      </div>
+      <div class="field" id="fieldOnline" style="display:none">
+        <span class="label">オンライン対戦（別の端末の相手と）</span>
+        <input id="onlineName" class="txt-in" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="off">
+        <button class="start-btn" id="onlineCreate" style="margin:8px 0 0">部屋を作る</button>
+        <div class="or-sep"><span>または</span></div>
+        <div class="join-row">
+          <input id="onlineCode" class="txt-in" type="tel" inputmode="numeric" maxlength="4" placeholder="部屋番号（4桁）">
+          <button class="icon-btn" id="onlineJoin" style="height:auto;padding:0 20px;">参加</button>
+        </div>
+        <p class="mini-msg" id="onlineMsg"></p>
       </div>
       <div class="field" id="fieldColor">
         <span class="label">あなたの石</span>
@@ -386,6 +409,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script type="module" src="online.js"></script>
 <script>
 "use strict";
 (function(){
@@ -428,9 +452,13 @@
     return ()=>wrap.querySelector("button.on").dataset.val;
   }
   const getMode  = seg("segMode", v=>{
-    const cpu = v==="cpu";
+    const cpu = v==="cpu", online = v==="online";
     document.getElementById("fieldColor").style.display = cpu?"flex":"none";
     document.getElementById("fieldLevel").style.display = cpu?"flex":"none";
+    document.getElementById("fieldOnline").style.display = online?"flex":"none";
+    document.getElementById("othelloStart").style.display = online?"none":"block";
+    document.getElementById("onlineMsg").textContent = "";
+    document.getElementById("onlineMsg").classList.remove("err");
   });
   const getColor = seg("segColor");
   const getLevel = seg("segLevel");
@@ -453,7 +481,8 @@
 
   const G={
     board:null, turn:BLACK, mode:"cpu", human:BLACK, level:2, hints:true,
-    history:[], busy:false, over:false
+    history:[], busy:false, over:false,
+    online:null   // { code, role, myColor, roomState, unsub, hbTimer, chkTimer, prevStatus }
   };
 
   function freshBoard(){
@@ -493,6 +522,33 @@
     let bl=0,wh=0;
     for(let i=0;i<64;i++){ if(b[i]===BLACK)bl++; else if(b[i]===WHITE)wh++; }
     return {bl,wh};
+  }
+
+  /* ---- online helpers ---- */
+  function boardToStr(b){
+    let s=""; for(let i=0;i<64;i++) s += b[i]===BLACK?"b":b[i]===WHITE?"w":".";
+    return s;
+  }
+  function strToBoard(s){
+    const b=new Int8Array(64);
+    for(let i=0;i<64 && i<s.length;i++) b[i]= s[i]==="b"?BLACK : s[i]==="w"?WHITE : 0;
+    return b;
+  }
+  function decideWinner(b){
+    const {bl,wh}=counts(b);
+    return bl===wh ? "draw" : (bl>wh ? "b" : "w");
+  }
+  function onlineReady(){
+    if(window.BGOnline) return Promise.resolve(window.BGOnline);
+    return new Promise((res,rej)=>{
+      const to=setTimeout(()=>rej(new Error("オンライン機能の読み込みに失敗しました")),8000);
+      window.addEventListener("bgonline-ready",()=>{ clearTimeout(to); res(window.BGOnline); },{once:true});
+    });
+  }
+  function omsg(text, isErr){
+    const el=document.getElementById("onlineMsg");
+    el.textContent=text||"";
+    el.classList.toggle("err",!!isErr);
   }
 
   /* ---- rendering ---- */
@@ -546,24 +602,35 @@
       const side=G.turn===BLACK?"黒":"白";
       if(G.mode==="cpu"){
         st.textContent = G.turn===G.human ? side+"（あなた）の番" : side+"（CPU）が考え中…";
+      }else if(G.mode==="online"){
+        /* 文言は updateOnlineConn() が設定する */
       }else{
         st.textContent = side+"の番";
       }
     }
     document.getElementById("whoB").textContent = labelFor(BLACK);
     document.getElementById("whoW").textContent = labelFor(WHITE);
+    if(G.mode==="online") updateOnlineConn();
   }
   function labelFor(color){
-    if(G.mode!=="cpu") return color===BLACK?"黒":"白";
-    return (color===G.human?"あなた":"CPU");
+    if(G.mode==="cpu") return (color===G.human?"あなた":"CPU");
+    if(G.mode==="online" && G.online) return (color===G.online.myColor?"あなた":"相手");
+    return color===BLACK?"黒":"白";
   }
   function currentIsInteractive(){
     if(G.mode==="pvp") return true;
+    if(G.mode==="online"){
+      return !G.over && G.online && G.online.roomState
+        && G.online.roomState.status==="playing"
+        && G.turn===G.online.myColor;
+    }
     return G.turn===G.human;
   }
 
   /* ---- flow ---- */
   function startGame(){
+    if(getMode()==="online") return;   // オンラインは専用の導線から開始
+    teardownOnline();
     G.mode=getMode();
     G.human = getColor()==="b"?BLACK:WHITE;
     G.level = +getLevel();
@@ -580,6 +647,157 @@
   }
   document.getElementById("othelloStart").addEventListener("click",startGame);
 
+  /* ---- online flow ---- */
+  document.getElementById("onlineCreate").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineCreate");
+    const name=document.getElementById("onlineName").value.trim();
+    if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    btn.disabled=true; omsg("部屋を作成中…");
+    try{
+      const API=await onlineReady();
+      const initial={ board: boardToStr(freshBoard()), turn:"b", last:-1, pass:0, winner:null };
+      const code=await API.createRoom("othello", name, initial);
+      enterOnlineGame(code, "host");
+    }catch(e){
+      omsg((e&&e.message)||"部屋を作れませんでした",true);
+    }finally{ btn.disabled=false; }
+  });
+
+  document.getElementById("onlineJoin").addEventListener("click", async ()=>{
+    const btn=document.getElementById("onlineJoin");
+    const name=document.getElementById("onlineName").value.trim();
+    const code=document.getElementById("onlineCode").value.trim();
+    if(name.length<1){ omsg("ニックネームを入力してください",true); return; }
+    if(!/^[0-9]{4}$/.test(code)){ omsg("部屋番号は4桁の数字です",true); return; }
+    btn.disabled=true; omsg("参加中…");
+    try{
+      const API=await onlineReady();
+      const {role}=await API.joinRoom(code, name);
+      enterOnlineGame(code, role);
+    }catch(e){
+      omsg((e&&e.message)||"参加できませんでした",true);
+    }finally{ btn.disabled=false; }
+  });
+
+  function enterOnlineGame(code, role){
+    teardownOnline();
+    G.mode="online";
+    G.human = role==="host" ? BLACK : WHITE;
+    G.hints = getHint()==="on";
+    G.board = freshBoard();
+    G.turn = BLACK;
+    G.history=[]; G.busy=true; G.over=false;
+    lastMove=-1; animFlips=new Set();
+    G.online = { code, role, myColor:(role==="host"?BLACK:WHITE), roomState:null, unsub:null, hbTimer:null, chkTimer:null, prevStatus:"waiting", ended:false };
+    show("othelloPlay");
+    render();
+    document.getElementById("statusText").textContent =
+      role==="host" ? "相手を待っています…（部屋番号 "+code+"）" : "接続中…";
+    onlineReady().then(API=>{
+      G.online.unsub = API.watchRoom(code, onRoomUpdate);
+      G.online.hbTimer = setInterval(()=>{ if(G.online) API.heartbeat(code, G.online.role); }, 5000);
+      API.heartbeat(code, role);
+    });
+    G.online.chkTimer = setInterval(updateOnlineConn, 3000);
+  }
+
+  function onRoomUpdate(data, err){
+    if(!G.online) return;
+    if(err){ omsgNote("通信エラーが発生しました"); return; }
+    if(!data){
+      // 部屋が消えた（ホストが閉じた等）
+      if(!G.online.ended) showOnlineEnd("部屋が閉じられました","相手が退出したか、部屋が削除されました");
+      return;
+    }
+    G.online.roomState = data;
+    if(data.status==="playing" && G.online.prevStatus==="waiting"){
+      toast("対戦相手が参加しました！");
+    }
+    G.online.prevStatus = data.status;
+
+    const s = data.state || {};
+    if(s.board && s.board.length===64){
+      const nb = strToBoard(s.board);
+      const flips=new Set();
+      if(G.board){ for(let i=0;i<64;i++) if(G.board[i]!==nb[i] && nb[i]!==0) flips.add(i); }
+      G.board = nb;
+      animFlips = flips;
+    }
+    G.turn = s.turn==="w" ? WHITE : BLACK;
+    lastMove = (typeof s.last==="number") ? s.last : -1;
+    G.over = !!s.winner;
+    G.busy = data.status!=="playing";   // 待機中は操作不可。対戦中は currentIsInteractive() で制御
+    render();
+    updateOnlineConn();
+
+    if(s.winner && !G.online.ended){
+      let title, detail;
+      const {bl,wh}=counts(G.board);
+      detail = "黒 "+bl+" ー "+wh+" 白";
+      if(s.winner==="draw"){ title="引き分け"; }
+      else{
+        const iWon = (s.winner==="b" && G.online.myColor===BLACK) || (s.winner==="w" && G.online.myColor===WHITE);
+        title = iWon ? "あなたの勝ち！" : "あなたの負け…";
+      }
+      showOnlineEnd(title, detail);
+    }
+  }
+
+  function omsgNote(t){
+    const st=document.getElementById("statusText");
+    if(st) st.textContent=t;
+  }
+
+  function updateOnlineConn(){
+    if(!G.online || !G.online.roomState) return;
+    const d=G.online.roomState;
+    const st=document.getElementById("statusText");
+    if(G.over) return;
+    if(d.status==="waiting"){
+      st.textContent = "相手を待っています…（部屋番号 "+G.online.code+"）";
+      return;
+    }
+    // 相手の最終生存時刻
+    const oppSeen = G.online.role==="host" ? d.guestSeen : d.hostSeen;
+    let stale=false;
+    try{ if(oppSeen && oppSeen.toMillis) stale = (Date.now()-oppSeen.toMillis())>16000; }catch(e){}
+    const side = G.turn===BLACK?"黒":"白";
+    const mine = G.turn===G.online.myColor;
+    let base = mine ? side+"（あなた）の番" : side+"（相手）の番";
+    st.textContent = stale ? base+"／相手の接続が不安定です…" : base;
+  }
+
+  function showOnlineEnd(title, detail){
+    if(G.online) G.online.ended=true;
+    G.over=true; render();
+    document.getElementById("ovResult").textContent=title;
+    document.getElementById("ovDetail").textContent=detail||"";
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  function teardownOnline(){
+    if(!G.online) return;
+    try{ G.online.unsub && G.online.unsub(); }catch(e){}
+    clearInterval(G.online.hbTimer);
+    clearInterval(G.online.chkTimer);
+    const wasHost = G.online.role==="host";
+    const code = G.online.code;
+    const rs = G.online.roomState;
+    const ended = G.online.ended || (rs && rs.state && rs.state.winner) || (rs && rs.status!=="playing");
+    G.online=null;
+    onlineReady().then(API=>{
+      if(wasHost){
+        API.closeRoom(code).catch(()=>{});          // ホスト離脱＝部屋を片付ける
+      }else if(!ended && rs){
+        // ゲスト離脱＝投了扱い（ホストの勝ち）
+        API.pushRoom(code,{ state:{
+          board: rs.state.board, turn: rs.state.turn,
+          last: (rs.state.last!=null?rs.state.last:-1), pass:0, winner:"b"
+        }}).catch(()=>{});
+      }
+    }).catch(()=>{});
+  }
+
   function pushHistory(){
     G.history.push({board:Int8Array.from(G.board),turn:G.turn,last:lastMove});
     if(G.history.length>40) G.history.shift();
@@ -590,9 +808,32 @@
     if(!currentIsInteractive()) return;
     const f=flipsFor(G.board,idx,G.turn);
     if(!f){ toast("そこには置けません"); return; }
+    if(G.mode==="online"){ onlineMove(idx,f); return; }
     pushHistory();
     applyMove(idx,f);
     advance();
+  }
+
+  function onlineMove(idx,flips){
+    const myColor=G.turn;
+    const opp = myColor===BLACK?WHITE:BLACK;
+    G.busy=true;
+    applyMove(idx,flips);           // optimistic
+    let nextTurn, winner=null;
+    if(legalMoves(G.board,opp).size>0) nextTurn=opp;
+    else if(legalMoves(G.board,myColor).size>0) nextTurn=myColor;   // 相手はパス
+    else { nextTurn=myColor; winner=decideWinner(G.board); }
+    G.turn=nextTurn;
+    render();
+    const patch={ state:{
+      board: boardToStr(G.board),
+      turn: nextTurn===BLACK?"b":"w",
+      last: idx, pass:0, winner
+    }};
+    onlineReady().then(API=>API.pushRoom(G.online.code, patch)).catch(()=>{
+      toast("送信に失敗しました。通信状況を確認してください");
+      G.busy=false;
+    });
   }
 
   function applyMove(idx,flips){
@@ -735,18 +976,32 @@
   }
   document.getElementById("ovAgain").addEventListener("click",()=>{
     document.getElementById("overlay").classList.remove("show");
+    if(G.mode==="online"){ teardownOnline(); show("othelloSetup"); return; }
     startGame();
   });
   document.getElementById("ovHome").addEventListener("click",()=>{
     document.getElementById("overlay").classList.remove("show");
+    if(G.mode==="online") teardownOnline();
     show("home");
+  });
+  document.querySelector('#othelloPlay .back-btn').addEventListener("click",()=>{
+    if(G.mode==="online") teardownOnline();
   });
   document.getElementById("othelloRestart").addEventListener("click",()=>{
     if(G.busy) return;
+    if(G.mode==="online"){ teardownOnline(); show("othelloSetup"); return; }
     startGame();
   });
   document.getElementById("othelloResign").addEventListener("click",()=>{
     if(G.over) return;
+    if(G.mode==="online"){
+      const loseTo = G.online.myColor===BLACK ? "w" : "b";
+      onlineReady().then(API=>API.pushRoom(G.online.code,{ state:{
+        board: boardToStr(G.board), turn: G.turn===BLACK?"b":"w",
+        last: lastMove, pass:0, winner: loseTo
+      }})).catch(()=>toast("送信に失敗しました"));
+      return;
+    }
     if(G.mode==="cpu"){
       G.over=true;render();
       document.getElementById("ovResult").textContent="CPUの勝ち";
@@ -762,6 +1017,7 @@
     }
   });
   document.getElementById("othelloUndo").addEventListener("click",()=>{
+    if(G.mode==="online"){ toast("オンライン対戦では待ったできません"); return; }
     if(G.busy||G.over) return;
     animFlips=new Set();
     if(G.mode==="cpu"){

@@ -1,0 +1,84 @@
+rules_version = '2';
+
+// ボードゲームアプリ オンライン対戦 Firestore セキュリティルール
+// 方針: 匿名認証のみ・個人情報なし。部屋番号(ドキュメントID)を知っている人だけが
+// get でき、一覧(list)は誰にも許可しない。対戦中の state 更新は「今の手番の
+// プレイヤー」だけに限定して競合・不正な手を防ぐ。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{code} {
+
+      function signedIn() { return request.auth != null; }
+      function uid() { return request.auth.uid; }
+      function d() { return resource.data; }          // 変更前
+      function n() { return request.resource.data; }  // 変更後
+      function changed() { return n().diff(d()).affectedKeys(); }
+
+      function coreUnchanged() {
+        return n().game == d().game
+          && n().host.uid == d().host.uid
+          && n().createdAt == d().createdAt;
+      }
+      function isPlayerUid(u) {
+        return u == d().host.uid || (d().guest != null && u == d().guest.uid);
+      }
+
+      // 部屋番号を直接指定した get のみ許可。一覧検索(list)は誰にも許可しない。
+      allow get: if signedIn();
+      allow list: if false;
+
+      // 部屋作成: 自分がホスト・待機中・ゲスト未定・4桁の部屋番号
+      allow create: if signedIn()
+        && n().host.uid == uid()
+        && n().status == "waiting"
+        && n().guest == null
+        && n().game is string
+        && code.matches("[0-9]{4}");
+
+      allow update: if signedIn() && coreUnchanged() && (
+        isJoin() || isHeartbeat() || isMove()
+      );
+
+      // 待機中の部屋にゲストとして参加する
+      function isJoin() {
+        return d().status == "waiting"
+          && d().guest == null
+          && n().status == "playing"
+          && n().guest.uid == uid()
+          && n().guest.name is string
+          && changed().hasOnly(["guest", "status", "guestSeen", "updatedAt"]);
+      }
+
+      // 生存通知だけの更新（離脱検知用）。自分の Seen フィールドのみ。
+      function isHeartbeat() {
+        return (changed().hasOnly(["hostSeen"]) && uid() == d().host.uid)
+          || (changed().hasOnly(["guestSeen"]) && d().guest != null && uid() == d().guest.uid);
+      }
+
+      // 対戦中に盤面(state)を進める。
+      // 通常の手は「今の手番のプレイヤー」のみ。投了は「自分の負け（＝相手の勝ち）」
+      // としてゲームを終了する場合に限りいつでも可。
+      // ※ 現在はオセロ専用の判定（ホスト=黒 "b" / ゲスト=白 "w"）。別ゲームを
+      //   オンライン対応する際はこの関数を拡張すること。
+      function myColor() {
+        return uid() == d().host.uid ? "b" : "w";
+      }
+      function oppColor() {
+        return uid() == d().host.uid ? "w" : "b";
+      }
+      function isMove() {
+        return d().status == "playing"
+          && isPlayerUid(uid())
+          && n().guest.uid == d().guest.uid
+          && changed().hasOnly(["state", "status", "updatedAt", "hostSeen", "guestSeen"])
+          && (
+            d().state.turn == myColor()
+            || (d().state.winner == null && n().state.winner == oppColor())
+          );
+      }
+
+      // 部屋を閉じられるのはホストのみ
+      allow delete: if signedIn() && uid() == d().host.uid;
+    }
+  }
+}
