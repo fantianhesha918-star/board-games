@@ -163,6 +163,35 @@
     opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* once-per-player shuffle (ババ嵐) */
+  .shuffle-bar{
+    display:none;flex-direction:column;gap:9px;align-items:center;
+    background:color-mix(in srgb,var(--accent) 16%,var(--surface));
+    border:2px solid var(--accent);border-radius:14px;padding:11px 12px;margin:0 2px;
+  }
+  .shuffle-bar.show{display:flex;}
+  .shuffle-bar .sb-txt{font-size:12.5px;font-weight:800;color:var(--accent);text-align:center;line-height:1.55;}
+  .shuffle-bar .sb-btns{display:flex;gap:8px;}
+  .shuffle-bar .sb-btns button{border:none;border-radius:11px;padding:10px 20px;font-weight:800;font-size:13.5px;cursor:pointer;}
+  .shuffle-bar .sb-btns .yes{background:var(--accent);color:#fff;}
+  .shuffle-bar .sb-btns .yes:active{background:var(--accent-press);}
+  .shuffle-bar .sb-btns .no{background:var(--line);color:var(--text);}
+
+  .dice-modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:55;padding:24px;}
+  .dice-modal.show{display:flex;}
+  .dice-box{
+    background:var(--surface);border-radius:24px;padding:26px 30px 24px;display:flex;flex-direction:column;
+    align-items:center;gap:14px;box-shadow:var(--shadow);min-width:230px;
+  }
+  .dice-box .dtitle{font-size:13px;font-weight:800;color:var(--text-dim);}
+  .die{
+    font-size:74px;line-height:1;transition:transform .12s ease;
+    width:1.3em;height:1.3em;display:flex;align-items:center;justify-content:center;
+  }
+  .die.spin{transform:rotate(16deg) scale(1.04);}
+  .die.land{transform:scale(1.28);}
+  .dice-result{font-size:16.5px;font-weight:800;text-align:center;min-height:22px;color:var(--accent);}
 </style>
 </head>
 <body>
@@ -190,7 +219,7 @@
         </div>
       </div>
     </div>
-    <p class="hint-text">同じ数字の2枚がペア。手番では左隣の人の手札から1枚引き、ペアがそろったら捨てます。最後にジョーカーを持っていた人の負け。</p>
+    <p class="hint-text">同じ数字の2枚がペア。手番では左隣の人の手札から1枚引き、ペアがそろったら捨てます。最後にジョーカーを持っていた人の負け。<br>ジョーカーを持っている人は、自分の手番で引く前に <b>1ゲームに1回だけ</b>「シャッフル」を使えます。サイコロで <b>➡</b>=全員の手札が右へ / <b>⬅</b>=左へ 一斉に移動、<b>☠</b>=不発。</p>
     <button class="start-btn" id="startBtn">ゲーム開始</button>
   </section>
 
@@ -203,6 +232,13 @@
     </div>
     <div class="play">
       <div class="opps" id="opps"></div>
+      <div class="shuffle-bar" id="shuffleBar">
+        <span class="sb-txt" id="sbText">あなたはジョーカー保持者！ 1回だけ「シャッフル」できます</span>
+        <div class="sb-btns">
+          <button class="yes" id="sbYes">シャッフルする</button>
+          <button class="no" id="sbNo">やめる</button>
+        </div>
+      </div>
       <div class="stage" id="stage">
         <div class="pile" id="pile">捨て札 0組</div>
         <div class="status" id="statusText">配札中…</div>
@@ -225,6 +261,14 @@
   <div class="big" id="handoffName">プレイヤー2 の番</div>
   <div class="sub">ほかの人に手札が見えないようにして、準備ができたらタップ</div>
   <button id="handoffBtn">見る</button>
+</div>
+
+<div class="dice-modal" id="diceModal">
+  <div class="dice-box">
+    <div class="dtitle" id="diceTitle">シャッフル！</div>
+    <div class="die" id="die">🎲</div>
+    <div class="dice-result" id="diceResult"></div>
+  </div>
 </div>
 
 <div class="overlay" id="overlay">
@@ -263,7 +307,7 @@
   });
   const getCount=seg("segCount");
 
-  const G={ mode:"cpu", n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0 };
+  const G={ mode:"cpu", n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[] };
 
   function faceUrl(c){ return c.joker ? "url(assets/cards/JB.webp)" : "url(assets/cards/"+c.suit+c.rank+".webp)"; }
 
@@ -297,6 +341,7 @@
   }
   function isHuman(i){ return G.mode==="pvp" ? true : i===0; }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
+  function jokerHolder(){ for(let i=0;i<G.n;i++) if(G.players[i].hand.some(c=>c.joker)) return i; return -1; }
   function nextActive(from){
     let q=from;
     do{ q=(q+1)%G.n; }while(G.players[q].done && q!==from);
@@ -313,7 +358,9 @@
     deck.forEach((c,idx)=>G.players[idx%G.n].hand.push(c));
     G.players.forEach(p=>{ p.pairs += autoPairs(p.hand); if(p.hand.length===0) p.done=true; });
     G.pileP = G.players.reduce((s,p)=>s+p.pairs,0);
+    G.usedShuffle = new Array(G.n).fill(false);
     G.cur=0;
+    hideShuffleBar();
     document.getElementById("overlay").classList.remove("show");
     show("play");
     beginTurn(0, true);
@@ -329,22 +376,103 @@
     if(G.mode==="pvp" && !first){
       await handoff(p);
     }
-    const target = nextActive(p);
-    shuffle(G.players[target].hand);
     hidePickrow();
+    hideShuffleBar();
     render();
 
-    if(isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0)){
+    const humanControls = isHuman(p) && (G.mode==="pvp" ? p===G.viewer : p===0);
+    const canShuffle = !G.usedShuffle[p] && jokerHolder()===p;
+
+    if(humanControls){
+      const target = nextActive(p);
+      shuffle(G.players[target].hand);
+      if(canShuffle) showShuffleBar(p);
       setStatus(name(p)+"の番："+name(target)+"の手札から1枚引いてください");
       armHumanDraw(p, target);
     }else{
+      await wait(500);
+      if(canShuffle && Math.random()<0.8){
+        setStatus(name(p)+" はシャッフルを使う！");
+        await wait(950);
+        await runShuffle(p);
+        await wait(750);
+        if(G.over) return;
+        if(G.players[p].done || activeIdx().length<=1){ endTurn(p); return; }
+      }
+      if(G.over) return;
+      const target = nextActive(p);
+      shuffle(G.players[target].hand);
       setStatus(name(p)+"が"+name(target)+"から引いています…");
-      await wait(750);
+      await wait(1000);
       const idx = Math.random()*G.players[target].hand.length | 0;
       await doDraw(p, target, idx);
-      await wait(650);
+      await wait(800);
       endTurn(p);
     }
+  }
+
+  /* ---------- ババ嵐 shuffle ---------- */
+  function showShuffleBar(p){
+    const bar=document.getElementById("shuffleBar");
+    document.getElementById("sbText").textContent =
+      name(p)+" はジョーカー保持者！ 引く前に1回だけ「シャッフル」できます";
+    bar.classList.add("show");
+  }
+  function hideShuffleBar(){ document.getElementById("shuffleBar").classList.remove("show"); }
+
+  function applyRotation(dir){
+    const act=activeIdx();
+    const m=act.length;
+    if(m<2) return;
+    const oldHands=act.map(i=>G.players[i].hand);
+    const newHands=new Array(m);
+    for(let k=0;k<m;k++){
+      const dst = dir==="R" ? (k+1)%m : (k-1+m)%m;
+      newHands[dst]=oldHands[k];
+    }
+    act.forEach((i,k)=>{ G.players[i].hand=newHands[k]; });
+    act.forEach(i=>{
+      const rem=autoPairs(G.players[i].hand);
+      if(rem) G.pileP+=rem;
+      if(G.players[i].hand.length===0) G.players[i].done=true;
+    });
+    document.getElementById("pile").textContent="捨て札 "+G.pileP+"組";
+  }
+
+  async function runShuffle(by){
+    G.usedShuffle[by]=true;
+    hideShuffleBar();
+    const faces=["R","R","L","L","X","X"];
+    const res=faces[Math.random()*6|0];
+    const glyph={R:"➡",L:"⬅",X:"☠"};
+    const modal=document.getElementById("diceModal");
+    const die=document.getElementById("die");
+    const rt=document.getElementById("diceResult");
+    document.getElementById("diceTitle").textContent = name(by)+" のシャッフル！";
+    rt.textContent="";
+    die.textContent="🎲";
+    modal.classList.add("show");
+    await wait(250);
+    for(let i=0;i<15;i++){
+      die.textContent=glyph[faces[Math.random()*6|0]];
+      die.classList.toggle("spin");
+      await wait(70+i*8);
+    }
+    die.classList.remove("spin");
+    die.textContent=glyph[res];
+    die.classList.add("land");
+    await wait(520);
+    if(res==="X"){
+      rt.textContent="☠ 不発！ 手札はそのまま";
+      await wait(1150);
+    }else{
+      applyRotation(res);
+      render();
+      rt.textContent = res==="R" ? "➡ 全員の手札が右へ！" : "⬅ 全員の手札が左へ！";
+      await wait(1400);
+    }
+    modal.classList.remove("show");
+    die.classList.remove("land");
   }
 
   function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
@@ -367,12 +495,31 @@
   document.getElementById("pickrow").addEventListener("click",e=>{
     const pc=e.target.closest(".pcard");
     if(!pc || G.busy || G.over) return;
+    hideShuffleBar();                       // picking a card = skip shuffle this turn
     const row=e.currentTarget;
     row.querySelectorAll(".pcard").forEach(x=>x.style.pointerEvents="none");
     pc.classList.add("chosen");
     const idx=+pc.dataset.idx;
     setTimeout(()=>humanPicked(G.cur, nextActive(G.cur), idx), 240);
   });
+
+  document.getElementById("sbYes").addEventListener("click", async ()=>{
+    if(G.busy || G.over) return;
+    if(G.usedShuffle[G.cur] || jokerHolder()!==G.cur){ hideShuffleBar(); return; }
+    G.busy=true;
+    hideShuffleBar();
+    hidePickrow();
+    await runShuffle(G.cur);
+    await wait(450);
+    G.busy=false;
+    if(G.over) return;
+    if(G.players[G.cur].done || activeIdx().length<=1){ endTurn(G.cur); return; }
+    const t=nextActive(G.cur);
+    shuffle(G.players[t].hand);
+    setStatus(name(G.cur)+"の番："+name(t)+"の手札から1枚引いてください");
+    armHumanDraw(G.cur, t);
+  });
+  document.getElementById("sbNo").addEventListener("click", ()=>{ hideShuffleBar(); });
 
   async function humanPicked(p, target, idx){
     if(G.over) return;
