@@ -91,15 +91,15 @@
   .opp .pass{color:var(--warn);font-size:9.5px;font-weight:800;}
 
   .stage{
-    flex:none;display:flex;flex-direction:column;align-items:center;gap:9px;
+    flex:none;display:flex;flex-direction:column;align-items:center;gap:11px;
     background:var(--felt);border-radius:16px;box-shadow:var(--shadow),inset 0 0 26px rgba(0,0,0,.14);
-    padding:14px 12px;min-height:150px;position:relative;
+    padding:16px 12px;min-height:172px;position:relative;
   }
   .flags{position:absolute;top:8px;left:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:70%;}
   .flag{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,.28);color:#fff;}
   .flag.rev{background:var(--warn);}
-  .fieldcards{display:flex;gap:5px;min-height:70px;align-items:center;flex-wrap:wrap;justify-content:center;}
-  .fc{width:48px;aspect-ratio:2/3;border-radius:5px;background:#fff center/cover;box-shadow:0 3px 8px rgba(0,0,0,.34);}
+  .fieldcards{display:flex;gap:8px;min-height:112px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .fc{width:76px;aspect-ratio:2/3;border-radius:8px;background:#fff center/cover;box-shadow:0 4px 13px rgba(0,0,0,.36);}
   .fc.new{animation:fcpop .3s cubic-bezier(.3,1.4,.5,1);}
   @keyframes fcpop{0%{transform:translateY(-14px) scale(.6);opacity:.3;}100%{transform:none;}}
   .status{color:#fff;font-weight:800;font-size:13.5px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.35);line-height:1.45;min-height:19px;}
@@ -107,27 +107,30 @@
 
   .handwrap{margin-top:2px;}
   .handlabel{font-size:11px;font-weight:800;color:var(--text-dim);text-align:center;margin-bottom:4px;}
-  .hand{display:flex;justify-content:flex-start;align-items:flex-end;min-height:100px;padding:10px 8px 4px;
+  .hand{display:flex;justify-content:flex-start;align-items:flex-end;min-height:108px;padding:14px 8px 10px;
     overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
   .hand::-webkit-scrollbar{height:5px;}
   .hand::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
   .hand .card{
-    width:54px;aspect-ratio:2/3;border-radius:6px;background:#fff center/cover;flex:none;
-    box-shadow:0 2px 6px rgba(0,0,0,.28);margin-left:-15px;transition:transform .13s,margin .13s;cursor:pointer;
+    width:56px;aspect-ratio:2/3;border-radius:6px;background:#fff center/cover;flex:none;position:relative;
+    box-shadow:0 2px 6px rgba(0,0,0,.28);margin-left:-15px;transition:transform .13s,margin .13s,opacity .13s,filter .13s;cursor:pointer;
   }
   .hand .card:first-child{margin-left:0;}
-  .hand .card.sel{transform:translateY(-16px);box-shadow:0 0 0 3px var(--accent),0 6px 12px rgba(0,0,0,.32);}
-  .hand .card.sel + .card{margin-left:-6px;}
+  .hand .card.ok{box-shadow:0 0 0 2px var(--accent),0 3px 10px rgba(0,0,0,.32);}
+  .hand .card.no{opacity:.4;filter:grayscale(.55);transform:translateY(7px);}
+  .hand .card.sel{transform:translateY(-18px);box-shadow:0 0 0 3px var(--accent),0 8px 15px rgba(0,0,0,.34);opacity:1;filter:none;z-index:6;}
 
-  .actions{display:flex;gap:9px;padding:2px 4px 0;}
+  .actions{display:flex;gap:9px;padding:2px 4px 0;align-items:stretch;}
   .actions button,.actions a{
     flex:1;border:none;background:var(--surface);color:var(--text);padding:13px 8px;border-radius:14px;
     font-weight:800;font-size:14px;box-shadow:var(--shadow);cursor:pointer;text-decoration:none;text-align:center;
     display:flex;align-items:center;justify-content:center;
   }
   .actions button:active{transform:scale(.97);}
-  .actions .play-btn{background:var(--accent);color:#fff;}
+  .actions .play-btn{background:var(--accent);color:#fff;flex:1.3;font-size:15px;}
   .actions .pass-btn{background:color-mix(in srgb,#d4a017 22%,var(--surface));}
+  .actions .pass-btn.urge{background:var(--warn);color:#fff;animation:passurge 1.15s ease-in-out infinite;}
+  @keyframes passurge{0%,100%{box-shadow:var(--shadow);}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--warn) 32%,transparent),var(--shadow);}}
   .actions button:disabled{opacity:.4;pointer-events:none;}
 
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:22px;z-index:50;}
@@ -290,8 +293,8 @@
         <div class="hand" id="hand"></div>
       </div>
       <div class="actions">
-        <button class="play-btn" id="playBtn">出す</button>
         <button class="pass-btn" id="passBtn">パス</button>
+        <button class="play-btn" id="playBtn">出す</button>
         <a href="index.html">ホーム</a>
       </div>
     </div>
@@ -1065,22 +1068,57 @@
 
     // my hand
     const P=G.players[G.viewer];
-    document.getElementById("handLabel").textContent=name(G.viewer)+"の手札（"+P.hand.length+"枚）";
     const hand=document.getElementById("hand"); hand.innerHTML="";
     const isTurn = G.turn===G.viewer && isHuman(G.viewer) && !G.over && !G.busy;
     const many=P.hand.length;
-    P.hand.forEach(c=>{
+
+    // このターンに「場に出せる」カードidを算出（場があるときだけ）
+    let playable=null;
+    if(isTurn && G.field){
+      playable=new Set();
+      const legalG=genGroups(P.hand).filter(g=>{
+        if(g.meta.type==="seq" && !G.rules.kaidan) return false;
+        if(!beats(g.meta)) return false;
+        if(G.lockSuits && suitSig(g.meta)!==G.lockSuits.join("")) return false;
+        return true;
+      });
+      const s3=P.hand.find(c=>!c.joker && c.suit==="S" && c.rank===3);
+      if(s3 && isSpade3Return([s3])) legalG.push({cards:[s3],meta:{type:"single"}});
+      const widen=!G.lockSuits, okRanks=new Set(); let okJoker=false;
+      legalG.forEach(g=>{
+        if(!widen || (g.meta && g.meta.type==="seq")){ g.cards.forEach(c=>playable.add(c.id)); }
+        else g.cards.forEach(c=>{ if(c.joker) okJoker=true; else okRanks.add(c.rank); });
+      });
+      if(widen) P.hand.forEach(c=>{ if(c.joker?okJoker:okRanks.has(c.rank)) playable.add(c.id); });
+    }
+    const mustPass = isTurn && !!G.field && playable && playable.size===0;
+
+    let lbl=name(G.viewer)+"の手札（"+many+"枚）";
+    if(isTurn && G.field) lbl += mustPass ? "  出せる札がありません → パス" : "  枠付き＝出せる札";
+    document.getElementById("handLabel").textContent=lbl;
+
+    // 自分の手番は重なりを浅くしてタップしやすく
+    const ov = isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12);
+    P.hand.forEach((c,idx)=>{
       const el=document.createElement("div");
-      el.className="card"+(G.sel.includes(c.id)?" sel":"");
+      let cls="card"+(G.sel.includes(c.id)?" sel":"");
+      if(playable) cls += playable.has(c.id) ? " ok" : " no";
+      el.className=cls;
       el.style.backgroundImage="url("+cardImg(c)+")";
-      el.style.marginLeft = many>14 ? "-24px" : many>10 ? "-18px" : "-12px";
+      el.style.marginLeft=(idx===0?0:ov)+"px";
       el.dataset.id=c.id;
       hand.appendChild(el);
     });
-    if(hand.firstChild) hand.firstChild.style.marginLeft="0";
+    // 選択カードの前後にすき間を作り、2枚目以降を選びやすく
+    Array.from(hand.children).forEach((el,idx)=>{
+      if(el.classList.contains("sel")) el.style.marginLeft=(idx===0?0:10)+"px";
+      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) el.style.marginLeft="10px";
+    });
 
-    document.getElementById("playBtn").disabled = !isTurn || G.sel.length===0;
-    document.getElementById("passBtn").disabled = !isTurn || !G.field; // 親はパス不可
+    const playBtn=document.getElementById("playBtn"), passBtn=document.getElementById("passBtn");
+    playBtn.disabled = !isTurn || G.sel.length===0;
+    passBtn.disabled = !isTurn || !G.field; // 親はパス不可
+    passBtn.classList.toggle("urge", !!mustPass);
   }
 
   /* ---------------- interaction ---------------- */
