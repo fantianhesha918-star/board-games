@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<title>ソリティア</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --felt:#2f7d55;--gold:#e9c46a;--red:#b3261e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --felt:#245f42;--red:#e0776a;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:600px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:12px 14px;min-height:52px;}
+  .topbar h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .topbar .meta{font-size:12px;font-weight:800;color:var(--text-dim);text-align:right;line-height:1.35;white-space:nowrap;}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;text-decoration:none;}
+  .back-btn{width:36px;height:36px;font-size:20px;display:flex;align-items:center;justify-content:center;}
+  .icon-btn{height:36px;padding:0 13px;font-size:13px;display:flex;align-items:center;gap:5px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  /* setup */
+  .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:20px;}
+  .field{display:flex;flex-direction:column;gap:10px;}
+  .field > .label{font-weight:800;font-size:14px;}
+  .seg{display:flex;gap:8px;}
+  .seg button{
+    flex:1;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:13px 8px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s ease;
+  }
+  .seg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
+  .seg button:active{transform:scale(.96);}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:0 20px;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
+  .start-btn{margin:6px 20px 26px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
+
+  /* play */
+  .tools{display:flex;gap:7px;padding:0 12px 8px;}
+  .tools button{
+    flex:1;border:none;background:var(--surface);color:var(--text);padding:10px 4px;border-radius:12px;
+    font-weight:800;font-size:12px;box-shadow:var(--shadow);cursor:pointer;min-width:0;
+  }
+  .tools button:active{transform:scale(.96);}
+  .tools button:disabled{opacity:.4;pointer-events:none;}
+  .tools .auto{background:var(--accent);color:#fff;}
+
+  .boardwrap{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+  #board{
+    background:var(--felt);border-radius:16px;margin:0 8px 10px;padding:9px;
+    box-shadow:var(--shadow),inset 0 0 26px rgba(0,0,0,.14);
+    --cw:46px;--g:6px;
+  }
+  .toprow{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--g);margin-bottom:12px;position:relative;}
+  .slot{
+    width:100%;aspect-ratio:2/3;border-radius:calc(var(--cw)*.11);
+    border:2px dashed rgba(255,255,255,.28);position:relative;
+  }
+  .slot.fslot::after{
+    content:attr(data-sym);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--cw)*.5);color:rgba(255,255,255,.22);font-weight:700;
+  }
+  .slot.fslot.red::after{color:rgba(255,170,160,.3);}
+  .stockcount{
+    position:absolute;left:0;right:0;bottom:-15px;text-align:center;font-size:10px;font-weight:800;color:rgba(255,255,255,.7);
+  }
+  .recycle::after{
+    content:"\21BB";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--cw)*.55);color:rgba(255,255,255,.4);
+  }
+
+  .tableau{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--g);align-items:start;}
+  .col{position:relative;width:100%;min-height:calc(var(--cw)*1.5);}
+
+  .pcard{
+    position:absolute;left:0;width:100%;aspect-ratio:2/3;
+    border-radius:calc(var(--cw)*.11);background:#fff center/cover no-repeat;
+    box-shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+  .toprow .pcard{position:relative;}
+  .pcard.down{background-image:var(--back-img);}
+  .pcard .ix{
+    position:absolute;top:3%;left:6%;font-weight:800;line-height:1;
+    font-size:calc(var(--cw)*.26);color:#1a1a1a;
+    background:rgba(255,255,255,.82);border-radius:3px;padding:1px 2px;letter-spacing:-.02em;
+  }
+  .pcard .ix.red{color:var(--red);}
+  .pcard.sel{box-shadow:0 0 0 3px var(--gold),0 4px 12px rgba(0,0,0,.4);z-index:20;}
+  .pcard.hintflash{animation:hintflash .7s ease 2;}
+  @keyframes hintflash{0%,100%{box-shadow:0 1px 3px rgba(0,0,0,.35);}50%{box-shadow:0 0 0 3px #7fe3a6,0 4px 12px rgba(0,0,0,.4);}}
+  .pcard.deal{animation:deal .3s ease;}
+  @keyframes deal{0%{transform:translateY(-16px);opacity:.2;}100%{transform:none;opacity:1;}}
+  .col .pcard{cursor:pointer;}
+
+  .msg{color:#fff;font-weight:800;font-size:12.5px;text-align:center;padding:2px 6px 8px;min-height:16px;text-shadow:0 1px 2px rgba(0,0,0,.3);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:26px 22px;width:100%;max-width:340px;text-align:center;box-shadow:var(--shadow);}
+  .modal .result{font-size:24px;font-weight:800;margin:0 0 6px;}
+  .modal .detail{color:var(--text-dim);font-size:14px;margin:0 0 20px;line-height:1.6;}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:13px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.84);color:#fff;font-size:13px;font-weight:700;padding:10px 17px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="trump.html">‹</a>
+      <h1>ソリティア</h1>
+      <span class="spacer"></span>
+      <a class="icon-btn" href="rules.html#solitaire">ルール</a>
+    </div>
+    <div class="setup">
+      <div class="field">
+        <span class="label">山札のめくり方</span>
+        <div class="seg" id="segDraw">
+          <button data-val="1" class="on">1枚ずつ（やさしい）</button>
+          <button data-val="3">3枚ずつ（本格）</button>
+        </div>
+      </div>
+    </div>
+    <div class="howto">
+      <h3>遊び方</h3>
+      <p>7つの列と、右上の<b>組札（4カ所）</b>。組札を <b>A→2→3…→K</b> の順に、スートごとに全部そろえたらクリア。</p>
+      <p>列の上では<b>色ちがい・1つ小さい数字</b>を重ねられます（例：赤6の上に黒5）。つながったカードはまとめて動きます。空いた列には<b>K</b >だけ置けます。</p>
+      <p>カードを<b>タップ</b>すると自動で置ける所へ移動。行き先が複数ある時は選択され、置きたい列をタップします。<b>ダブルタップ</b>で組札へ直行。山札をタップでめくり、なくなったらもう一度タップで戻します。</p>
+    </div>
+    <button class="start-btn" id="startBtn">ゲーム開始</button>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <a class="back-btn" href="#" id="toSetup">‹</a>
+      <h1>ソリティア</h1>
+      <span class="spacer"></span>
+      <span class="meta" id="meta">手 0<br>0:00</span>
+    </div>
+    <div class="tools">
+      <button id="undoBtn">もどす</button>
+      <button id="hintBtn">ヒント</button>
+      <button id="autoBtn" class="auto">オート</button>
+      <button id="redealBtn">配り直す</button>
+      <button id="newBtn">新規</button>
+    </div>
+    <div class="boardwrap">
+      <div id="board">
+        <div class="toprow" id="toprow"></div>
+        <div class="tableau" id="tableau"></div>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="result" id="ovTitle">クリア！</p>
+    <p class="detail" id="ovDetail"></p>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovAgain">もう一度</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const SU=["S","H","D","C"], SYM={S:"♠",H:"♥",D:"♦",C:"♣"};
+  const suitOf=id=>SU[(id/13)|0];
+  const rankOf=id=>(id%13)+1;
+  const isRed=id=>{const s=suitOf(id);return s==="H"||s==="D";};
+  const rlabel=r=>({1:"A",11:"J",12:"Q",13:"K"})[r]||(""+r);
+  const cface=id=>"assets/cards/"+suitOf(id)+rankOf(id)+".webp";
+  const idOf=(s,r)=>SU.indexOf(s)*13+(r-1);
+
+  const $=id=>document.getElementById(id);
+  let tt=null;
+  function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),1500); }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  document.documentElement.style.setProperty("--back-img","url(assets/cards/back.webp)");
+
+  const G={ draw:1, deck:[], stock:[], waste:[], found:{S:0,H:0,D:0,C:0}, tab:[],
+            sel:null, hist:[], moves:0, t0:0, timer:null, won:false,
+            lastTapLoc:null, lastTapT:0 };
+
+  function seg(id,on){
+    const w=$(id);
+    w.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+      w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); on&&on(b.dataset.val); });
+    return ()=>w.querySelector("button.on").dataset.val;
+  }
+  const getDraw=seg("segDraw");
+
+  /* ---------- deal ---------- */
+  function deal(fromDeck){
+    G.deck = fromDeck ? fromDeck.slice() : shuffle(Array.from({length:52},(_,i)=>i));
+    const d=G.deck.slice();
+    G.tab=[[],[],[],[],[],[],[]];
+    for(let i=0;i<7;i++){
+      for(let j=0;j<=i;j++){ G.tab[i].push({id:d.pop(), up:j===i}); }
+    }
+    G.stock=d;                 // 残り24枚（末尾から引く）
+    G.waste=[];
+    G.found={S:0,H:0,D:0,C:0};
+    G.sel=null; G.hist=[]; G.moves=0; G.won=false;
+    G.t0=Date.now();
+    clearInterval(G.timer);
+    G.timer=setInterval(updateMeta,1000);
+    render(true);
+    requestAnimationFrame(()=>{ if($("play").classList.contains("active")) render(); });
+    updateMeta();
+  }
+
+  function startGame(){
+    G.draw=+getDraw();
+    $("overlay").classList.remove("show");
+    show("play");
+    deal(null);
+  }
+  function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+
+  /* ---------- snapshot / undo ---------- */
+  function snap(){
+    return JSON.stringify({
+      stock:G.stock, waste:G.waste, found:G.found,
+      tab:G.tab.map(c=>c.map(x=>[x.id,x.up?1:0])), moves:G.moves
+    });
+  }
+  function pushHist(){ G.hist.push(snap()); if(G.hist.length>300) G.hist.shift(); }
+  function undo(){
+    if(!G.hist.length) return;
+    const s=JSON.parse(G.hist.pop());
+    G.stock=s.stock; G.waste=s.waste; G.found=s.found;
+    G.tab=s.tab.map(c=>c.map(([id,up])=>({id,up:!!up})));
+    G.moves=s.moves; G.sel=null; G.won=false;
+    render(); updateMeta();
+  }
+
+  /* ---------- rules ---------- */
+  function canToFound(id){ return rankOf(id)===G.found[suitOf(id)]+1; }
+  function canToCol(id,col){
+    const t=G.tab[col];
+    if(!t.length) return rankOf(id)===13;
+    const top=t[t.length-1];
+    if(!top.up) return false;
+    return isRed(top.id)!==isRed(id) && rankOf(top.id)===rankOf(id)+1;
+  }
+  function colDests(id,exceptCol){
+    const out=[];
+    for(let c=0;c<7;c++){ if(c===exceptCol) continue; if(canToCol(id,c)) out.push(c); }
+    return out;
+  }
+
+  /* ---------- moves ---------- */
+  function afterMove(){
+    G.moves++;
+    // 露出したカードをめくる
+    G.tab.forEach(c=>{ if(c.length){ const top=c[c.length-1]; if(!top.up) top.up=true; } });
+    G.sel=null;
+    if(checkWin()){ G.won=true; render(); winModal(); return; }
+    render(); updateMeta();
+    maybeAutoFinish();
+  }
+  function moveToFound(src){
+    // src: {kind:'w'} | {kind:'t',col} | {kind:'f',suit}
+    pushHist();
+    let id;
+    if(src.kind==="w") id=G.waste.pop();
+    else if(src.kind==="t") id=G.tab[src.col].pop().id;
+    else id=idOf(src.suit,G.found[src.suit]);  // 使わない想定
+    G.found[suitOf(id)]=rankOf(id);
+    afterMove();
+  }
+  function moveRun(ids,src,destCol){
+    pushHist();
+    if(src.kind==="w"){ G.waste.pop(); }
+    else if(src.kind==="f"){ G.found[src.suit]--; }
+    else if(src.kind==="t"){ G.tab[src.col].splice(src.idx); }
+    ids.forEach(id=>G.tab[destCol].push({id,up:true}));
+    afterMove();
+  }
+  function doStock(){
+    if(G.sel){ G.sel=null; render(); return; }
+    pushHist();
+    if(!G.stock.length){
+      if(!G.waste.length){ G.hist.pop(); return; }
+      G.stock = G.waste.reverse(); G.waste=[];
+    }else{
+      const n=Math.min(G.draw,G.stock.length);
+      for(let i=0;i<n;i++) G.waste.push(G.stock.pop());
+    }
+    G.moves++; G.sel=null;
+    render(); updateMeta();
+  }
+
+  /* ---------- interaction ---------- */
+  function selectRun(src,ids,locStr){ G.sel={src,ids,locStr}; render(); }
+
+  function tapCard(loc,locStr){
+    // loc: {kind, col, idx, suit}
+    const now=Date.now();
+    const dbl = (locStr===G.lastTapLoc && now-G.lastTapT<330);
+    G.lastTapLoc=locStr; G.lastTapT=now;
+
+    if(loc.kind==="stock"){ doStock(); return; }
+
+    // 選択中の処理
+    if(G.sel){
+      const s=G.sel;
+      // 同じ元カードを再タップ → 組札へ or 解除
+      if(locStr===s.locStr){
+        if(s.ids.length===1 && s.src.kind!=="f" && canToFound(s.ids[0])) moveToFound(s.src);
+        else { G.sel=null; render(); }
+        return;
+      }
+      // 行き先として解釈
+      if(loc.kind==="found"){
+        if(s.ids.length===1 && suitOf(s.ids[0])===loc.suit && canToFound(s.ids[0])) moveToFound(s.src);
+        else { toast("そこには置けません"); G.sel=null; render(); }
+        return;
+      }
+      if(loc.kind==="col" || loc.kind==="tcard"){
+        const destCol = loc.col;
+        if(canToCol(s.ids[0],destCol)) moveRun(s.ids,s.src,destCol);
+        else { toast("そこには置けません"); G.sel=null; render(); }
+        return;
+      }
+      G.sel=null; render(); return;
+    }
+
+    // 未選択：カードを拾う
+    let src,ids;
+    if(loc.kind==="waste"){
+      if(!G.waste.length) return;
+      src={kind:"w"}; ids=[G.waste[G.waste.length-1]];
+    }else if(loc.kind==="found"){
+      const r=G.found[loc.suit]; if(!r) return;
+      src={kind:"f",suit:loc.suit}; ids=[idOf(loc.suit,r)];
+    }else if(loc.kind==="tcard"){
+      const c=G.tab[loc.col], card=c[loc.idx];
+      if(!card || !card.up) return;
+      src={kind:"t",col:loc.col,idx:loc.idx};
+      ids=c.slice(loc.idx).map(x=>x.id);
+    }else return;
+
+    // ダブルタップ → 組札直行
+    if(dbl && ids.length===1 && src.kind!=="f" && canToFound(ids[0])){ moveToFound(src); return; }
+
+    // 単カード自動移動
+    if(ids.length===1){
+      const id=ids[0];
+      const dests=colDests(id, src.kind==="t"?src.col:-1);
+      const lowRank = rankOf(id)<=2;
+      if(src.kind!=="f" && canToFound(id) && (lowRank || dests.length===0)){ moveToFound(src); return; }
+      const ne=dests.filter(c=>G.tab[c].length), em=dests.filter(c=>!G.tab[c].length);
+      if(ne.length===1 && em.length===0){ moveRun(ids,src,ne[0]); return; }
+      if(dests.length===1){ moveRun(ids,src,dests[0]); return; }
+      if(dests.length===0){
+        if(src.kind!=="f" && canToFound(id)){ moveToFound(src); return; }
+        return; // どこにも行けない
+      }
+      selectRun(src,ids,locStr); return;
+    }
+    // 連なり
+    const dests=colDests(ids[0], src.col);
+    if(dests.length===1){ moveRun(ids,src,dests[0]); return; }
+    if(dests.length===0){ toast("移動先がありません"); return; }
+    selectRun(src,ids,locStr);
+  }
+
+  /* ---------- auto to foundations ---------- */
+  function oneAutoFound(){
+    if(G.waste.length && canToFound(G.waste[G.waste.length-1])){ moveToFound({kind:"w"}); return true; }
+    for(let c=0;c<7;c++){
+      const t=G.tab[c];
+      if(t.length && t[t.length-1].up && canToFound(t[t.length-1].id)){ moveToFound({kind:"t",col:c}); return true; }
+    }
+    return false;
+  }
+  function autoRun(){
+    if(G.won) return;
+    if(oneAutoFound()){ setTimeout(autoRun,140); }
+  }
+  function allExposed(){
+    return !G.stock.length && !G.waste.length && G.tab.every(c=>c.every(x=>x.up));
+  }
+  function maybeAutoFinish(){
+    if(!G.won && allExposed()) setTimeout(autoRun,160);
+  }
+
+  /* ---------- hint ---------- */
+  function findHint(){
+    // 1) 組札へ
+    if(G.waste.length && canToFound(G.waste[G.waste.length-1])) return {kind:"tcardless",arr:["w"]};
+    for(let c=0;c<7;c++){ const t=G.tab[c]; if(t.length&&t[t.length-1].up&&canToFound(t[t.length-1].id)) return {col:c,idx:t.length-1}; }
+    // 2) 裏カードをめくれる列間移動
+    for(let c=0;c<7;c++){
+      const t=G.tab[c]; const fu=t.findIndex(x=>x.up);
+      if(fu>0){ const id=t[fu].id; const d=colDests(id,c); if(d.length) return {col:c,idx:fu}; }
+    }
+    // 3) 場札から空列へ K（裏が下にある時のみ有効）
+    for(let c=0;c<7;c++){
+      const t=G.tab[c]; const fu=t.findIndex(x=>x.up);
+      if(fu>0 && rankOf(t[fu].id)===13){ const d=colDests(t[fu].id,c); if(d.length) return {col:c,idx:fu}; }
+    }
+    // 4) waste から場札へ
+    if(G.waste.length){ const id=G.waste[G.waste.length-1]; if(colDests(id,-1).length) return {waste:true}; }
+    // 5) 山札
+    if(G.stock.length||G.waste.length) return {stock:true};
+    return null;
+  }
+  function hint(){
+    const h=findHint();
+    if(!h){ toast("動かせる手が見つかりません"); return; }
+    let el=null;
+    if(h.stock) el=$("toprow").querySelector('[data-loc*="stock"]');
+    else if(h.waste || (h.arr&&h.arr[0]==="w")) el=$("toprow").querySelector('[data-loc*="waste"]');
+    else if(h.col!=null) el=$("tableau").querySelector('.col[data-col="'+h.col+'"] .pcard[data-idx="'+h.idx+'"]');
+    if(el){ el.classList.add("hintflash"); setTimeout(()=>el&&el.classList.remove("hintflash"),1500); }
+  }
+
+  /* ---------- win ---------- */
+  function checkWin(){ return G.found.S===13&&G.found.H===13&&G.found.D===13&&G.found.C===13; }
+  function fmtTime(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+  function updateMeta(){
+    const el=$("meta");
+    const tm = G.won ? (G._wonAt-G.t0) : (Date.now()-G.t0);
+    el.innerHTML="手 "+G.moves+"<br>"+fmtTime(tm);
+  }
+  function winModal(){
+    G._wonAt=Date.now(); clearInterval(G.timer);
+    $("ovTitle").textContent="クリア！";
+    $("ovDetail").innerHTML="手数 "+G.moves+" ／ タイム "+fmtTime(G._wonAt-G.t0);
+    $("overlay").classList.add("show");
+    updateMeta();
+  }
+
+  /* ---------- render ---------- */
+  function mkCard(id,down,cls,loc,idx){
+    const d=document.createElement("div");
+    d.className="pcard"+(down?" down":"")+(cls?(" "+cls):"");
+    if(!down){
+      d.style.backgroundImage="url("+cface(id)+")";
+      const ix=document.createElement("b");
+      ix.className="ix"+(isRed(id)?" red":"");
+      ix.textContent=rlabel(rankOf(id))+SYM[suitOf(id)];
+      d.appendChild(ix);
+    }
+    if(loc) d.dataset.loc=loc;
+    if(idx!=null) d.dataset.idx=idx;
+    return d;
+  }
+
+  function render(dealAnim){
+    const board=$("board");
+    const g=6;
+    // 実測（列幅は 1fr なので横あふれはしない。cw はフォント/縦間隔の目安）
+    let bw=board.clientWidth-18;
+    if(bw<120) bw=Math.min(window.innerWidth||360,600)-34;
+    const cw=Math.max(38,Math.floor((bw - 6*g)/7));
+    board.style.setProperty("--cw",cw+"px");
+    board.style.setProperty("--g",g+"px");
+    const ch=cw*1.5;
+
+    // top row
+    const tr=$("toprow"); tr.innerHTML="";
+    // stock
+    const stCell=document.createElement("div");
+    stCell.className="slot"+(G.stock.length?"":" recycle");
+    stCell.dataset.loc="stock";
+    if(G.stock.length){ const c=mkCard(0,true,"","stock"); stCell.appendChild(c); }
+    const sc=document.createElement("div"); sc.className="stockcount";
+    sc.textContent = G.stock.length ? G.stock.length+"枚" : (G.waste.length? "↻戻す":"");
+    stCell.appendChild(sc);
+    tr.appendChild(stCell);
+    // waste
+    const wCell=document.createElement("div"); wCell.className="slot"; wCell.dataset.loc="waste";
+    const wShow=G.waste.slice(-3);
+    wShow.forEach((id,i)=>{
+      const c=mkCard(id,false,"","waste");
+      c.style.position="absolute";
+      c.style.left=(i*Math.round(cw*0.28))+"px";
+      c.style.top="0";
+      if(i<wShow.length-1) c.style.pointerEvents="none";
+      wCell.appendChild(c);
+    });
+    tr.appendChild(wCell);
+    // spacer
+    const sp=document.createElement("div"); sp.className="slotspace"; tr.appendChild(sp);
+    // foundations
+    SU.forEach(s=>{
+      const f=document.createElement("div");
+      f.className="slot fslot"+(s==="H"||s==="D"?" red":"");
+      f.dataset.loc="found:"+s; f.dataset.sym=SYM[s];
+      if(G.found[s]){ const c=mkCard(idOf(s,G.found[s]),false,"","found:"+s); f.appendChild(c); }
+      tr.appendChild(f);
+    });
+
+    // tableau
+    const tab=$("tableau"); tab.innerHTML="";
+    const downStep=Math.max(9,Math.round(ch*0.16));
+    let maxUp=1,maxDown=0;
+    G.tab.forEach(c=>{ const u=c.filter(x=>x.up).length, dn=c.length-u; if(u>maxUp)maxUp=u; if(dn>maxDown)maxDown=dn; });
+    const availH = Math.max(240, window.innerHeight - 220);
+    let upStep=Math.floor((availH - ch - maxDown*downStep)/Math.max(1,maxUp-1));
+    upStep=Math.max(12,Math.min(upStep,Math.round(ch*0.38)));
+
+    G.tab.forEach((c,ci)=>{
+      const col=document.createElement("div");
+      col.className="col"; col.dataset.col=ci; col.dataset.loc="col:"+ci;
+      let y=0;
+      if(!c.length){ col.style.height=ch+"px"; }
+      c.forEach((card,idx)=>{
+        const selHere = G.sel && G.sel.src.kind==="t" && G.sel.src.col===ci && idx>=G.sel.src.idx;
+        const el=mkCard(card.id, !card.up, selHere?"sel":"", "tcard:"+ci+":"+idx, idx);
+        el.dataset.col=ci;
+        el.style.top=y+"px";
+        col.appendChild(el);
+        y += (card.up?upStep:downStep);
+        if(idx===c.length-1) col.style.height=(y - (card.up?upStep:downStep) + ch)+"px";
+      });
+      tab.appendChild(col);
+    });
+
+    // waste 選択ハイライト
+    if(G.sel && G.sel.src.kind==="w"){ const last=wCell.lastElementChild; if(last&&last.classList.contains("pcard")) last.classList.add("sel"); }
+    if(G.sel && G.sel.src.kind==="f"){ const fe=tr.querySelector('[data-loc="found:'+G.sel.src.suit+'"] .pcard'); if(fe) fe.classList.add("sel"); }
+
+    $("undoBtn").disabled = !G.hist.length;
+    $("msg").textContent = G.sel ? "置きたい列や組札をタップ（山札で解除）" : "";
+  }
+
+  /* ---------- events ---------- */
+  function parseLoc(str){
+    if(!str) return null;
+    if(str==="stock") return {kind:"stock"};
+    if(str==="waste") return {kind:"waste"};
+    if(str.startsWith("found:")) return {kind:"found",suit:str.slice(6)};
+    if(str.startsWith("col:")) return {kind:"col",col:+str.slice(4)};
+    if(str.startsWith("tcard:")){ const p=str.split(":"); return {kind:"tcard",col:+p[1],idx:+p[2]}; }
+    return null;
+  }
+  $("board").addEventListener("click",e=>{
+    if(G.won) return;
+    const el=e.target.closest("[data-loc]"); if(!el) return;
+    const loc=parseLoc(el.dataset.loc); if(!loc) return;
+    tapCard(loc, el.dataset.loc);
+  });
+
+  $("startBtn").addEventListener("click",startGame);
+  $("toSetup").addEventListener("click",e=>{ e.preventDefault(); clearInterval(G.timer); show("setup"); });
+  $("undoBtn").addEventListener("click",undo);
+  $("hintBtn").addEventListener("click",hint);
+  $("autoBtn").addEventListener("click",autoRun);
+  $("redealBtn").addEventListener("click",()=>{ if(confirm("同じ配りで最初からやり直しますか？")) deal(G.deck); });
+  $("newBtn").addEventListener("click",()=>{ if(confirm("新しく配り直しますか？")) deal(null); });
+  $("ovAgain").addEventListener("click",()=>{ $("overlay").classList.remove("show"); deal(null); });
+  window.addEventListener("resize",()=>{ if($("play").classList.contains("active")) render(); });
+})();
+</script>
+</body>
+</html>
