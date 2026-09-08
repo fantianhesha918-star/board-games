@@ -430,7 +430,7 @@
     humans:1, n:3, level:2, rensen:true, rules:{},
     players:[], turn:0, dir:1, field:null,
     revolution:false, ebActive:false, lockSuits:null,
-    lastPlayer:-1, passCount:0, finishers:[],
+    lastPlayer:-1, passCount:0, passed:[], finishers:[],
     over:false, busy:false, viewer:0,
     prevDaifugo:-1, gameNo:0, sel:[],
     net:false, online:null
@@ -455,6 +455,22 @@
       if(activeCount()===0) break;
     }
     return i;
+  }
+  // done かつ「この場でパス済み」の席を飛ばして steps 進む。進める相手がいなければ -1（＝場が流れる）
+  function nextInPlay(from,steps){
+    steps=steps||1; let i=from, guard=0;
+    while(steps>0 && guard++<80){
+      i=(i+G.dir+G.n)%G.n;
+      if(i===from) return -1;                       // 一周した（5飛ばしで自分に戻る等）→ 流す
+      if(!G.players[i].done && !G.passed[i]) steps--;
+    }
+    return (steps>0 || G.players[i].done || G.passed[i]) ? -1 : i;
+  }
+  function advanceTurn(from,steps){
+    const nx=nextInPlay(from,steps);
+    if(nx<0) return -1;
+    if(nx===G.lastPlayer && G.lastPlayer>=0 && !G.players[G.lastPlayer].done) return -1; // 場を出した本人に戻った → 流す
+    return nx;
   }
 
   /* ---------------- deal / start ---------------- */
@@ -495,7 +511,7 @@
   async function dealRound(){
     G.gameNo++;
     G.field=null; G.revolution=false; G.ebActive=false; G.lockSuits=null;
-    G.passCount=0; G.finishers=[]; G.over=false; G.busy=true; G.sel=[];
+    G.passCount=0; G.passed=new Array(G.n).fill(false); G.finishers=[]; G.over=false; G.busy=true; G.sel=[];
     G.players.forEach(p=>{ p.hand=[]; p.done=false; p.place=0; p.foul=false; p.miyako=false; });
     const deck=shuffle(newDeck());
     deck.forEach((c,idx)=>G.players[idx%G.n].hand.push(c));
@@ -639,7 +655,15 @@
   async function beginTurn(p,first){
     if(G.over) return;
     if(activeCount()<=1){ endRound(); return; }
-    if(G.players[p].done){ beginTurn(nextActive(p)); return; }
+    if(G.players[p].done || G.passed[p]){
+      const nx=nextInPlay(p,1);
+      if(nx<0){
+        flushTrick();
+        const ld=(G.lastPlayer>=0 && !G.players[G.lastPlayer].done)?G.lastPlayer:nextActive(p);
+        render(); beginTurn(ld); return;
+      }
+      beginTurn(nx); return;
+    }
     G.turn=p;
     G.sel=[];
     if(isHuman(p)){
@@ -758,7 +782,14 @@
       G.turn = leader;
     }else{
       let extra = (G.rules.skip5 && fives>0) ? fives : 0;
-      G.turn = nextActive(p, 1+extra);
+      const nx = advanceTurn(p, 1+extra);
+      if(nx<0){                       // 全員パス済み／5飛ばしで一周 → 場が流れる
+        flushTrick();
+        G.turn = G.players[p].done ? nextActive(p) : p;
+        if(G.rules.skip5 && fives>0 && !G.players[p].done) toast("5飛ばしで一周：場が流れる");
+      }else{
+        G.turn = nx;
+      }
     }
     render();
     await wait(260);
@@ -768,16 +799,15 @@
 
   async function doPass(p){
     G.busy=true;
-    const P=G.players[p];
     setStatus(name(p)+" はパス");
-    G.passCount++;
+    G.passed[p]=true;          // この場では以降スキップ（流れるまで手番が回らない）
     render();
     await wait(420);
-    if(G.passCount >= Math.max(1,activeCount()-1)){
+    const nx = advanceTurn(p,1);
+    if(nx<0){
       // 場が流れる
       flushTrick();
-      let leader = G.lastPlayer;
-      if(G.players[leader].done) leader=nextActive(leader);
+      let leader = (G.lastPlayer>=0 && !G.players[G.lastPlayer].done) ? G.lastPlayer : nextActive(p);
       toast("場が流れました");
       G.turn=leader;
       render();
@@ -785,16 +815,17 @@
       G.busy=false;
       beginTurn(leader);
     }else{
-      G.turn=nextActive(p);
+      G.turn=nx;
       render();
       await wait(150);
       G.busy=false;
-      beginTurn(G.turn);
+      beginTurn(nx);
     }
   }
 
   function flushTrick(){
     G.field=null; G.lockSuits=null; G.ebActive=false; G.passCount=0;
+    G.passed=new Array(G.n).fill(false);
   }
 
   /* ---------------- 7渡し / 10捨て ---------------- */
@@ -1041,7 +1072,7 @@
       let inner="<span>"+name(i)+"</span>";
       if(P.title) inner+="<span class='t "+tcls+"'>"+P.title+"</span>";
       inner+="<span class='cnt'>"+(P.done? (P.place+"位") : P.hand.length+"枚")+"</span>";
-      if(!P.done && i===G.turn===false){}
+      if(!P.done && G.field && G.passed[i]) inner+="<span class='pass'>パス</span>";
       d.innerHTML=inner;
       opps.appendChild(d);
     }
@@ -1202,6 +1233,21 @@
     while(steps>0 && guard++<60){ i=(i+dir+n)%n; if(!done[i]) steps--; }
     return i;
   }
+  function nextInPlayS(ns,from,steps){
+    steps=steps||1; let i=from, guard=0;
+    while(steps>0 && guard++<80){
+      i=(i+ns.dir+ns.n)%ns.n;
+      if(i===from) return -1;
+      if(!ns.done[i] && !ns.passed[i]) steps--;
+    }
+    return (steps>0 || ns.done[i] || ns.passed[i]) ? -1 : i;
+  }
+  function advanceTurnS(ns,from,steps){
+    const nx=nextInPlayS(ns,from,steps);
+    if(nx<0) return -1;
+    if(nx===ns.lastPlayer && ns.lastPlayer>=0 && !ns.done[ns.lastPlayer]) return -1;
+    return nx;
+  }
   const activeCountS=ns=>ns.done.filter(d=>!d).length;
   const activeIdxS=ns=>ns.done.map((d,i)=>i).filter(i=>!ns.done[i]);
 
@@ -1238,6 +1284,7 @@
       cfg:st.cfg, n:st.n, gameNo:st.gameNo,
       hands:st.hands.map(handArr),
       done:st.done.slice(), place:st.place.slice(),
+      passed: st.passed ? st.passed.slice() : new Array(st.n).fill(false),
       foul:st.foul.slice(), miyako:st.miyako.slice(), title:st.title.slice(),
       finishers:st.finishers.slice(),
       turn:st.turn, dir:st.dir,
@@ -1258,7 +1305,7 @@
     return ns;
   }
 
-  function flushTrickS(ns){ ns.field=null; ns.lockSuits=null; ns.ebActive=false; ns.passCount=0; }
+  function flushTrickS(ns){ ns.field=null; ns.lockSuits=null; ns.ebActive=false; ns.passCount=0; ns.passed=new Array(ns.n).fill(false); }
 
   function finishSeat(ns,seat){
     ns.done[seat]=true;
@@ -1337,7 +1384,13 @@
         if(ns._pl && ns._pl.flushed) ns.turn=ns._pl.leader;
         else {
           const extra=(ns.cfg.rules.skip5 && ns._pl.fives>0)? ns._pl.fives : 0;
-          ns.turn=nextActiveSeat(ns.done,ns.dir,ns.n,seat,1+extra);
+          const nx=advanceTurnS(ns,seat,1+extra);
+          if(nx<0){
+            flushTrickS(ns);
+            ns.turn = ns.done[seat] ? nextActiveSeat(ns.done,ns.dir,ns.n,seat,1) : seat;
+          }else{
+            ns.turn=nx;
+          }
         }
         ns.phase="play";
       }
@@ -1371,15 +1424,16 @@
   }
 
   function doPassPure(ns,seat){
-    ns.passCount++;
-    if(ns.passCount >= Math.max(1,activeCountS(ns)-1)){
+    ns.passed[seat]=true;
+    const nx=advanceTurnS(ns,seat,1);
+    if(nx<0){
       flushTrickS(ns);
       let leader=ns.lastPlayer;
-      if(ns.done[leader]) leader=nextActiveSeat(ns.done,ns.dir,ns.n,leader,1);
+      if(leader<0 || ns.done[leader]) leader=nextActiveSeat(ns.done,ns.dir,ns.n, leader<0?seat:leader, 1);
       ns.turn=leader;
       ns.last={ev:"pass",by:seat,flush:true,leader};
     }else{
-      ns.turn=nextActiveSeat(ns.done,ns.dir,ns.n,seat,1);
+      ns.turn=nx;
       ns.last={ev:"pass",by:seat,flush:false};
     }
     return ns;
@@ -1471,7 +1525,7 @@
     if(!ns.cfg.rensen){ ns.gameNo=1; for(let i=0;i<ns.n;i++) ns.title[i]=""; ns.prevDaifugo=-1; }
     else ns.gameNo++;
     ns.field=null; ns.revolution=false; ns.ebActive=false; ns.lockSuits=null;
-    ns.passCount=0; ns.finishers=[]; ns.order=null;
+    ns.passCount=0; ns.passed=new Array(ns.n).fill(false); ns.finishers=[]; ns.order=null;
     ns.done=new Array(ns.n).fill(false);
     ns.place=new Array(ns.n).fill(0);
     ns.foul=new Array(ns.n).fill(false);
@@ -1538,6 +1592,7 @@
     const st={
       cfg, n, gameNo:1,
       hands:[], done:new Array(n).fill(false), place:new Array(n).fill(0),
+      passed:new Array(n).fill(false),
       foul:new Array(n).fill(false), miyako:new Array(n).fill(false), title:new Array(n).fill(""),
       finishers:[], turn:0, dir:1, field:null,
       revolution:false, ebActive:false, lockSuits:null,
@@ -1562,6 +1617,7 @@
     G.revolution=s.revolution; G.ebActive=s.ebActive;
     G.lockSuits=s.lockSuits? s.lockSuits.slice():null;
     G.lastPlayer=s.lastPlayer; G.passCount=s.passCount;
+    G.passed=s.passed? s.passed.slice() : new Array(s.n).fill(false);
     G.finishers=s.finishers.slice();
     G.prevDaifugo=s.prevDaifugo; G.gameNo=s.gameNo;
     G.over=(s.phase==="roundover");
