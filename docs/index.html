@@ -100,6 +100,7 @@
   .game-card .card-ico{height:44px;display:flex;align-items:flex-end;}
   .game-card .card-ico img{height:44px;width:auto;border-radius:4px;display:block;
     box-shadow:0 1px 5px rgba(0,0,0,.28);transform:rotate(-6deg);transform-origin:bottom left;}
+  .game-card .ico-svg{height:44px;display:flex;align-items:flex-end;color:var(--accent);}
   .game-card .name{font-weight:800;font-size:17px;}
   .game-card .desc{font-size:12px;color:var(--text-dim);line-height:1.5;overflow-wrap:anywhere;}
   .game-card.soon{opacity:.55;}
@@ -289,21 +290,17 @@
         <span class="name">トランプ</span>
         <span class="desc">神経衰弱ほか。CPU対戦 / 2人対面</span>
       </button>
-      <button class="game-card soon" data-game="shogi">
-        <span class="badge">準備中</span>
-        <span class="emoji">🔺</span>
-        <span class="name">将棋</span>
-        <span class="desc">本将棋</span>
-      </button>
-      <button class="game-card soon" data-game="dobutsu">
-        <span class="badge">準備中</span>
-        <span class="emoji">🐘🦁</span>
-        <span class="name">どうぶつしょうぎ</span>
-        <span class="desc">3×4のミニ将棋</span>
+      <button class="game-card" data-game="sudoku">
+        <span class="ico-svg" aria-hidden="true"><svg viewBox="0 0 44 44" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="38" height="38" rx="4"/>
+          <path d="M16.3 3v38M27.7 3v38M3 16.3h38M3 27.7h38"/>
+        </svg></span>
+        <span class="name">ナンプレ</span>
+        <span class="desc">9×9の数字パズル。1人用。全部埋めるとイラストが完成</span>
       </button>
     </div>
     <a class="rules-link" href="rules.html"><span class="ic">📖</span>遊び方・ルール説明</a>
-    <p class="footer-note">収録：オセロ／トランプ（神経衰弱・ババ抜き・七並べ・大富豪・ソリティア）。将棋・どうぶつしょうぎは順次追加予定です。</p>
+    <p class="footer-note">収録：オセロ／トランプ（神経衰弱・ババ抜き・七並べ・大富豪・ソリティア）／ナンプレ</p>
   </section>
 
   <!-- ============ OTHELLO SETUP ============ -->
@@ -450,6 +447,7 @@
     const g=card.dataset.game;
     if(g==="othello"){ show("othelloSetup"); return; }
     if(g==="trump"){ location.href="trump.html"; return; }
+    if(g==="sudoku"){ location.href="sudoku.html"; return; }
     toast("準備中です。もう少しお待ちください");
   });
 

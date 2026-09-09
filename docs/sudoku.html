@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=2">
+<title>ナンプレ</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --gline:#d5d2c6;--gline-bold:#8f8a7c;--bad:#d64545;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --gline:#3b3d35;--gline-bold:#5f6154;--bad:#ef6b6b;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .topbar .meta{font-size:12.5px;font-weight:800;color:var(--text-dim);text-align:right;line-height:1.35;white-space:nowrap;}
+  .topbar .meta .warn{color:var(--bad);}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;text-decoration:none;}
+  .back-btn{width:38px;height:38px;font-size:20px;display:flex;align-items:center;justify-content:center;}
+  .icon-btn{height:38px;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:5px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  /* setup */
+  .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px;}
+  .field{display:flex;flex-direction:column;gap:10px;}
+  .field > .label{font-weight:800;font-size:14px;}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg button{
+    flex:1 1 68px;min-width:0;border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 8px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s ease;
+  }
+  .seg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);}
+  .seg button:active{transform:scale(.96);}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:0;padding:12px 14px;font-size:12.5px;line-height:1.75;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
+  .start-btn{margin:4px 0 8px;border:none;background:var(--accent);color:#fff;padding:16px;border-radius:16px;font-size:16px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .start-btn:active{background:var(--accent-press);transform:translateY(1px);}
+
+  /* play */
+  .play{flex:1;display:flex;flex-direction:column;gap:12px;padding:2px 14px 16px;}
+  .boardwrap{position:relative;width:100%;max-width:440px;margin:0 auto;}
+  #board{
+    position:relative;display:grid;grid-template-columns:repeat(9,1fr);gap:0;
+    width:100%;aspect-ratio:1/1;border:2px solid var(--gline-bold);border-radius:9px;overflow:hidden;
+    background:var(--surface);user-select:none;
+  }
+  .cell{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    background:var(--surface);font-size:min(6.6vw,25px);font-weight:700;color:var(--accent);cursor:pointer;
+    transition:background .12s ease;
+  }
+  .cell .pic{
+    position:absolute;inset:0;background-image:var(--pic,none);background-repeat:no-repeat;
+    background-size:900% 900%;background-position:calc(var(--c) / 8 * 100%) calc(var(--r) / 8 * 100%);
+    opacity:0;transition:opacity .5s ease;pointer-events:none;
+  }
+  .cell .num{position:relative;z-index:2;text-shadow:0 0 4px var(--surface),0 0 4px var(--surface);}
+  .cell.given .num{color:var(--text);}
+  .cell.hint .num{color:#c98a1e;}
+  .cell.bad .num{color:var(--bad);}
+  .cell.peer{background:color-mix(in srgb,var(--accent) 7%,var(--surface));}
+  .cell.same{background:color-mix(in srgb,var(--accent) 15%,var(--surface));}
+  .cell.correct{background:color-mix(in srgb,var(--accent) 13%,var(--surface));}
+  .cell.correct .pic{opacity:.34;}
+  .cell.peer.correct{background:color-mix(in srgb,var(--accent) 17%,var(--surface));}
+  .cell.sel{background:color-mix(in srgb,var(--accent) 30%,var(--surface));box-shadow:inset 0 0 0 2px var(--accent);}
+  .notes{
+    position:absolute;inset:6%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    font-size:min(2.7vw,10.5px);font-weight:700;color:var(--text-dim);z-index:2;pointer-events:none;
+  }
+  .notes span{display:flex;align-items:center;justify-content:center;}
+  .gridlines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:opacity .6s ease;}
+  #board.solved{border-color:transparent;}
+  #board.solved + .gridlines{opacity:0;}
+  #board.solved .cell{background:transparent;box-shadow:none;}
+  #board.solved .cell .pic{opacity:1;}
+  #board.solved .cell .num{opacity:.18;transition:opacity .7s ease;text-shadow:none;}
+  #board.done-nopic .cell.correct{background:color-mix(in srgb,var(--accent) 20%,var(--surface));}
+
+  .numpad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:440px;margin:0 auto;width:100%;}
+  .numpad button{
+    position:relative;border:none;background:var(--surface);color:var(--text);border-radius:13px;
+    padding:12px 0 13px;font-size:19px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .numpad button:active{transform:scale(.95);}
+  .numpad button.dim{opacity:.32;pointer-events:none;}
+  .numpad button .cnt{
+    position:absolute;right:6px;bottom:4px;font-size:9.5px;font-weight:800;color:var(--text-dim);
+  }
+  .numpad button.erase{font-size:13px;color:var(--text-dim);}
+  .tools{display:flex;gap:6px;max-width:440px;margin:0 auto;width:100%;}
+  .tools button{
+    flex:1;border:none;background:var(--surface);color:var(--text);border-radius:13px;padding:11px 4px;
+    font-size:12.5px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;min-width:0;
+  }
+  .tools button:active{transform:scale(.96);}
+  .tools button.tgl.on{background:var(--accent);color:#fff;}
+  .tools button:disabled{opacity:.4;pointer-events:none;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:24px 22px;width:100%;max-width:330px;text-align:center;box-shadow:var(--shadow);}
+  .modal .result{font-size:24px;font-weight:800;margin:0 0 8px;}
+  .modal .detail{color:var(--text-dim);font-size:14px;margin:0 0 20px;line-height:1.7;}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:13px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.84);color:#fff;font-size:13px;font-weight:700;padding:10px 17px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* 横持ち：盤を左に大きく、テンキーと操作を右の縦列へ */
+  @media (orientation:landscape) and (max-height:600px){
+    .app{max-width:none;}
+    #play .topbar{min-height:0;padding:4px 14px;}
+    #play .topbar h1{font-size:15px;}
+    #play .back-btn{width:32px;height:32px;}
+    #play.screen{min-height:0;height:100vh;max-height:100vh;overflow:hidden;}
+    .play{padding:4px 12px 6px;gap:8px;overflow:hidden;min-height:0;
+      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      display:grid;grid-template-columns:1fr 168px;grid-template-rows:1fr;align-items:center;}
+    .boardwrap{grid-column:1;grid-row:1;max-width:min(100%,calc(100vh - 60px));margin:0 auto;}
+    .numpad{grid-column:2;grid-row:1;align-self:center;grid-template-columns:repeat(3,1fr);gap:5px;max-width:none;}
+    .numpad button{padding:9px 0 10px;font-size:16px;}
+    .tools{grid-column:2;grid-row:1;align-self:end;flex-wrap:wrap;gap:4px;max-width:none;}
+    .tools button{flex:1 1 46%;padding:8px 3px;font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="index.html">‹</a>
+      <h1>ナンプレ</h1>
+      <span class="spacer"></span>
+      <a class="icon-btn" href="rules.html#sudoku">ルール</a>
+    </div>
+    <div class="setup">
+      <div class="field">
+        <span class="label">むずかしさ</span>
+        <div class="seg" id="segLevel">
+          <button data-val="easy" class="on">やさしい</button>
+          <button data-val="normal">ふつう</button>
+          <button data-val="hard">むずかしい</button>
+          <button data-val="oni">おに</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">ミス自動チェック</span>
+        <div class="seg" id="segCheck">
+          <button data-val="on" class="on">オン</button>
+          <button data-val="off">オフ</button>
+        </div>
+        <p class="howto" style="margin-top:2px">入れた数字が答えと違う・同じ行／列／ブロックで重なっているマスを<b>赤字</b>で知らせます。オフにすると赤字なしで解けます。</p>
+      </div>
+      <div class="howto">
+        <h3>遊び方</h3>
+        <p>タテ9・ヨコ9・太線の3×3ブロックのどれにも <b>1〜9 を1回ずつ</b> 入れます。</p>
+        <p>マスを選んでテンキーで入力。<b>メモ</b>を押すと、そのマスに小さく候補数字を書き込めます。<b>もどす</b>で1手ずつ取り消し、<b>ヒント</b>で選んだマスの正解を1つ開けます。</p>
+        <p>正しく入ったマスは<b>背景がつき</b>、全部そろうと<b>うっすらイラストが浮かび上がって完成</b>します。</p>
+      </div>
+      <button class="start-btn" id="startBtn">はじめる</button>
+    </div>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <button class="back-btn" id="toSetup">‹</button>
+      <h1>ナンプレ</h1>
+      <span class="spacer"></span>
+      <span class="meta"><span id="time">0:00</span><br><span id="mist">ミス 0</span></span>
+    </div>
+    <div class="play">
+      <div class="boardwrap">
+        <div id="board"></div>
+        <svg class="gridlines" id="gridlines" viewBox="0 0 90 90" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+      <div class="numpad" id="numpad"></div>
+      <div class="tools">
+        <button id="memoBtn" class="tgl">メモ</button>
+        <button id="undoBtn">もどす</button>
+        <button id="hintBtn">ヒント</button>
+        <button id="newBtn">新規</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="result" id="ovTitle">クリア！</p>
+    <p class="detail" id="ovDetail"></p>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovAgain">もう一度</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const $=id=>document.getElementById(id);
+  const boardEl=$("board");
+  let toastTimer=0;
+  function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1500); }
+  function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+  function seg(id){ const w=$(id);
+    w.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+      w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); });
+    return ()=>w.querySelector("button.on").dataset.val; }
+  const getLevel=seg("segLevel"), getCheck=seg("segCheck");
+
+  const GIVENS={easy:42, normal:34, hard:29, oni:25};
+  const PICS=["assets/sudoku/pic1.webp","assets/sudoku/pic2.webp","assets/sudoku/pic3.webp","assets/sudoku/pic4.webp"];
+
+  const boxOf=i=>((i/9|0)/3|0)*3 + ((i%9)/3|0);
+
+  /* ---------- 生成 ---------- */
+  function genFull(){
+    const g=new Int8Array(81);
+    const rows=new Uint16Array(9), cols=new Uint16Array(9), box=new Uint16Array(9);
+    (function bt(i){
+      if(i===81) return true;
+      const r=i/9|0, c=i%9, b=boxOf(i), used=rows[r]|cols[c]|box[b];
+      const opts=[];
+      for(let d=1; d<=9; d++) if(!(used&(1<<d))) opts.push(d);
+      for(let k=opts.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; const t=opts[k]; opts[k]=opts[j]; opts[j]=t; }
+      for(const d of opts){
+        g[i]=d; rows[r]|=1<<d; cols[c]|=1<<d; box[b]|=1<<d;
+        if(bt(i+1)) return true;
+        g[i]=0; rows[r]&=~(1<<d); cols[c]&=~(1<<d); box[b]&=~(1<<d);
+      }
+      return false;
+    })(0);
+    return g;
+  }
+  function countSolutions(puz, limit){
+    const g=Int8Array.from(puz);
+    const rows=new Uint16Array(9), cols=new Uint16Array(9), box=new Uint16Array(9);
+    for(let i=0;i<81;i++){ const d=g[i]; if(d){ rows[i/9|0]|=1<<d; cols[i%9]|=1<<d; box[boxOf(i)]|=1<<d; } }
+    let count=0;
+    (function bt(){
+      if(count>=limit) return;
+      let best=-1, bestUsed=0, bestCnt=99;
+      for(let i=0;i<81;i++){
+        if(g[i]) continue;
+        const used=rows[i/9|0]|cols[i%9]|box[boxOf(i)];
+        let c=0; for(let d=1;d<=9;d++) if(!(used&(1<<d))) c++;
+        if(c===0) return;
+        if(c<bestCnt){ bestCnt=c; best=i; bestUsed=used; if(c===1) break; }
+      }
+      if(best<0){ count++; return; }
+      const i=best, r=i/9|0, c=i%9, b=boxOf(i);
+      for(let d=1;d<=9;d++){
+        if(bestUsed&(1<<d)) continue;
+        g[i]=d; rows[r]|=1<<d; cols[c]|=1<<d; box[b]|=1<<d;
+        bt();
+        g[i]=0; rows[r]&=~(1<<d); cols[c]&=~(1<<d); box[b]&=~(1<<d);
+        if(count>=limit) return;
+      }
+    })();
+    return count;
+  }
+  function shuffled(n){
+    const a=[...Array(n).keys()];
+    for(let k=a.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; const t=a[k]; a[k]=a[j]; a[j]=t; }
+    return a;
+  }
+  function makePuzzle(target){
+    const sol=genFull();
+    const puz=Int8Array.from(sol);
+    let filled=81;
+    // 1) 点対称でペア抜き（見た目がきれい）
+    for(const i of shuffled(81)){
+      if(filled<=target) break;
+      const j=80-i;
+      if(!puz[i] || (j!==i && !puz[j])) continue;
+      const bi=puz[i], bj=puz[j];
+      puz[i]=0; if(j!==i) puz[j]=0;
+      if(countSolutions(puz,2)!==1){ puz[i]=bi; if(j!==i) puz[j]=bj; }
+      else filled -= 1+(j!==i?1:0);
+    }
+    // 2) 目標に届かなければ1マスずつさらに抜く
+    for(const i of shuffled(81)){
+      if(filled<=target) break;
+      if(!puz[i]) continue;
+      const bi=puz[i]; puz[i]=0;
+      if(countSolutions(puz,2)!==1) puz[i]=bi;
+      else filled--;
+    }
+    return {puzzle:puz, solution:sol};
+  }
+
+  /* ---------- ゲーム状態 ---------- */
+  const G={
+    puzzle:null, solution:null, cur:null, notes:null, given:null,
+    sel:-1, memo:false, mistakes:0, hints:0, hist:[],
+    check:true, t0:0, timer:0, done:false, picUrl:null
+  };
+
+  function buildGridlines(){
+    const sv=$("gridlines"); let s="";
+    for(let k=1;k<=8;k++){
+      const p=k*10, w=(k%3===0)?1.5:0.6, col=(k%3===0)?"var(--gline-bold)":"var(--gline)";
+      s+=`<line x1="${p}" y1="0" x2="${p}" y2="90" stroke="${col}" stroke-width="${w}"/>`;
+      s+=`<line x1="0" y1="${p}" x2="90" y2="${p}" stroke="${col}" stroke-width="${w}"/>`;
+    }
+    sv.innerHTML=s;
+  }
+
+  function pickPic(cb){
+    const order=PICS.slice();
+    for(let k=order.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; const t=order[k]; order[k]=order[j]; order[j]=t; }
+    let idx=0;
+    (function tryNext(){
+      if(idx>=order.length){ cb(null); return; }
+      const url=order[idx++], im=new Image();
+      im.onload=()=>cb(url); im.onerror=tryNext; im.src=url;
+    })();
+  }
+
+  function startGame(){
+    G.check = getCheck()==="on";
+    const {puzzle,solution}=makePuzzle(GIVENS[getLevel()]||34);
+    G.puzzle=puzzle; G.solution=solution;
+    G.cur=Int8Array.from(puzzle);
+    G.given=Array.from(puzzle,v=>v!==0);
+    G.notes=Array.from({length:81},()=>[]);
+    G.sel=-1; G.memo=false; G.mistakes=0; G.hints=0; G.hist=[]; G.done=false; G.picUrl=null;
+    $("memoBtn").classList.remove("on");
+    $("overlay").classList.remove("show");
+    boardEl.classList.remove("solved","done-nopic");
+    boardEl.style.removeProperty("--pic");
+    buildBoard();
+    render();
+    show("play");
+    startTimer();
+    pickPic(url=>{ if(url && !G.done){ G.picUrl=url; boardEl.style.setProperty("--pic",`url(${url})`); } });
+  }
+
+  function buildBoard(){
+    boardEl.innerHTML="";
+    for(let i=0;i<81;i++){
+      const d=document.createElement("div");
+      d.className="cell"; d.dataset.i=i;
+      d.style.setProperty("--c", i%9);
+      d.style.setProperty("--r", i/9|0);
+      d.innerHTML='<span class="pic"></span><span class="num"></span><span class="notes">'+
+        '<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>';
+      boardEl.appendChild(d);
+    }
+  }
+
+  function conflicts(i){
+    const v=G.cur[i]; if(!v) return false;
+    const r=i/9|0, c=i%9, b=boxOf(i);
+    for(let k=0;k<81;k++){
+      if(k===i || !G.cur[k]) continue;
+      if(G.cur[k]!==v) continue;
+      if((k/9|0)===r || (k%9)===c || boxOf(k)===b) return true;
+    }
+    return false;
+  }
+
+  function render(){
+    const sel=G.sel, sv=sel>=0?G.cur[sel]:0;
+    const sr=sel>=0?sel/9|0:-1, sc=sel>=0?sel%9:-1, sb=sel>=0?boxOf(sel):-1;
+    for(let i=0;i<81;i++){
+      const el=boardEl.children[i], v=G.cur[i];
+      let cls="cell";
+      if(G.given[i]) cls+=" given";
+      if(!G.given[i] && v && v===G.solution[i]) cls+=" correct";
+      if(v && v===G.solution[i] && !G.given[i] && G.hintAt && G.hintAt.has(i)) cls+=" hint";
+      if(sel>=0 && i!==sel && ((i/9|0)===sr || (i%9)===sc || boxOf(i)===sb)) cls+=" peer";
+      if(sv && v===sv) cls+=" same";
+      if(i===sel) cls+=" sel";
+      if(G.check && v && !G.given[i] && (v!==G.solution[i] || conflicts(i))) cls+=" bad";
+      el.className=cls;
+      const num=el.querySelector(".num"), notes=el.querySelector(".notes");
+      if(v){ num.textContent=v; notes.style.display="none"; }
+      else{
+        num.textContent="";
+        const ns=G.notes[i];
+        if(ns.length){
+          notes.style.display="grid";
+          for(let n=1;n<=9;n++) notes.children[n-1].textContent = ns.indexOf(n)>=0 ? n : "";
+        }else notes.style.display="none";
+      }
+    }
+    // numpad counts
+    const cnt=new Array(10).fill(0);
+    for(let i=0;i<81;i++) if(G.cur[i]) cnt[G.cur[i]]++;
+    for(const b of $("numpad").children){
+      const n=+b.dataset.n; if(!n) continue;
+      const left=9-cnt[n];
+      b.querySelector(".cnt").textContent = left>0 ? left : "";
+      b.classList.toggle("dim", left<=0);
+    }
+    $("undoBtn").disabled = G.hist.length===0;
+    $("mist").textContent = "ミス "+G.mistakes;
+    $("mist").classList.toggle("warn", G.mistakes>0);
+  }
+
+  /* ---------- 操作 ---------- */
+  function selectCell(i){ G.sel=i; render(); }
+
+  function pushHist(i){
+    G.hist.push({i, val:G.cur[i], notes:G.notes[i].slice(), mistakes:G.mistakes, hints:G.hints});
+    if(G.hist.length>300) G.hist.shift();
+  }
+
+  function place(n){
+    const i=G.sel;
+    if(i<0 || G.given[i] || G.done) return;
+    if(G.memo){
+      if(G.cur[i]) return;
+      pushHist(i);
+      const ns=G.notes[i], k=ns.indexOf(n);
+      if(k>=0) ns.splice(k,1); else ns.push(n);
+      render(); return;
+    }
+    if(G.cur[i]===n){ // 同じ数字をもう一度 → 消す
+      pushHist(i); G.cur[i]=0; render(); return;
+    }
+    pushHist(i);
+    G.cur[i]=n; G.notes[i]=[];
+    // 同じ行・列・ブロックのメモから n を消す
+    const r=i/9|0, c=i%9, b=boxOf(i);
+    for(let k=0;k<81;k++){
+      if(!G.notes[k].length) continue;
+      if((k/9|0)===r || (k%9)===c || boxOf(k)===b){
+        const p=G.notes[k].indexOf(n); if(p>=0) G.notes[k].splice(p,1);
+      }
+    }
+    if(G.check && n!==G.solution[i]) G.mistakes++;
+    render();
+    checkWin();
+  }
+  function erase(){
+    const i=G.sel;
+    if(i<0 || G.given[i] || G.done) return;
+    if(!G.cur[i] && !G.notes[i].length) return;
+    pushHist(i);
+    G.cur[i]=0; G.notes[i]=[];
+    render();
+  }
+  function undo(){
+    const h=G.hist.pop();
+    if(!h) return;
+    G.cur[h.i]=h.val; G.notes[h.i]=h.notes; G.mistakes=h.mistakes;
+    if(h.hints!=null) G.hints=h.hints;
+    if(G.hintAt) G.hintAt.delete(h.i);
+    G.sel=h.i; render();
+  }
+  function hint(){
+    if(G.done) return;
+    let i=G.sel;
+    if(i<0 || G.given[i] || G.cur[i]===G.solution[i]){
+      const empt=[];
+      for(let k=0;k<81;k++) if(!G.given[k] && G.cur[k]!==G.solution[k]) empt.push(k);
+      if(!empt.length) return;
+      i=empt[Math.random()*empt.length|0];
+    }
+    pushHist(i);
+    G.cur[i]=G.solution[i]; G.notes[i]=[];
+    G.hints++;
+    (G.hintAt=G.hintAt||new Set()).add(i);
+    G.sel=i;
+    render();
+    checkWin();
+  }
+
+  function checkWin(){
+    for(let i=0;i<81;i++) if(G.cur[i]!==G.solution[i]) return;
+    G.done=true;
+    stopTimer();
+    G.sel=-1; render();
+    boardEl.classList.add(G.picUrl ? "solved" : "done-nopic");
+    toast("クリア！");
+    setTimeout(()=>{
+      $("ovTitle").textContent = G.picUrl ? "イラスト完成！" : "クリア！";
+      $("ovDetail").innerHTML = "タイム "+fmt(elapsed())+"<br>ミス "+G.mistakes+" ／ ヒント "+G.hints+
+        (G.picUrl?"":"<br><span style='font-size:12px'>※完成イラストは未設定です</span>");
+      $("overlay").classList.add("show");
+    }, 780);
+  }
+
+  /* ---------- タイマー ---------- */
+  function elapsed(){ return G.t0 ? Date.now()-G.t0 : 0; }
+  function fmt(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+  function tick(){ $("time").textContent=fmt(elapsed()); }
+  function startTimer(){ stopTimer(); G.t0=Date.now(); tick(); G.timer=setInterval(tick,1000); }
+  function stopTimer(){ if(G.timer){ clearInterval(G.timer); G.timer=0; } }
+
+  /* ---------- イベント ---------- */
+  boardEl.addEventListener("click",e=>{
+    const c=e.target.closest(".cell"); if(!c || G.done) return;
+    selectCell(+c.dataset.i);
+  });
+
+  (function buildNumpad(){
+    const np=$("numpad");
+    for(let n=1;n<=9;n++){
+      const b=document.createElement("button");
+      b.dataset.n=n; b.innerHTML='<b>'+n+'</b><i class="cnt"></i>';
+      np.appendChild(b);
+    }
+    const er=document.createElement("button");
+    er.className="erase"; er.id="eraseKey"; er.textContent="消す";
+    np.appendChild(er);
+    np.addEventListener("click",e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      if(b.id==="eraseKey"){ erase(); return; }
+      place(+b.dataset.n);
+    });
+  })();
+
+  $("memoBtn").addEventListener("click",()=>{ G.memo=!G.memo; $("memoBtn").classList.toggle("on",G.memo); });
+  $("undoBtn").addEventListener("click",undo);
+  $("hintBtn").addEventListener("click",hint);
+  $("newBtn").addEventListener("click",()=>{ if(G.done || confirm("新しい問題にしますか？")) startGame(); });
+  $("toSetup").addEventListener("click",()=>{ stopTimer(); show("setup"); });
+  $("startBtn").addEventListener("click",startGame);
+  $("ovAgain").addEventListener("click",startGame);
+
+  document.addEventListener("keydown",e=>{
+    if(!$("play").classList.contains("active") || G.done) return;
+    if(e.key>="1" && e.key<="9"){ place(+e.key); e.preventDefault(); return; }
+    if(e.key==="0" || e.key==="Backspace" || e.key==="Delete"){ erase(); e.preventDefault(); return; }
+    if(e.key.toLowerCase()==="m"){ $("memoBtn").click(); return; }
+    if(G.sel<0) return;
+    let d=0;
+    if(e.key==="ArrowLeft") d=-1; else if(e.key==="ArrowRight") d=1;
+    else if(e.key==="ArrowUp") d=-9; else if(e.key==="ArrowDown") d=9;
+    if(d){ const n=G.sel+d; if(n>=0 && n<81 && !(Math.abs(d)===1 && (n/9|0)!==(G.sel/9|0))) selectCell(n); e.preventDefault(); }
+  });
+
+  window.addEventListener("resize",()=>{});
+
+  buildGridlines();
+})();
+</script>
+</body>
+</html>
