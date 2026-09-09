@@ -178,6 +178,40 @@
   .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
   .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
   .mini-msg.err{color:var(--accent-press);}
+
+  /* 横持ち：場を大きく、手札と操作は右の縦列へ。画面・枠からはみ出さないよう overflow を全面 hidden */
+  .side{display:contents;}
+  @media (orientation:landscape) and (max-height:600px){
+    .app{max-width:none;}
+    #play .topbar{min-height:0;padding:4px 14px;}
+    #play .topbar h1{font-size:15px;}
+    #play .icon-btn,#play .back-btn{height:32px;}
+    #play.screen{min-height:0;height:100vh;max-height:100vh;overflow:hidden;}
+    .play{padding:3px 10px 5px;gap:5px;overflow:hidden;min-height:0;
+      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      display:grid;grid-template-columns:1fr 118px;grid-template-rows:auto minmax(0,1fr);}
+    .opps{grid-column:1/-1;gap:5px;}
+    .opp{min-width:0;font-size:10px;padding:4px 7px;gap:2px;}
+    .opp .t{font-size:9px;}
+    .stage{grid-column:1;grid-row:2;min-height:0;height:100%;overflow:hidden;padding:8px 10px;gap:6px;justify-content:center;align-self:stretch;}
+    .fieldcards{min-height:0;gap:6px;flex-wrap:wrap;overflow:hidden;}
+    .fc{width:clamp(58px,17vh,104px);}
+    .status{font-size:12px;min-height:0;}
+    .flags{position:static;max-width:none;justify-content:center;margin-bottom:2px;}
+    .side{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;}
+    .handwrap{margin:0;flex:1;min-height:0;display:flex;flex-direction:column;}
+    .handlabel{margin-bottom:2px;font-size:9.5px;line-height:1.3;}
+    .hand{flex:1;min-height:0;flex-direction:column;align-items:center;
+      overflow-x:hidden;overflow-y:auto;padding:3px 2px;}
+    .hand .card{width:52px;margin-left:0;margin-top:-36px;}
+    .hand .card:first-child{margin-top:0;}
+    .hand .card.no{transform:translateX(-4px);}
+    .hand .card.sel{transform:translateX(12px);margin-top:-36px;z-index:6;}
+    .hand .card.sel:first-child{margin-top:0;}
+    .actions{flex:none;flex-direction:column;gap:4px;padding:0;}
+    .actions button,.actions a{flex:none;padding:7px 5px;font-size:12px;border-radius:10px;}
+    .actions .play-btn{flex:none;font-size:12px;}
+  }
 </style>
 </head>
 <body>
@@ -292,14 +326,16 @@
         <div class="fieldcards" id="fieldcards"></div>
         <div class="status" id="statusText">配札中…</div>
       </div>
-      <div class="handwrap">
-        <div class="handlabel" id="handLabel">あなたの手札</div>
-        <div class="hand" id="hand"></div>
-      </div>
-      <div class="actions">
-        <button class="pass-btn" id="passBtn">パス</button>
-        <button class="play-btn" id="playBtn">出す</button>
-        <a href="index.html">ホーム</a>
+      <div class="side">
+        <div class="handwrap">
+          <div class="handlabel" id="handLabel">あなたの手札</div>
+          <div class="hand" id="hand"></div>
+        </div>
+        <div class="actions">
+          <button class="pass-btn" id="passBtn">パス</button>
+          <button class="play-btn" id="playBtn">出す</button>
+          <a href="index.html">ホーム</a>
+        </div>
       </div>
     </div>
   </section>
@@ -445,10 +481,15 @@
       if(i<G.online.cap) return (G.online.seatNames[i]||("プレイヤー"+(i+1)))+(i===G.online.myIdx?"(あなた)":"");
       return "CPU"+(i-G.online.cap+1);
     }
+    if(G.players[i] && G.players[i].dispName) return G.players[i].dispName;
     if(i<G.humans) return G.humans===1?"あなた":"プレイヤー"+(i+1);
     return "CPU"+(i-G.humans+1);
   }
-  function isHuman(i){ return (G.net && G.online) ? i<G.online.cap : i<G.humans; }
+  function isHuman(i){
+    if(G.net && G.online) return i<G.online.cap;
+    if(G.players[i]) return !!G.players[i].human;
+    return i<G.humans;
+  }
   function activeIdx(){ return G.players.map((p,i)=>i).filter(i=>!G.players[i].done); }
   function activeCount(){ return activeIdx().length; }
   function nextActive(from,steps){
@@ -504,8 +545,20 @@
     G.rensen = getRensen()==="on";
     G.rules=readRules();
     G.gameNo=0; G.prevDaifugo=-1;
+    // 席順をランダムに（人間とCPUを毎回ばらけさせる。5飛ばし等で人間が必ず割を食うのを防ぐ）
+    const roles=[];
+    for(let k=0;k<hu;k++) roles.push(true);
+    for(let k=0;k<cp;k++) roles.push(false);
+    shuffle(roles);
+    let hn=0, cn=0;
     G.players=[];
-    for(let i=0;i<G.n;i++) G.players.push({hand:[],done:false,place:0,title:"",foul:false,miyako:false});
+    for(let i=0;i<G.n;i++){
+      const human=roles[i];
+      const dispName = human ? (hu===1?"あなた":"プレイヤー"+(++hn)) : "CPU"+(++cn);
+      G.players.push({hand:[],done:false,place:0,title:"",foul:false,miyako:false,human,dispName});
+    }
+    G.viewer = G.players.findIndex(p=>p.human);
+    if(G.viewer<0) G.viewer=0;
     document.getElementById("playTitle").textContent="大富豪";
     document.getElementById("overlay").classList.remove("show");
     show("play");
@@ -617,6 +670,21 @@
     }
     return null;
   }
+  // 階段にジョーカーを混ぜたとき、穴を埋める位置にジョーカーを差し込んだ順に並べ替える
+  function orderPlayCards(cards,meta){
+    if(!meta || meta.type!=="seq") return cards.slice();
+    const jokers=cards.filter(c=>c.joker);
+    if(!jokers.length) return cards.slice();
+    const byRank={}; cards.filter(c=>!c.joker).forEach(c=>{ byRank[c.rank]=c; });
+    const out=[]; let ji=0;
+    const lo=meta.rv, hi=meta.seqHi!=null?meta.seqHi:(meta.rv+meta.count-1);
+    for(let r=lo;r<=hi;r++){
+      if(byRank[r]) out.push(byRank[r]);
+      else if(ji<jokers.length) out.push(jokers[ji++]);
+    }
+    while(ji<jokers.length) out.push(jokers[ji++]);
+    return out.length===cards.length ? out : cards.slice();
+  }
   function effRev(){ return G.revolution !== G.ebActive; }
 
   function beats(a){
@@ -701,11 +769,11 @@
     }
     let flush=false, leader=p;
     if(lp.spade3){
-      G.field={cards:cards.slice(),meta,owner:p};
+      G.field={cards:orderPlayCards(cards,meta),meta,owner:p};
       flush=true;
       setStatus(name(p)+" が ♠3 でジョーカーを返した！");
     }else{
-      G.field={cards:cards.slice(),meta,owner:p};
+      G.field={cards:orderPlayCards(cards,meta),meta,owner:p};
       G.passCount=0; G.lastPlayer=p;
       setStatus(name(p)+" が "+cards.map(cardLabel).join(" ")+" を出した");
     }
@@ -1040,8 +1108,9 @@
     // 表示
     let title;
     if(G.humans===1){
-      const myPlace=G.players[0].place;
-      title = G.players[0].title + "（"+myPlace+"位）";
+      const mySeat=Math.max(0,G.players.findIndex(p=>p.human));
+      const myPlace=G.players[mySeat].place;
+      title = G.players[mySeat].title + "（"+myPlace+"位）";
     }else{
       title = name(order[0])+" の勝ち";
     }
@@ -1133,21 +1202,23 @@
     document.getElementById("handLabel").textContent=lbl;
 
     // 自分の手番は重なりを浅くしてタップしやすく
-    const ov = isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12);
+    const LS = matchMedia("(orientation:landscape) and (max-height:600px)").matches;
+    const ov = LS ? -36 : (isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12));
+    const setOv = (el,idx,v)=>{ if(LS){ el.style.marginLeft="0"; el.style.marginTop=(idx===0?0:v)+"px"; } else { el.style.marginLeft=(idx===0?0:v)+"px"; el.style.marginTop=""; } };
     P.hand.forEach((c,idx)=>{
       const el=document.createElement("div");
       let cls="card"+(G.sel.includes(c.id)?" sel":"");
       if(playable) cls += playable.has(c.id) ? " ok" : " no";
       el.className=cls;
       el.style.backgroundImage="url("+cardImg(c)+")";
-      el.style.marginLeft=(idx===0?0:ov)+"px";
+      setOv(el,idx,ov);
       el.dataset.id=c.id;
       hand.appendChild(el);
     });
     // 選択カードの前後にすき間を作り、2枚目以降を選びやすく
     Array.from(hand.children).forEach((el,idx)=>{
-      if(el.classList.contains("sel")) el.style.marginLeft=(idx===0?0:10)+"px";
-      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) el.style.marginLeft="10px";
+      if(el.classList.contains("sel")) setOv(el,idx,LS?-18:10);
+      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) setOv(el,idx,LS?-18:10);
     });
 
     const playBtn=document.getElementById("playBtn"), passBtn=document.getElementById("passBtn");
@@ -1409,7 +1480,7 @@
     if(ns.cfg.rules.shibari && ns.field && meta.suits.length){
       if(suitSig(meta)===suitSig(ns.field.meta)) ns.lockSuits=meta.suits.slice().sort();
     }
-    ns.field={cards:codes.slice(),meta,owner:seat};
+    ns.field={cards:orderPlayCards(cards,meta).map(c=>c.id),meta,owner:seat};
     if(!lp.spade3){ ns.passCount=0; ns.lastPlayer=seat; }
     const real8=cards.some(c=>!c.joker&&c.rank===8);
     const nines=cards.filter(c=>!c.joker&&c.rank===9).length;
@@ -1911,6 +1982,13 @@
 
   buildRuleToggles();
   updateCountNote();
+
+  // 画面回転・リサイズで手札の重なり方向（縦持ち＝横／横持ち＝縦）を組み直す
+  let _roTimer=0;
+  window.addEventListener("resize",()=>{
+    clearTimeout(_roTimer);
+    _roTimer=setTimeout(()=>{ if(document.getElementById("play").classList.contains("active") && G.players && G.players.length) render(); },160);
+  });
 })();
 </script>
 </body>

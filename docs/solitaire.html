@@ -142,6 +142,21 @@
     opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* 横持ち：盤を画面幅いっぱいに。上部バーを薄くして縦の作業領域を確保 */
+  @media (orientation:landscape) and (max-height:600px){
+    .app{max-width:none;}
+    #play .topbar{min-height:0;padding:3px 12px;}
+    #play .topbar h1{font-size:15px;}
+    #play .back-btn{width:32px;height:32px;}
+    #play .meta{font-size:11px;}
+    .tools{padding:0 10px 5px;gap:6px;}
+    .tools button{padding:7px 4px;font-size:11px;border-radius:10px;}
+    #board{margin:0 auto 8px;padding:8px;max-width:min(100%,calc((100vh - 118px)/1.5*7/3 + 60px));}
+    .boardwrap{padding:0 8px;}
+    .toprow{margin-bottom:9px;}
+    .msg{padding:1px 6px 5px;min-height:0;font-size:11.5px;}
+  }
 </style>
 </head>
 <body>
@@ -549,7 +564,8 @@
     const downStep=Math.max(9,Math.round(ch*0.16));
     let maxUp=1,maxDown=0;
     G.tab.forEach(c=>{ const u=c.filter(x=>x.up).length, dn=c.length-u; if(u>maxUp)maxUp=u; if(dn>maxDown)maxDown=dn; });
-    const availH = Math.max(240, window.innerHeight - 220);
+    const _ls = matchMedia("(orientation:landscape) and (max-height:600px)").matches;
+    const availH = Math.max(_ls?150:240, window.innerHeight - (_ls?96:220));
     let upStep=Math.floor((availH - ch - maxDown*downStep)/Math.max(1,maxUp-1));
     upStep=Math.max(12,Math.min(upStep,Math.round(ch*0.38)));
 

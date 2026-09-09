@@ -172,6 +172,60 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* 引いたカードを目立たせる */
+  .myhand .card.justdrew{
+    position:relative;z-index:6;
+    transform:translateY(-22px) scale(1.07);
+    box-shadow:0 0 0 3px #ffd54a,0 12px 22px rgba(0,0,0,.42);
+  }
+  .drew-tag{
+    position:absolute;left:50%;transform:translateX(-50%);top:-14px;
+    background:#ffd54a;color:#3a2b00;font-size:10px;font-weight:900;
+    padding:2px 8px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);
+    pointer-events:none;z-index:7;
+  }
+
+  /* 手札シャッフルの演出 */
+  @keyframes shuf{
+    0%{transform:translateY(0) rotate(0);}
+    22%{transform:translateY(-18px) rotate(-6deg);}
+    50%{transform:translateY(7px) rotate(5deg);}
+    76%{transform:translateY(-4px) rotate(-2deg);}
+    100%{transform:translateY(0) rotate(0);}
+  }
+  .myhand.shuffling{outline:3px dashed color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:5px;border-radius:10px;}
+
+  /* ペア成立の演出 */
+  .burst{
+    position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,229,120,.95),rgba(255,229,120,0) 70%);
+    animation:burst .62s ease-out forwards;pointer-events:none;z-index:8;
+  }
+  @keyframes burst{0%{transform:scale(.3);opacity:.9;}100%{transform:scale(11);opacity:0;}}
+  .pairbang{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.2);
+    font-size:26px;font-weight:900;color:#fff;letter-spacing:.06em;
+    text-shadow:0 2px 0 #b8860b,0 0 16px rgba(255,229,120,.9);
+    animation:pairbang 1.15s cubic-bezier(.2,1.5,.4,1) forwards;pointer-events:none;z-index:9;white-space:nowrap;
+  }
+  @keyframes pairbang{
+    0%{transform:translate(-50%,-50%) scale(.2);opacity:0;}
+    30%{transform:translate(-50%,-50%) scale(1.12);opacity:1;}
+    62%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+    100%{transform:translate(-50%,-90%) scale(.96);opacity:0;}
+  }
+  .spark{
+    position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4px 0 0 -4px;border-radius:2px;
+    background:#ffe578;box-shadow:0 0 8px rgba(255,229,120,.9);
+    animation:spark .7s ease-out forwards;pointer-events:none;z-index:8;
+  }
+  @keyframes spark{
+    0%{transform:translate(0,0) scale(1);opacity:1;}
+    100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0;}
+  }
+  .pile.bump{animation:pilebump .5s ease;}
+  @keyframes pilebump{0%,100%{transform:scale(1);}35%{transform:scale(1.5);color:#ffe578;}}
+
   /* once-per-player shuffle (ババ嵐) */
   .shuffle-bar{
     display:none;flex-direction:column;gap:9px;align-items:center;
@@ -210,6 +264,45 @@
   .join-row .txt-in{flex:1;letter-spacing:.24em;text-align:center;}
   .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
   .mini-msg.err{color:var(--accent-press);}
+
+  /* 横持ち：場（引く札・演出）を大きく、手札と操作は右の縦列へ。はみ出し防止に overflow:hidden */
+  .side{display:contents;}
+  @media (orientation:landscape) and (max-height:600px){
+    .app{max-width:none;}
+    #play .topbar{min-height:0;padding:4px 14px;}
+    #play .topbar h1{font-size:15px;}
+    #play .icon-btn,#play .back-btn{height:32px;}
+    #play.screen{min-height:0;height:100vh;max-height:100vh;overflow:hidden;}
+    .play{padding:3px 10px 5px;gap:5px;overflow:hidden;min-height:0;
+      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      display:grid;grid-template-columns:1fr 118px;grid-template-rows:auto minmax(0,1fr);}
+    .opps{grid-column:1/-1;gap:6px;padding:0;flex-wrap:nowrap;overflow:hidden;}
+    .opp{padding:3px 6px 4px;gap:2px;flex:none;}
+    .opp .oname{font-size:10px;}
+    .opp .fan{height:26px;overflow:hidden;}
+    .opp .fan .mini{width:20px;margin-left:-14px;}
+    .shuffle-bar{position:absolute;top:46px;left:12px;right:130px;z-index:8;margin:0;padding:6px 9px;gap:6px;
+      flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center;}
+    .shuffle-bar .sb-txt{font-size:10.5px;flex:1 1 100%;}
+    .shuffle-bar .sb-btns{gap:6px;}
+    .shuffle-bar .sb-btns button{padding:6px 14px;font-size:11.5px;}
+    .stage{grid-column:1;grid-row:2;min-height:0;height:100%;overflow:hidden;padding:8px;gap:6px;
+      align-self:stretch;justify-content:center;}
+    .status{font-size:12px;}
+    .pile{font-size:10.5px;top:5px;right:8px;}
+    .pickrow{max-width:100%;padding:3px 2px 5px;flex:none;}
+    .pickrow .pcard{width:clamp(60px,21vh,110px);}
+    .anim-card{width:clamp(70px,24vh,124px);}
+    .side{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;}
+    .myhand-wrap{padding:0;flex:1;min-height:0;display:flex;flex-direction:column;}
+    .myhand-label{margin-bottom:2px;font-size:9.5px;line-height:1.3;}
+    .myhand{min-height:0;flex:1;padding:2px;flex-direction:column;justify-content:flex-start;align-items:center;
+      overflow-x:hidden;overflow-y:auto;}
+    .myhand .card{width:52px;margin-left:0;margin-top:-40px;}
+    .myhand .card:first-child{margin-top:0;}
+    .play-actions{flex:none;flex-direction:column;gap:4px;padding:0;}
+    .play-actions button,.play-actions a{flex:none;padding:7px 5px;font-size:11.5px;border-radius:10px;}
+  }
 </style>
 </head>
 <body>
@@ -315,13 +408,15 @@
         <div class="pickrow" id="pickrow" hidden></div>
         <div class="anim-layer" id="animLayer"></div>
       </div>
-      <div class="myhand-wrap">
-        <div class="myhand-label" id="myLabel">あなたの手札</div>
-        <div class="myhand" id="myhand"></div>
-      </div>
-      <div class="play-actions">
-        <button id="restartBtn2">最初から</button>
-        <a href="index.html">ホームへ</a>
+      <div class="side">
+        <div class="myhand-wrap">
+          <div class="myhand-label" id="myLabel">あなたの手札</div>
+          <div class="myhand" id="myhand"></div>
+        </div>
+        <div class="play-actions">
+          <button id="restartBtn2">最初から</button>
+          <a href="index.html">ホームへ</a>
+        </div>
       </div>
     </div>
   </section>
@@ -406,7 +501,7 @@
     document.getElementById("netCountNote").textContent="人間 "+hu+"人（自分＋"+(hu-1)+"人）"+(cpu>0?" ＋ CPU "+cpu+"人":"");
   }
 
-  const G={ humans:1, n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[], shuffleOn:true, net:false, online:null };
+  const G={ humans:1, n:2, players:[], pileP:0, cur:0, over:false, busy:false, viewer:0, usedShuffle:[], shuffleOn:true, net:false, online:null, justDrewCard:null, _jdTimer:0 };
 
   function faceUrl(c){ return c.joker ? "url(assets/cards/JB.webp)" : "url(assets/cards/"+c.suit+c.rank+".webp)"; }
 
@@ -510,6 +605,12 @@
       if(G.over) return;
       const target = nextActive(p);
       shuffle(G.players[target].hand);
+      if(target===G.viewer){
+        setStatus(name(p)+" が引く前に、あなたの手札をシャッフル…");
+        render();
+        await flourishHand();
+        await wait(260);
+      }
       setStatus(name(p)+"が"+name(target)+"から引いています…");
       await wait(1000);
       const idx = Math.random()*G.players[target].hand.length | 0;
@@ -577,7 +678,12 @@
       applyRotation(res);
       render();
       rt.textContent = res==="R" ? "➡ 全員の手札が右へ！" : "⬅ 全員の手札が左へ！";
-      await wait(1400);
+      await wait(950);
+      modal.classList.remove("show");
+      die.classList.remove("land");
+      await flourishHand();
+      await wait(300);
+      return;
     }
     modal.classList.remove("show");
     die.classList.remove("land");
@@ -585,6 +691,37 @@
 
   function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
   function hidePickrow(){ const r=document.getElementById("pickrow"); r.hidden=true; r.innerHTML=""; }
+
+  // 自分の手札が混ぜられたことが分かるように、ひとしきりカードを踊らせる
+  async function flourishHand(){
+    const hand=document.getElementById("myhand");
+    const cards=[...hand.children];
+    if(!cards.length){ await wait(180); return; }
+    hand.classList.add("shuffling");
+    cards.forEach((el,i)=>{ el.style.animation="shuf .52s "+(i*24)+"ms ease both"; });
+    await wait(520 + cards.length*24 + 90);
+    cards.forEach(el=>{ el.style.animation=""; });
+    hand.classList.remove("shuffling");
+  }
+
+  // ペアがそろった瞬間の派手めな演出（バースト＋火花＋「そろった！」＋捨て札カウント）
+  function pairCelebrate(){
+    const stage=document.getElementById("stage");
+    if(!stage) return;
+    const burst=document.createElement("div"); burst.className="burst"; stage.appendChild(burst);
+    const bang=document.createElement("div"); bang.className="pairbang"; bang.textContent="そろった！"; stage.appendChild(bang);
+    const sparks=[];
+    for(let i=0;i<11;i++){
+      const s=document.createElement("i"); s.className="spark";
+      const ang=Math.PI*2*i/11 + Math.random()*0.5, d=52+Math.random()*46;
+      s.style.setProperty("--dx",(Math.cos(ang)*d).toFixed(0)+"px");
+      s.style.setProperty("--dy",(Math.sin(ang)*d).toFixed(0)+"px");
+      stage.appendChild(s); sparks.push(s);
+    }
+    const pile=document.getElementById("pile");
+    pile.classList.remove("bump"); void pile.offsetWidth; pile.classList.add("bump");
+    setTimeout(()=>{ burst.remove(); bang.remove(); sparks.forEach(s=>s.remove()); pile.classList.remove("bump"); }, 1250);
+  }
 
   function armHumanDraw(p, target){
     G.busy=false;
@@ -676,7 +813,7 @@
     await nextFrame();
     c1.style.opacity="1";
     c1.style.transform="translate(-50%,-50%) scale(1)";
-    await wait(reveal ? 640 : 460);
+    await wait(reveal ? 720 : 460);
 
     if(willPair){
       setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" のペアがそろいました！");
@@ -700,15 +837,22 @@
       await wait(200);
       c1.style.transform="translate(-50%,-50%) scale(1.05)";
       c2.style.transform="translate(-50%,-50%) scale(1.05)";
-      await wait(180);
+      await wait(160);
+      G.pileP++;
+      document.getElementById("pile").textContent="捨て札 "+G.pileP+"組";
+      pairCelebrate();
+      await wait(220);
       [c1,c2].forEach(c=>{ c.style.transition="transform .42s ease, opacity .42s ease"; c.style.opacity="0"; });
       c1.style.transform="translate(-50%,-50%) scale(.1) rotate(-40deg)";
       c2.style.transform="translate(-50%,-50%) scale(.1) rotate(40deg)";
-      G.pileP++;
-      document.getElementById("pile").textContent="捨て札 "+G.pileP+"組";
-      await wait(440);
+      await wait(640);
     }else{
       G.players[p].hand.push(drawn);
+      if(p===G.viewer){
+        G.justDrewCard = drawn;
+        clearTimeout(G._jdTimer);
+        G._jdTimer = setTimeout(()=>{ G.justDrewCard=null; render(); }, 2000);
+      }
       if(drawn.joker && p===G.viewer) setStatus(name(p)+" は……ジョーカーを引きました！");
       else if(p===G.viewer) setStatus(name(p)+" は "+RANKNAME[drawn.rank]+" を手札に入れました");
       else if(target===G.viewer) setStatus(name(p)+" は あなたの "+(drawn.joker?"ジョーカー":RANKNAME[drawn.rank])+" を引きました");
@@ -719,10 +863,6 @@
       c1.style.opacity="0";
       await wait(360);
       render();
-      if(p===G.viewer){
-        const cards=document.querySelectorAll("#myhand .card");
-        if(cards.length) cards[cards.length-1].classList.add("dealt");
-      }
     }
 
     layer.innerHTML="";
@@ -765,14 +905,23 @@
     document.getElementById("myLabel").textContent = name(G.viewer)+"の手札（"+me.hand.length+"枚）";
     const hand=document.getElementById("myhand");
     hand.innerHTML="";
-    me.hand.forEach(c=>{
+    const LS = matchMedia("(orientation:landscape) and (max-height:600px)").matches;
+    const overlap = LS ? -38 : (me.hand.length>14 ? -46 : me.hand.length>9 ? -40 : -30);
+    me.hand.forEach((c,i)=>{
       const el=document.createElement("div");
       el.className="card";
       el.style.setProperty("--face", faceUrl(c));
+      const jd = (c===G.justDrewCard);
+      const m = i===0 ? "0" : (jd ? "8px" : overlap+"px");
+      if(LS){ el.style.marginLeft="0"; el.style.marginTop = i===0 ? "0" : (jd ? "8px" : overlap+"px"); }
+      else { el.style.marginLeft = m; el.style.marginTop=""; }
+      if(jd){
+        el.classList.add("justdrew");
+        const tag=document.createElement("div"); tag.className="drew-tag"; tag.textContent="引いた札";
+        el.appendChild(tag);
+      }
       hand.appendChild(el);
     });
-    const overlap = me.hand.length>14 ? -46 : me.hand.length>9 ? -40 : -30;
-    [...hand.children].forEach((el,i)=>{ el.style.marginLeft = i===0?"0":overlap+"px"; });
 
     document.getElementById("pile").textContent = "捨て札 "+G.pileP+"組";
   }
@@ -1025,15 +1174,23 @@
       return;
     }
     const s=data.state; if(!s || !s.hands) return;
-    if(s.last && s.last.type==="shuffle" && s.seq!==G.online.lastEvSeq){
+    let evShuffle=false, evPaired=false;
+    if(s.last && s.seq!==G.online.lastEvSeq){
       G.online.lastEvSeq=s.seq;
-      if(s.last.by!==G.online.myIdx){
-        const g={R:"➡ 右へ",L:"⬅ 左へ",X:"☠ 不発"}[s.last.dir]||"";
-        toast(name(s.last.by)+" のシャッフル："+g);
+      if(s.last.type==="shuffle"){
+        evShuffle = s.last.dir!=="X";
+        if(s.last.by!==G.online.myIdx){
+          const g={R:"➡ 右へ",L:"⬅ 左へ",X:"☠ 不発"}[s.last.dir]||"";
+          toast(name(s.last.by)+" のシャッフル："+g);
+        }
+      }else if(s.last.type==="draw" && s.last.paired){
+        evPaired = true;
       }
     }
     applyNetSnapshot(s);
     render();
+    if(evPaired){ pairCelebrate(); toast(name(s.last.by)+" のペア成立！"); }
+    if(evShuffle){ flourishHand(); }
     if(s.over){ if(!G.online.ended){ G.online.ended=true; showNetEnd(s); } return; }
     hidePickrow(); hideShuffleBar();
     if(G.cur===G.online.myIdx){
@@ -1132,6 +1289,13 @@
   document.getElementById("restartBtn2").addEventListener("click",()=>{ if(G.net||G.online){ backToSetup(); return; } if(G.over||!G.busy) startGame(); });
   document.getElementById("toSetup").addEventListener("click",e=>{ e.preventDefault(); if(G.online) teardownNet(); show("setup"); });
   updateCountNote();
+
+  // 画面回転・リサイズで手札の重なり方向を組み直す
+  let _roTimer=0;
+  window.addEventListener("resize",()=>{
+    clearTimeout(_roTimer);
+    _roTimer=setTimeout(()=>{ if(document.getElementById("play").classList.contains("active") && G.players && G.players.length) render(); },160);
+  });
 })();
 </script>
 </body>
