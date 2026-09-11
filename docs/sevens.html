@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
 <title>七並べ</title>
 <style>
   :root{
@@ -174,18 +176,18 @@
 
   /* 横持ち：場（並べ札）を大きく見せる。手札は右の縦列へ寄せる */
   @media (orientation:landscape) and (max-height:600px){
-    .app{max-width:none;}
+    .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
     #play .topbar{min-height:0;padding:4px 14px;}
     #play .topbar h1{font-size:15px;}
     #play .icon-btn,#play .back-btn{height:32px;}
     #play.screen{min-height:0;overflow:hidden;}
     .play{padding:3px 12px 6px;gap:5px;overflow:hidden;min-height:0;
-      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
       display:grid;grid-template-columns:1fr 92px;grid-template-rows:auto minmax(0,1fr);}
     .rowinfo{grid-column:1/-1;gap:6px;}
     .pchip{font-size:10px;padding:3px 8px;}
     .board{grid-column:1;grid-row:2;align-self:center;justify-self:center;
-      max-width:min(100%,calc((100vh - 106px)/4*0.667*13 + 30px));
+      max-width:min(100%,calc((100vh - 106px - var(--safe-v,0px))/4*0.667*13 + 30px));
       padding:6px 8px;gap:3px;}
     .board .hd{font-size:11px;padding-bottom:2px;}
     .board .rl{font-size:16px;}
@@ -792,6 +794,15 @@
       title = myPlace===1 ? "あなたの勝ち！（1位）"
             : myPlace===G.n ? "あなたの負け…（最下位）"
             : "あなたは "+myPlace+"位";
+      if(window.BGStats){
+        BGStats.record("sevens", cur=>{
+          cur.plays=(cur.plays||0)+1;
+          cur.ranks=cur.ranks||{};
+          cur.ranks[myPlace]=(cur.ranks[myPlace]||0)+1;
+          if(myPlace===1) cur.wins=(cur.wins||0)+1;
+          if(myPlace===G.n) cur.losses=(cur.losses||0)+1;
+        });
+      }
     }else{
       title = name(ranked[0])+" の勝ち";
     }

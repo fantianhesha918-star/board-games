@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
 <title>ボードゲーム</title>
 <style>
   :root{
@@ -267,7 +269,9 @@
     background:var(--surface);color:var(--text);font-weight:800;font-size:15px;box-shadow:var(--shadow);
   }
   .rules-link:active{transform:scale(.98);}
-  .rules-link .ic{font-size:18px;}
+  .rules-link .ic{font-size:18px;display:flex;}
+  .rules-link .ic svg{width:18px;height:18px;}
+  .rules-link + .rules-link{margin-top:8px;}
 </style>
 </head>
 <body>
@@ -299,7 +303,8 @@
         <span class="desc">9×9の数字パズル。1人用。全部埋めるとイラストが完成</span>
       </button>
     </div>
-    <a class="rules-link" href="rules.html"><span class="ic">📖</span>遊び方・ルール説明</a>
+    <a class="rules-link" href="rules.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-1.8-1.3-4-2-6.5-2S2 4.3 2 5v13c2-1 4-1.5 6-1.3S11 18 12 19"/><path d="M12 6c1.8-1.3 4-2 6.5-2S22 4.3 22 5v13c-2-1-4-1.5-6-1.3S13 18 12 19"/><path d="M12 6v13"/></svg></span>遊び方・ルール説明</a>
+    <a class="rules-link" href="stats.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/><path d="M2 20h20"/></svg></span>記録・成績</a>
     <p class="footer-note">収録：オセロ／トランプ（神経衰弱・ババ抜き・七並べ・大富豪・ソリティア）／ナンプレ</p>
   </section>
 
@@ -1010,6 +1015,14 @@
       else title = (winColor===BLACK?"黒":"白")+"の勝ち";
     }
     detail = "黒 "+bl+" ー "+wh+" 白";
+    if(window.BGStats && G.mode==="cpu"){
+      BGStats.record("othello", cur=>{
+        cur.plays=(cur.plays||0)+1;
+        if(bl===wh) cur.draws=(cur.draws||0)+1;
+        else if((bl>wh?BLACK:WHITE)===G.human) cur.wins=(cur.wins||0)+1;
+        else cur.losses=(cur.losses||0)+1;
+      });
+    }
     document.getElementById("ovResult").textContent=title;
     document.getElementById("ovDetail").textContent=detail;
     document.getElementById("overlay").classList.add("show");

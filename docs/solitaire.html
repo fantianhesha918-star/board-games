@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
 <title>ソリティア</title>
 <style>
   :root{
@@ -145,14 +147,14 @@
 
   /* 横持ち：盤を画面幅いっぱいに。上部バーを薄くして縦の作業領域を確保 */
   @media (orientation:landscape) and (max-height:600px){
-    .app{max-width:none;}
+    .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
     #play .topbar{min-height:0;padding:3px 12px;}
     #play .topbar h1{font-size:15px;}
     #play .back-btn{width:32px;height:32px;}
     #play .meta{font-size:11px;}
     .tools{padding:0 10px 5px;gap:6px;}
     .tools button{padding:7px 4px;font-size:11px;border-radius:10px;}
-    #board{margin:0 auto 8px;padding:8px;max-width:min(100%,calc((100vh - 118px)/1.5*7/3 + 60px));}
+    #board{margin:0 auto 8px;padding:8px;max-width:min(100%,calc((100vh - 118px - var(--safe-v,0px))/1.5*7/3 + 60px));}
     .boardwrap{padding:0 8px;}
     .toprow{margin-bottom:9px;}
     .msg{padding:1px 6px 5px;min-height:0;font-size:11.5px;}
@@ -279,6 +281,7 @@
     $("overlay").classList.remove("show");
     show("play");
     deal(null);
+    if(window.BGStats) BGStats.record("solitaire", cur=>{ cur.plays=(cur.plays||0)+1; });
   }
   function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
 
@@ -492,10 +495,17 @@
   }
   function winModal(){
     G._wonAt=Date.now(); clearInterval(G.timer);
+    const tm=G._wonAt-G.t0;
     $("ovTitle").textContent="クリア！";
-    $("ovDetail").innerHTML="手数 "+G.moves+" ／ タイム "+fmtTime(G._wonAt-G.t0);
+    $("ovDetail").innerHTML="手数 "+G.moves+" ／ タイム "+fmtTime(tm);
     $("overlay").classList.add("show");
     updateMeta();
+    if(window.BGStats){
+      BGStats.record("solitaire", cur=>{
+        cur.clears=(cur.clears||0)+1;
+        if(cur.bestTimeMs==null || tm<cur.bestTimeMs) cur.bestTimeMs=tm;
+      });
+    }
   }
 
   /* ---------- render ---------- */

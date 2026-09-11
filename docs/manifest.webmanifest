@@ -1,7 +1,7 @@
 {
   "name": "チンチラのボードゲーム",
   "short_name": "ボードゲーム",
-  "description": "オセロ・トランプ（神経衰弱・ババ抜き・七並べ・大富豪）・ソリティア",
+  "description": "オセロ・トランプ（神経衰弱・ババ抜き・七並べ・大富豪・ソリティア）・ナンプレ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

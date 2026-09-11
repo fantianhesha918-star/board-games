@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
 <title>ナンプレ</title>
 <style>
   :root{
@@ -139,6 +141,34 @@
   .modal .row .primary{background:var(--accent);color:#fff;}
   .modal .row .ghost{background:var(--line);color:var(--text);}
 
+  /* つづきから */
+  .resume{
+    display:none;flex-direction:column;gap:2px;text-align:left;
+    border:2px solid var(--accent);border-radius:16px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));
+    padding:14px 16px;cursor:pointer;color:var(--text);font:inherit;
+  }
+  .resume.show{display:flex;}
+  .resume:active{transform:scale(.98);}
+  .resume .rt{font-weight:800;font-size:15px;color:var(--accent);}
+  .resume .rs{font-size:12.5px;color:var(--text-dim);font-weight:700;}
+
+  /* イラスト図鑑 */
+  .dex .label{display:flex;align-items:baseline;gap:8px;}
+  .dex .count{font-size:12.5px;font-weight:800;color:var(--text-dim);}
+  .dexgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .dexcell{
+    position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;
+    background:var(--surface-2);border:1px solid var(--line);
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .dexcell img{width:100%;height:100%;object-fit:cover;display:block;}
+  .dexcell.locked img{filter:grayscale(1) brightness(.55) opacity(.32);}
+  .dexcell .nm{
+    position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:800;
+    text-align:center;padding:2px 0 3px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff;
+  }
+  .dexcell.locked .nm{background:none;color:var(--text-dim);}
+
   .toast{
     position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
     background:rgba(0,0,0,.84);color:#fff;font-size:13px;font-weight:700;padding:10px 17px;border-radius:999px;
@@ -148,15 +178,15 @@
 
   /* 横持ち：盤を左に大きく、テンキーと操作を右の縦列へ */
   @media (orientation:landscape) and (max-height:600px){
-    .app{max-width:none;}
+    .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
     #play .topbar{min-height:0;padding:4px 14px;}
     #play .topbar h1{font-size:15px;}
     #play .back-btn{width:32px;height:32px;}
-    #play.screen{min-height:0;height:100vh;max-height:100vh;overflow:hidden;}
+    #play.screen{min-height:0;height:calc(100vh - var(--safe-v,0px));max-height:calc(100vh - var(--safe-v,0px));overflow:hidden;}
     .play{padding:4px 12px 6px;gap:8px;overflow:hidden;min-height:0;
-      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
       display:grid;grid-template-columns:1fr 168px;grid-template-rows:1fr;align-items:center;}
-    .boardwrap{grid-column:1;grid-row:1;max-width:min(100%,calc(100vh - 60px));margin:0 auto;}
+    .boardwrap{grid-column:1;grid-row:1;max-width:min(100%,calc(100vh - 60px - var(--safe-v,0px)));margin:0 auto;}
     .numpad{grid-column:2;grid-row:1;align-self:center;grid-template-columns:repeat(3,1fr);gap:5px;max-width:none;}
     .numpad button{padding:9px 0 10px;font-size:16px;}
     .tools{grid-column:2;grid-row:1;align-self:end;flex-wrap:wrap;gap:4px;max-width:none;}
@@ -175,6 +205,10 @@
       <a class="icon-btn" href="rules.html#sudoku">ルール</a>
     </div>
     <div class="setup">
+      <button class="resume" id="resumeBtn" type="button">
+        <span class="rt">前回のつづき</span>
+        <span class="rs" id="resumeInfo"></span>
+      </button>
       <div class="field">
         <span class="label">むずかしさ</span>
         <div class="seg" id="segLevel">
@@ -199,6 +233,11 @@
         <p>正しく入ったマスは<b>背景がつき</b>、全部そろうと<b>うっすらイラストが浮かび上がって完成</b>します。</p>
       </div>
       <button class="start-btn" id="startBtn">はじめる</button>
+      <div class="field dex">
+        <span class="label">イラスト図鑑 <span class="count" id="dexCount">0 / 11</span></span>
+        <div class="dexgrid" id="dexGrid"></div>
+        <p class="howto" style="margin-top:2px">問題を全部正しく解くと、その回の<b>チンチラ</b>が図鑑に加わります。属性ちがいで全11種。</p>
+      </div>
     </div>
   </section>
 
@@ -253,7 +292,18 @@
   const getLevel=seg("segLevel"), getCheck=seg("segCheck");
 
   const GIVENS={easy:42, normal:34, hard:29, oni:25};
-  const PICS=[1,2,3,4,5,6,7,8,9,10,11].map(n=>"assets/sudoku/pic"+n+".webp");
+  const LV_LABEL={easy:"やさしい", normal:"ふつう", hard:"むずかしい", oni:"おに"};
+  const PIC_NAMES=["ベース","やみ","つち","ほのお","くさ","てんし","かみ","まほう","かみなり","みず","かぜ"];
+  const PICS=PIC_NAMES.map((_,k)=>"assets/sudoku/pic"+(k+1)+".webp");
+  const picNo=url=>{ const m=/pic(\d+)\.webp/.exec(url||""); return m?+m[1]:0; };
+
+  /* ---------- 保存（進行中セーブ／図鑑）---------- */
+  const SAVE_KEY="sudoku-save", DEX_KEY="sudoku-dex";
+  function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch{} }
+  function getDex(){ const a=lsGet(DEX_KEY); return Array.isArray(a)?a:[]; }
+  function addDex(n){ if(!n) return; const a=getDex(); if(a.indexOf(n)<0){ a.push(n); lsSet(DEX_KEY,a); } }
 
   const boxOf=i=>((i/9|0)/3|0)*3 + ((i%9)/3|0);
 
@@ -336,8 +386,8 @@
   /* ---------- ゲーム状態 ---------- */
   const G={
     puzzle:null, solution:null, cur:null, notes:null, given:null,
-    sel:-1, memo:false, mistakes:0, hints:0, hist:[],
-    check:true, t0:0, timer:0, done:false, picUrl:null
+    sel:-1, memo:false, mistakes:0, hints:0, hist:[], hintAt:new Set(),
+    check:true, t0:0, timer:0, done:false, picUrl:null, level:"easy"
   };
 
   function buildGridlines(){
@@ -351,8 +401,12 @@
   }
 
   function pickPic(cb){
-    const order=PICS.slice();
-    for(let k=order.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; const t=order[k]; order[k]=order[j]; order[j]=t; }
+    // まだ図鑑に無いものを優先（コンプしやすく）
+    const dex=getDex();
+    const undone=PICS.filter(u=>dex.indexOf(picNo(u))<0);
+    const pool=undone.length?undone:PICS.slice();
+    for(let k=pool.length-1;k>0;k--){ const j=Math.random()*(k+1)|0; const t=pool[k]; pool[k]=pool[j]; pool[j]=t; }
+    const order=pool.concat(PICS.filter(u=>pool.indexOf(u)<0));
     let idx=0;
     (function tryNext(){
       if(idx>=order.length){ cb(null); return; }
@@ -361,14 +415,39 @@
     })();
   }
 
+  /* ---------- 進行中セーブ ---------- */
+  let _saveT=0;
+  function saveState(){
+    if(G.done || !G.cur) { return; }
+    const s={
+      v:1, level:G.level, check:G.check,
+      puzzle:Array.from(G.puzzle).join(""),
+      solution:Array.from(G.solution).join(""),
+      cur:Array.from(G.cur).join(""),
+      notes:G.notes.map(a=>a.join("")),
+      mistakes:G.mistakes, hints:G.hints,
+      hintAt:[...G.hintAt], memo:G.memo,
+      picUrl:G.picUrl, elapsed:elapsed(), ts:Date.now()
+    };
+    lsSet(SAVE_KEY,s);
+  }
+  function scheduleSave(){ clearTimeout(_saveT); _saveT=setTimeout(saveState,250); }
+  function loadSave(){
+    const s=lsGet(SAVE_KEY);
+    if(!s || s.v!==1 || typeof s.cur!=="string" || s.cur.length!==81) return null;
+    return s;
+  }
+
   function startGame(){
+    lsDel(SAVE_KEY);
+    G.level = getLevel();
     G.check = getCheck()==="on";
-    const {puzzle,solution}=makePuzzle(GIVENS[getLevel()]||34);
+    const {puzzle,solution}=makePuzzle(GIVENS[G.level]||34);
     G.puzzle=puzzle; G.solution=solution;
     G.cur=Int8Array.from(puzzle);
     G.given=Array.from(puzzle,v=>v!==0);
     G.notes=Array.from({length:81},()=>[]);
-    G.sel=-1; G.memo=false; G.mistakes=0; G.hints=0; G.hist=[]; G.done=false; G.picUrl=null;
+    G.sel=-1; G.memo=false; G.mistakes=0; G.hints=0; G.hist=[]; G.hintAt=new Set(); G.done=false; G.picUrl=null;
     $("memoBtn").classList.remove("on");
     $("overlay").classList.remove("show");
     boardEl.classList.remove("solved","done-nopic");
@@ -377,7 +456,42 @@
     render();
     show("play");
     startTimer();
-    pickPic(url=>{ if(url && !G.done){ G.picUrl=url; boardEl.style.setProperty("--pic",`url(${url})`); } });
+    pickPic(url=>{ if(url && !G.done){ G.picUrl=url; boardEl.style.setProperty("--pic",`url(${url})`); saveState(); } });
+    saveState();
+    if(window.BGStats){
+      BGStats.record("sudoku", cur=>{
+        cur.plays=(cur.plays||0)+1;
+        cur.byLevel=cur.byLevel||{};
+        cur.byLevel[G.level]=cur.byLevel[G.level]||{plays:0,clears:0};
+        cur.byLevel[G.level].plays++;
+      });
+    }
+  }
+
+  function resumeGame(){
+    const s=loadSave();
+    if(!s) return;
+    G.level=s.level||"normal"; G.check=!!s.check;
+    G.puzzle=Int8Array.from(s.puzzle,c=>+c);
+    G.solution=Int8Array.from(s.solution,c=>+c);
+    G.cur=Int8Array.from(s.cur,c=>+c);
+    G.given=Array.from(G.puzzle,v=>v!==0);
+    G.notes=(s.notes||[]).map(str=>str?str.split("").map(Number):[]);
+    while(G.notes.length<81) G.notes.push([]);
+    G.sel=-1; G.memo=!!s.memo; G.mistakes=s.mistakes|0; G.hints=s.hints|0;
+    G.hist=[]; G.hintAt=new Set(s.hintAt||[]); G.done=false;
+    G.picUrl=s.picUrl||null;
+    $("memoBtn").classList.toggle("on",G.memo);
+    $("overlay").classList.remove("show");
+    boardEl.classList.remove("solved","done-nopic");
+    if(G.picUrl) boardEl.style.setProperty("--pic",`url(${G.picUrl})`);
+    else boardEl.style.removeProperty("--pic");
+    buildBoard();
+    render();
+    show("play");
+    G.t0=Date.now()-(s.elapsed|0); tick();
+    stopTimer(); G.timer=setInterval(tick,1000);
+    if(!G.picUrl) pickPic(url=>{ if(url && !G.done){ G.picUrl=url; boardEl.style.setProperty("--pic",`url(${url})`); saveState(); } });
   }
 
   function buildBoard(){
@@ -441,6 +555,7 @@
     $("undoBtn").disabled = G.hist.length===0;
     $("mist").textContent = "ミス "+G.mistakes;
     $("mist").classList.toggle("warn", G.mistakes>0);
+    scheduleSave();
   }
 
   /* ---------- 操作 ---------- */
@@ -516,15 +631,36 @@
     for(let i=0;i<81;i++) if(G.cur[i]!==G.solution[i]) return;
     G.done=true;
     stopTimer();
+    lsDel(SAVE_KEY);
+    if(G.picUrl){ addDex(picNo(G.picUrl)); renderDex(); }
+    if(window.BGStats){
+      const tm=elapsed();
+      BGStats.record("sudoku", cur=>{
+        cur.clears=(cur.clears||0)+1;
+        cur.byLevel=cur.byLevel||{};
+        const lv=cur.byLevel[G.level]=cur.byLevel[G.level]||{plays:0,clears:0};
+        lv.clears++;
+        if(lv.bestTimeMs==null || tm<lv.bestTimeMs) lv.bestTimeMs=tm;
+      });
+    }
     G.sel=-1; render();
     boardEl.classList.add(G.picUrl ? "solved" : "done-nopic");
-    toast("クリア！");
-    setTimeout(()=>{
-      $("ovTitle").textContent = G.picUrl ? "イラスト完成！" : "クリア！";
-      $("ovDetail").innerHTML = "タイム "+fmt(elapsed())+"<br>ミス "+G.mistakes+" ／ ヒント "+G.hints+
-        (G.picUrl?"":"<br><span style='font-size:12px'>※完成イラストは未設定です</span>");
-      $("overlay").classList.add("show");
-    }, 780);
+    if(!G.picUrl){
+      // 完成イラストが無いときは今まで通りすぐに結果を出す
+      toast("クリア！");
+      setTimeout(showResultModal, 780);
+    }
+    // イラストがあるときは何もしない＝タップされるまでイラストだけの状態のまま
+  }
+
+  function showResultModal(){
+    $("ovTitle").textContent = G.picUrl ? "イラスト完成！" : "クリア！";
+    const nm=G.picUrl ? (PIC_NAMES[picNo(G.picUrl)-1]||"") : "";
+    $("ovDetail").innerHTML =
+      (nm?"「"+nm+"」のチンチラを図鑑に登録<br>":"")+
+      "タイム "+fmt(elapsed())+"<br>ミス "+G.mistakes+" ／ ヒント "+G.hints+
+      (G.picUrl?"":"<br><span style='font-size:12px'>※完成イラストは未設定です</span>");
+    $("overlay").classList.add("show");
   }
 
   /* ---------- タイマー ---------- */
@@ -538,6 +674,10 @@
   boardEl.addEventListener("click",e=>{
     const c=e.target.closest(".cell"); if(!c || G.done) return;
     selectCell(+c.dataset.i);
+  });
+  $("play").addEventListener("click",()=>{
+    // クリア後、イラストを見たあとのタップで結果モーダルを開く
+    if(G.done && !$("overlay").classList.contains("show")) showResultModal();
   });
 
   (function buildNumpad(){
@@ -557,13 +697,46 @@
     });
   })();
 
-  $("memoBtn").addEventListener("click",()=>{ G.memo=!G.memo; $("memoBtn").classList.toggle("on",G.memo); });
+  $("memoBtn").addEventListener("click",()=>{ G.memo=!G.memo; $("memoBtn").classList.toggle("on",G.memo); saveState(); });
   $("undoBtn").addEventListener("click",undo);
   $("hintBtn").addEventListener("click",hint);
   $("newBtn").addEventListener("click",()=>{ if(G.done || confirm("新しい問題にしますか？")) startGame(); });
-  $("toSetup").addEventListener("click",()=>{ stopTimer(); show("setup"); });
+  $("toSetup").addEventListener("click",()=>{ saveState(); stopTimer(); refreshSetupExtras(); show("setup"); });
   $("startBtn").addEventListener("click",startGame);
-  $("ovAgain").addEventListener("click",startGame);
+  $("ovAgain").addEventListener("click",()=>{ refreshSetupExtras(); startGame(); });
+  $("resumeBtn").addEventListener("click",resumeGame);
+
+  /* ---------- setup 画面の追加パーツ ---------- */
+  function renderDex(){
+    const dex=getDex(), grid=$("dexGrid");
+    $("dexCount").textContent = dex.length+" / "+PICS.length;
+    grid.innerHTML="";
+    PICS.forEach((url,k)=>{
+      const n=k+1, got=dex.indexOf(n)>=0;
+      const c=document.createElement("div");
+      c.className="dexcell"+(got?"":" locked");
+      c.innerHTML='<img src="'+url+'" alt="" loading="lazy">'+
+        '<span class="nm">'+(got?PIC_NAMES[k]:"？")+'</span>';
+      grid.appendChild(c);
+    });
+  }
+  function refreshSetupExtras(){
+    renderDex();
+    const s=loadSave();
+    const btn=$("resumeBtn");
+    if(s){
+      const done=Array.from(s.cur).filter((ch,i)=>ch!=="0" && s.puzzle[i]==="0").length;
+      const blanks=Array.from(s.puzzle).filter(ch=>ch==="0").length;
+      $("resumeInfo").textContent =
+        (LV_LABEL[s.level]||s.level)+" ／ "+fmt(s.elapsed|0)+" ／ あと"+Math.max(0,blanks-done)+"マス";
+      btn.classList.add("show");
+    }else{
+      btn.classList.remove("show");
+    }
+  }
+
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveState(); });
+  window.addEventListener("pagehide",saveState);
 
   document.addEventListener("keydown",e=>{
     if(!$("play").classList.contains("active") || G.done) return;
@@ -580,6 +753,7 @@
   window.addEventListener("resize",()=>{});
 
   buildGridlines();
+  refreshSetupExtras();
 })();
 </script>
 </body>

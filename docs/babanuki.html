@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
 <title>ババ抜き</title>
 <style>
   :root{
@@ -268,13 +270,13 @@
   /* 横持ち：場（引く札・演出）を大きく、手札と操作は右の縦列へ。はみ出し防止に overflow:hidden */
   .side{display:contents;}
   @media (orientation:landscape) and (max-height:600px){
-    .app{max-width:none;}
+    .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
     #play .topbar{min-height:0;padding:4px 14px;}
     #play .topbar h1{font-size:15px;}
     #play .icon-btn,#play .back-btn{height:32px;}
-    #play.screen{min-height:0;height:100vh;max-height:100vh;overflow:hidden;}
+    #play.screen{min-height:0;height:calc(100vh - var(--safe-v,0px));max-height:calc(100vh - var(--safe-v,0px));overflow:hidden;}
     .play{padding:3px 10px 5px;gap:5px;overflow:hidden;min-height:0;
-      height:calc(100vh - 42px);max-height:calc(100vh - 42px);
+      height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
       display:grid;grid-template-columns:1fr 118px;grid-template-rows:auto minmax(0,1fr);}
     .opps{grid-column:1/-1;gap:6px;padding:0;flex-wrap:nowrap;overflow:hidden;}
     .opp{padding:3px 6px 4px;gap:2px;flex:none;}
@@ -932,6 +934,13 @@
     let loser=-1;
     for(let i=0;i<G.n;i++) if(G.players[i].hand.some(c=>c.joker)) loser=i;
     let title, detail;
+    if(G.humans===1 && window.BGStats){
+      BGStats.record("babanuki", cur=>{
+        cur.plays=(cur.plays||0)+1;
+        if(loser===0) cur.losses=(cur.losses||0)+1;
+        else if(loser>=0) cur.wins=(cur.wins||0)+1;
+      });
+    }
     if(loser<0){ title="引き分け"; detail=""; }
     else if(G.humans===1){
       title = loser===0 ? "あなたの負け…" : "あなたの勝ち！";
