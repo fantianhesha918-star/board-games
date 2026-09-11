@@ -397,7 +397,7 @@
   const RULE_DEFS_B=[
     ["yakiri","8切り","8を出すと場が流れる"],
     ["kakumei","革命","同じ数字4枚で強さ逆転"],
-    ["kaidan","階段","同スート連番3枚以上を出せる"],
+    ["kaidan","階段","同スート連番3〜4枚を出せる（4枚は革命扱い）"],
     ["shibari","縛り","同スート2連続でそのスート縛り"],
     ["spade3","スペ3返し","ジョーカー単騎に♠3で返せる"],
     ["elevenback","11バック","Jで場が流れるまで強さ逆転"],
@@ -658,8 +658,8 @@
       if(ok) return {type:"set",count:n,rv,joker:jok>0,suits:reals.map(c=>c.suit),
         has8:reals.some(c=>c.rank===8),real8:reals.some(c=>c.rank===8)};
     }
-    // sequence (階段)
-    if(n>=3 && reals.length){
+    // sequence (階段) ※最大4枚まで
+    if(n>=3 && n<=4 && reals.length){
       const suit0=reals[0].suit;
       if(reals.every(c=>c.suit===suit0)){
         const rs=reals.map(c=>c.rank).sort((a,b)=>a-b);
@@ -797,7 +797,7 @@
 
     if(G.rules.kakumei && meta.type==="set" && meta.count===4){ G.revolution=!G.revolution;
       toast(G.revolution?"革命！強さ逆転":"革命返し！元通り"); }
-    if(G.rules.kakumei && G.rules.kaidan && meta.type==="seq" && meta.count>=5){ G.revolution=!G.revolution;
+    if(G.rules.kakumei && G.rules.kaidan && meta.type==="seq" && meta.count>=4){ G.revolution=!G.revolution;
       toast(G.revolution?"階段革命！":"革命返し！"); }
     if(G.rules.elevenback && hasRealJ){ G.ebActive=!G.ebActive; toast("11バック：この場は強さ逆転"); }
     if(G.rules.rev9 && nines%2===1){ G.dir*=-1; toast("9リバース：順番が逆回り"); }
@@ -1512,7 +1512,7 @@
     const hasRealJ=cards.some(c=>!c.joker&&c.rank===11);
     const fx=[];
     if(ns.cfg.rules.kakumei && meta.type==="set" && meta.count===4){ ns.revolution=!ns.revolution; fx.push(ns.revolution?"革命！強さ逆転":"革命返し"); }
-    if(ns.cfg.rules.kakumei && ns.cfg.rules.kaidan && meta.type==="seq" && meta.count>=5){ ns.revolution=!ns.revolution; fx.push(ns.revolution?"階段革命！":"革命返し"); }
+    if(ns.cfg.rules.kakumei && ns.cfg.rules.kaidan && meta.type==="seq" && meta.count>=4){ ns.revolution=!ns.revolution; fx.push(ns.revolution?"階段革命！":"革命返し"); }
     if(ns.cfg.rules.elevenback && hasRealJ){ ns.ebActive=!ns.ebActive; fx.push("11バック：強さ逆転"); }
     if(ns.cfg.rules.rev9 && nines%2===1){ ns.dir*=-1; fx.push("9リバース：逆回り"); }
     ns.last={ev:"play",by:seat,codes:codes.slice(),spade3:!!lp.spade3,fx};
