@@ -143,6 +143,9 @@
   .overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:22px;padding:22px 20px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow);max-height:88vh;overflow-y:auto;}
   .modal h2{font-size:20px;margin:0 0 12px;}
+  .ovTrend{margin:-6px 0 14px;font-size:13.5px;font-weight:800;color:var(--text-dim);}
+  .ovTrend:empty{display:none;margin:0;}
+  .ovTrend b{color:var(--accent);}
   .modal .rank{list-style:none;padding:0;margin:0 0 18px;font-size:14px;text-align:left;}
   .modal .rank li{display:flex;justify-content:space-between;padding:7px 9px;border-radius:9px;gap:8px;}
   .modal .rank li:nth-child(odd){background:var(--surface-2);}
@@ -181,7 +184,7 @@
   .mini-msg{font-size:12px;line-height:1.6;margin:8px 2px 0;color:var(--text-dim);min-height:1em;}
   .mini-msg.err{color:var(--accent-press);}
 
-  /* 横持ち：場を大きく、手札と操作は右の縦列へ。画面・枠からはみ出さないよう overflow を全面 hidden */
+  /* 横持ち：場を上に大きく、手札は画面下いっぱいに横並び、操作ボタンはその下の帯に。画面・枠からはみ出さないよう overflow を全面 hidden */
   .side{display:contents;}
   @media (orientation:landscape) and (max-height:600px){
     .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
@@ -189,30 +192,30 @@
     #play .topbar h1{font-size:15px;}
     #play .icon-btn,#play .back-btn{height:32px;}
     #play.screen{min-height:0;height:calc(100vh - var(--safe-v,0px));max-height:calc(100vh - var(--safe-v,0px));overflow:hidden;}
-    .play{padding:3px 10px 5px;gap:5px;overflow:hidden;min-height:0;
+    .play{padding:3px 10px 4px;gap:4px;overflow:hidden;min-height:0;
       height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
-      display:grid;grid-template-columns:1fr 118px;grid-template-rows:auto minmax(0,1fr);}
-    .opps{grid-column:1/-1;gap:5px;}
+      display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto auto;}
+    .opps{grid-column:1;grid-row:1;gap:5px;}
     .opp{min-width:0;font-size:10px;padding:4px 7px;gap:2px;}
     .opp .t{font-size:9px;}
-    .stage{grid-column:1;grid-row:2;min-height:0;height:100%;overflow:hidden;padding:8px 10px;gap:6px;justify-content:center;align-self:stretch;}
+    .stage{grid-column:1;grid-row:2;min-height:0;height:100%;overflow:hidden;padding:4px 10px;gap:4px;justify-content:center;align-self:stretch;}
     .fieldcards{min-height:0;gap:6px;flex-wrap:wrap;overflow:hidden;}
-    .fc{width:clamp(58px,17vh,104px);}
-    .status{font-size:12px;min-height:0;}
+    .fc{width:clamp(48px,11vh,88px);}
+    .status{font-size:11.5px;min-height:0;}
     .flags{position:static;max-width:none;justify-content:center;margin-bottom:2px;}
-    .side{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;}
-    .handwrap{margin:0;flex:1;min-height:0;display:flex;flex-direction:column;}
-    .handlabel{margin-bottom:2px;font-size:9.5px;line-height:1.3;}
-    .hand{flex:1;min-height:0;flex-direction:column;align-items:center;
-      overflow-x:hidden;overflow-y:auto;padding:3px 2px;}
-    .hand .card{width:52px;margin-left:0;margin-top:-36px;}
-    .hand .card:first-child{margin-top:0;}
-    .hand .card.no{transform:translateX(-4px);}
-    .hand .card.sel{transform:translateX(12px);margin-top:-36px;z-index:6;}
-    .hand .card.sel:first-child{margin-top:0;}
-    .actions{flex:none;flex-direction:column;gap:4px;padding:0;}
-    .actions button,.actions a{flex:none;padding:7px 5px;font-size:12px;border-radius:10px;}
-    .actions .play-btn{flex:none;font-size:12px;}
+    /* 手札は画面下いっぱいに横並び（スクロール可）、操作ボタンはその下の帯に横並び */
+    .handwrap{grid-column:1;grid-row:3;margin:0;min-height:0;}
+    .handlabel{margin-bottom:1px;font-size:9.5px;line-height:1.2;}
+    .hand{min-height:0;min-width:0;padding:4px 4px 2px;}
+    .hand .card{width:50px;margin-left:-15px;}
+    .hand .card:first-child{margin-left:0;}
+    .hand .card.sel{transform:translateY(-14px);}
+    .actions{grid-column:1;grid-row:4;flex-direction:row;gap:6px;padding:0;}
+    .actions button,.actions a{flex:1;padding:6px 6px;font-size:12px;border-radius:10px;}
+    .actions .play-btn{font-size:13px;}
+    /* 手札・操作バーが画面下端に来るので、トーストは場の上のほうに出して隠れないように */
+    .toast{bottom:auto;top:calc(50px + var(--safe-v,0px));transform:translateX(-50%) translateY(-10px);}
+    .toast.show{transform:translateX(-50%) translateY(0);}
   }
 </style>
 </head>
@@ -361,6 +364,7 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="ovResult">結果</h2>
+    <p class="ovTrend" id="ovTrend"></p>
     <ul class="rank" id="ovRank"></ul>
     <div class="row">
       <a class="ghost" href="index.html">ホーム</a>
@@ -475,6 +479,7 @@
     lastPlayer:-1, passCount:0, passed:[], finishers:[],
     over:false, busy:false, viewer:0,
     prevDaifugo:-1, gameNo:0, sel:[],
+    prevMyTitle:null,
     net:false, online:null
   };
 
@@ -546,7 +551,7 @@
     G.level=+getLevel();
     G.rensen = getRensen()==="on";
     G.rules=readRules();
-    G.gameNo=0; G.prevDaifugo=-1;
+    G.gameNo=0; G.prevDaifugo=-1; G.prevMyTitle=null;
     // 席順をランダムに（人間とCPUを毎回ばらけさせる。5飛ばし等で人間が必ず割を食うのを防ぐ）
     const roles=[];
     for(let k=0;k<hu;k++) roles.push(true);
@@ -1124,8 +1129,13 @@
           if(G.players[mySeat].foul) cur.fouls=(cur.fouls||0)+1;
         });
       }
+      // 前回の順位→今回の順位（連戦中、席替えなしで続けている場合のみ）
+      document.getElementById("ovTrend").textContent =
+        G.prevMyTitle ? (G.prevMyTitle+" → "+myTitle) : "";
+      G.prevMyTitle = myTitle;
     }else{
       title = name(order[0])+" の勝ち";
+      document.getElementById("ovTrend").textContent="";
     }
     document.getElementById("ovResult").textContent=title;
     const ul=document.getElementById("ovRank"); ul.innerHTML="";
@@ -1214,10 +1224,9 @@
     if(isTurn && G.field) lbl += mustPass ? "  出せる札がありません → パス" : "  枠付き＝出せる札";
     document.getElementById("handLabel").textContent=lbl;
 
-    // 自分の手番は重なりを浅くしてタップしやすく
-    const LS = matchMedia("(orientation:landscape) and (max-height:600px)").matches;
-    const ov = LS ? -36 : (isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12));
-    const setOv = (el,idx,v)=>{ if(LS){ el.style.marginLeft="0"; el.style.marginTop=(idx===0?0:v)+"px"; } else { el.style.marginLeft=(idx===0?0:v)+"px"; el.style.marginTop=""; } };
+    // 自分の手番は重なりを浅くしてタップしやすく（横持ちでも手札は横並びのまま）
+    const ov = isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12);
+    const setOv = (el,idx,v)=>{ el.style.marginLeft=(idx===0?0:v)+"px"; el.style.marginTop=""; };
     P.hand.forEach((c,idx)=>{
       const el=document.createElement("div");
       let cls="card"+(G.sel.includes(c.id)?" sel":"");
@@ -1230,8 +1239,8 @@
     });
     // 選択カードの前後にすき間を作り、2枚目以降を選びやすく
     Array.from(hand.children).forEach((el,idx)=>{
-      if(el.classList.contains("sel")) setOv(el,idx,LS?-18:10);
-      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) setOv(el,idx,LS?-18:10);
+      if(el.classList.contains("sel")) setOv(el,idx,10);
+      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) setOv(el,idx,10);
     });
 
     const playBtn=document.getElementById("playBtn"), passBtn=document.getElementById("passBtn");
@@ -1837,6 +1846,7 @@
     if(!data){
       if(!G.online.ended){ G.online.ended=true; G.over=true;
         document.getElementById("ovResult").textContent="部屋が閉じられました";
+        document.getElementById("ovTrend").textContent="";
         document.getElementById("ovRank").innerHTML="<li><span>だれかが退出したか、部屋が削除されました</span></li>";
         document.getElementById("ovAgain").style.display="none";
         document.getElementById("overlay").classList.add("show"); }
@@ -1890,6 +1900,7 @@
     G.over=true;
     const order = s.order && s.order.length ? s.order : s.hands.map((_,i)=>i);
     document.getElementById("ovResult").textContent = note ? note : (name(order[0])+" の勝ち");
+    document.getElementById("ovTrend").textContent="";
     const ul=document.getElementById("ovRank"); ul.innerHTML="";
     order.forEach((idx,k)=>{
       const t=s.title[idx]||"";
