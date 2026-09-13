@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
+<title>クロスワード</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --gline:#d5d2c6;--gline-bold:#8f8a7c;--bad:#d64545;--block:#2c2c2a;--pick:#c98a1e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --gline:#3b3d35;--gline-bold:#5f6154;--bad:#ef6b6b;--block:#0c0d0b;--pick:#e0a23c;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;text-decoration:none;}
+  .back-btn{width:38px;height:38px;font-size:20px;display:flex;align-items:center;justify-content:center;}
+  .icon-btn{height:38px;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:5px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  /* setup */
+  .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:20px;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:0;padding:12px 14px;font-size:12.5px;line-height:1.75;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
+  .plist{display:flex;flex-direction:column;gap:10px;}
+  .pcard{
+    position:relative;display:flex;flex-direction:column;gap:3px;text-align:left;
+    border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:14px 16px;border-radius:16px;cursor:pointer;font:inherit;box-shadow:var(--shadow);
+  }
+  .pcard:active{transform:scale(.98);}
+  .pcard.done{border-color:var(--accent);}
+  .pcard .nm{font-weight:800;font-size:15.5px;}
+  .pcard .sub{font-size:12px;color:var(--text-dim);font-weight:700;}
+  .pcard .check{position:absolute;top:12px;right:14px;color:var(--accent);font-weight:800;font-size:13px;}
+
+  /* play */
+  .play{flex:1;display:flex;flex-direction:column;gap:10px;padding:2px 14px 16px;min-height:0;}
+  .boardwrap{display:flex;justify-content:center;}
+  #board{
+    position:relative;display:grid;gap:0;
+    border:2px solid var(--gline-bold);border-radius:8px;overflow:hidden;background:var(--surface);user-select:none;
+  }
+  .cell{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    background:var(--surface);font-size:min(5.6vw,22px);font-weight:800;color:var(--text);cursor:pointer;
+    box-shadow:inset 0 0 0 .5px var(--gline);
+  }
+  .cell.block{background:var(--block);cursor:default;box-shadow:none;}
+  .cell .num{position:absolute;top:1px;left:2px;font-size:8.5px;font-weight:700;color:var(--text-dim);line-height:1;}
+  .cell .pk{position:absolute;bottom:1px;right:1px;width:13px;height:13px;border-radius:50%;
+    background:var(--pick);color:#fff;font-size:8px;font-weight:800;line-height:1;
+    display:flex;align-items:center;justify-content:center;}
+  .cell.wordsel{background:color-mix(in srgb,var(--accent) 12%,var(--surface));}
+  .cell.sel{background:color-mix(in srgb,var(--accent) 32%,var(--surface));box-shadow:inset 0 0 0 2px var(--accent);}
+  .cell.correct{color:var(--accent);}
+  .cell.bad{color:var(--bad);}
+
+  .curclue{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;
+    font-size:12.5px;font-weight:700;color:var(--text);min-height:20px;display:flex;align-items:center;gap:8px;
+  }
+  .curclue .badge{background:var(--accent);color:#fff;border-radius:999px;min-width:20px;height:20px;padding:0 5px;
+    font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;}
+  .curclue .tx{flex:1;line-height:1.4;}
+
+  .hidden-input{
+    position:fixed;left:0;top:0;opacity:0;border:0;padding:0;margin:0;background:transparent;color:transparent;
+    font-size:16px;pointer-events:none;caret-color:transparent;
+  }
+  .actions{display:flex;gap:8px;}
+  .actions button{flex:1;border:none;background:var(--surface);color:var(--text);border-radius:12px;padding:12px 0;
+    font-size:14px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .actions button:active{transform:scale(.96);}
+
+  .bonus{
+    background:color-mix(in srgb,var(--pick) 12%,var(--surface-2));border:1px solid color-mix(in srgb,var(--pick) 40%,var(--line));
+    border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--text-dim);
+  }
+  .bonus .letters{display:flex;gap:4px;}
+  .bonus .letters span{
+    min-width:22px;height:26px;border-radius:7px;background:var(--surface);color:var(--text);
+    display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .bonus .letters span.filled{background:var(--pick);color:#fff;box-shadow:none;}
+
+  .cluewrap{display:flex;gap:10px;}
+  .cluecol{flex:1;min-width:0;}
+  .cluecol h4{margin:0 0 4px;font-size:11.5px;font-weight:800;color:var(--text-dim);}
+  .cluecol ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;}
+  .cluecol li{font-size:11.5px;padding:6px 7px;border-radius:8px;cursor:pointer;line-height:1.5;color:var(--text);}
+  .cluecol li.active{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);font-weight:800;}
+  .cluecol li.done{color:var(--text-dim);text-decoration:line-through;}
+  .cluecol li b{font-weight:800;margin-right:3px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:24px 22px;width:100%;max-width:330px;text-align:center;box-shadow:var(--shadow);}
+  .modal .result{font-size:24px;font-weight:800;margin:0 0 8px;}
+  .modal .detail{color:var(--text-dim);font-size:14px;margin:0 0 20px;line-height:1.7;}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:13px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.84);color:#fff;font-size:13px;font-weight:700;padding:10px 17px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (orientation:landscape) and (max-height:600px){
+    .app{max-width:none;--safe-v:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom));}
+    #play .topbar{min-height:0;padding:4px 14px;}
+    #play .topbar h1{font-size:15px;}
+    #play .back-btn{width:32px;height:32px;}
+    #play.screen{min-height:0;height:calc(100vh - var(--safe-v,0px));max-height:calc(100vh - var(--safe-v,0px));overflow:hidden;}
+    .play{padding:4px 12px 6px;gap:6px;overflow:hidden;min-height:0;
+      height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
+      display:grid;grid-template-columns:1fr 190px;grid-template-rows:auto auto auto 1fr;column-gap:10px;row-gap:6px;}
+    .boardwrap{grid-column:1;grid-row:1/5;align-self:center;height:100%;min-height:0;}
+    .curclue{grid-column:2;grid-row:1;align-self:start;font-size:11.5px;padding:7px 9px;}
+    .bonus{grid-column:2;grid-row:2;align-self:start;font-size:11px;padding:6px 8px;}
+    .bonus .letters span{min-width:18px;height:20px;font-size:12px;}
+    .actions{grid-column:2;grid-row:3;align-self:start;}
+    .actions button{padding:8px 0;font-size:12px;}
+    .cluewrap{grid-column:2;grid-row:4;min-height:0;overflow-y:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="index.html">‹</a>
+      <h1>クロスワード</h1>
+      <span class="spacer"></span>
+      <a class="icon-btn" href="rules.html#crossword">ルール</a>
+    </div>
+    <div class="setup">
+      <div class="howto">
+        <h3>遊び方</h3>
+        <p>マスを選ぶとキーボードが立ち上がるので、かな入力で文字を入れます。<b>よこ／たて</b>のヒントを見ながら、すべてのマスを正しい文字で埋めるとクリアです。</p>
+        <p>すでに文字が入っているマスをもう一度タップすると、<b>よこ⇔たて</b>の向きが切りかわります。ヒントの文字をタップしても、その言葉の先頭マスに移動します。</p>
+        <p>マスの右下に<b>色つきの番号</b>がついているマスがあります。その番号の順番で文字を拾うと、もうひとつの<b>ボーナスの言葉</b>が浮かび上がります。</p>
+      </div>
+      <div class="plist" id="puzzleList"></div>
+    </div>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <button class="back-btn" id="toSetup">‹</button>
+      <h1 id="playTitle">クロスワード</h1>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="hintBtn">ヒント</button>
+    </div>
+    <div class="play">
+      <div class="boardwrap"><div id="board"></div></div>
+      <input id="hiddenInput" class="hidden-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-hidden="true">
+      <div class="curclue"><span class="badge" id="curNum">–</span><span class="tx" id="curText">問題を選んでください</span></div>
+      <div class="bonus"><span>ボーナス</span><span class="letters" id="bonusLetters"></span></div>
+      <div class="actions"><button type="button" id="eraseBtn">消す</button></div>
+      <div class="cluewrap">
+        <div class="cluecol"><h4>よこ</h4><ul id="acrossList"></ul></div>
+        <div class="cluecol"><h4>たて</h4><ul id="downList"></ul></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="result" id="ovTitle">クリア！</p>
+    <p class="detail" id="ovDetail"></p>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovAgain">もんだい一覧</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const $=id=>document.getElementById(id);
+  let toastTimer=0;
+  function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1500); }
+  function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+  function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+  /* ---------- パズルデータ（しりとりでつながる交差クロスワード）---------- */
+  const PUZZLES=[
+    {
+      id:1, title:"クロス①", theme:"どうぶつ・くだもの",
+      grid:["りんご#####","##り#####","##らっぱ###","####ん###","####だちょう"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"りんご",clue:"赤くて丸い、木になる果物。皮をむいて食べたりジュースにしたりする。"},
+        {num:3,row:2,col:2,len:3,answer:"らっぱ",clue:"息をふきこんで音を出す、金色の管楽器。"},
+        {num:5,row:4,col:4,len:4,answer:"だちょう",clue:"首と脚がとても長く、走るのが速い、空を飛べない大きな鳥。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"ごりら",clue:"大きくて力持ち、胸をたたくしぐさで知られる森の動物。"},
+        {num:4,row:2,col:4,len:3,answer:"ぱんだ",clue:"白と黒のもふもふ、笹を食べる人気者。"}
+      ],
+      pickup:[{num:1,row:4,col:4},{num:2,row:3,col:4},{num:3,row:0,col:2}], pickupAnswer:"だんご"
+    },
+    {
+      id:2, title:"クロス②", theme:"くだもの・どうぶつ",
+      grid:["すいか#####","##が#####","##みかづき##","#####つ##","#####ねずみ","#######か","#######ん"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"すいか",clue:"夏によく食べる、緑と黒のしまもようの皮で中が赤い大きな果物。"},
+        {num:3,row:2,col:2,len:4,answer:"みかづき",clue:"夜空に浮かぶ、細い形をした月。"},
+        {num:5,row:4,col:5,len:3,answer:"ねずみ",clue:"チーズが好きだと言われる、耳が丸くて尻尾が長い小さな動物。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"かがみ",clue:"顔や姿を映して見る、ガラスでできた道具。"},
+        {num:4,row:2,col:5,len:3,answer:"きつね",clue:"「コンコン」と鳴く、耳と尻尾がふさふさの、ずる賢いといわれる動物。"},
+        {num:6,row:4,col:7,len:3,answer:"みかん",clue:"冬によく食べる、オレンジ色で甘酸っぱい、皮が手でむける果物。"}
+      ],
+      pickup:[{num:1,row:0,col:0},{num:2,row:4,col:6},{num:3,row:2,col:5}], pickupAnswer:"すずき"
+    },
+    {
+      id:3, title:"クロス③（やさしい）", theme:"うみのいきもの",
+      grid:["くじら##","##っ##","##こおり","####ぼ","####ん"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"くじら",clue:"海にすむ、とても体が大きいほ乳類。潮を吹き上げることもある。"},
+        {num:3,row:2,col:2,len:3,answer:"こおり",clue:"水が凍ってできる、冷たくてかたいもの。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"らっこ",clue:"貝を石で割って食べることで知られる、仰向けに浮かぶ海の動物。"},
+        {num:4,row:2,col:4,len:3,answer:"りぼん",clue:"髪や贈り物を飾るときに使う、布でできた飾り。"}
+      ],
+      pickup:[{num:1,row:2,col:3},{num:2,row:3,col:4},{num:3,row:4,col:4}], pickupAnswer:"おぼん"
+    },
+    {
+      id:4, title:"クロス④", theme:"たべもの・どうぶつ",
+      grid:["たまご##","##ぼ##","##うさぎ","####ゅ","####う","####に","####ゅ","####う"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"たまご",clue:"鶏が産む、殻に入った丸い食べ物。ゆでたり焼いたりして食べる。"},
+        {num:3,row:2,col:2,len:3,answer:"うさぎ",clue:"長い耳とふわふわの尻尾を持つ、ぴょんぴょん跳ねる動物。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"ごぼう",clue:"土の中で育つ、細長い茶色の根菜。きんぴらなどに使われる。"},
+        {num:4,row:2,col:4,len:6,answer:"ぎゅうにゅう",clue:"牛からとれる、給食でもおなじみの白い飲み物。"}
+      ],
+      pickup:[{num:1,row:2,col:2},{num:2,row:5,col:4}], pickupAnswer:"うに"
+    },
+    {
+      id:5, title:"クロス⑤（むずかしい）", theme:"さくら・どうぶつ・わがし",
+      grid:["さくら####","#つく####","##だんご##","####り##","####らっぱ"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"さくら",clue:"うすいピンク色の花をさかせる、日本を代表する春の木。"},
+        {num:4,row:1,col:1,len:2,answer:"つく",clue:"スイッチを入れると明かりが「〜」。船が港に着くときにも使うことば。"},
+        {num:5,row:2,col:2,len:3,answer:"だんご",clue:"米の粉を丸めてむした、くしに刺して食べることが多い和菓子。"},
+        {num:7,row:4,col:4,len:3,answer:"らっぱ",clue:"息をふきこんで音を出す、金色の管楽器。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:3,row:0,col:2,len:3,answer:"らくだ",clue:"背中にこぶがある、砂ばくを歩くのが得意な動物。"},
+        {num:6,row:2,col:4,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる、大きくて力持ちな森の動物。"}
+      ],
+      pickup:[{num:1,row:3,col:4},{num:2,row:2,col:3},{num:3,row:2,col:4}], pickupAnswer:"りんご"
+    },
+    {
+      id:6, title:"クロス⑥（むずかしい）", theme:"とけい・やさい・どうぶつ",
+      grid:["とけい###","#しち###","##ごぼう#","###うち#","####わに","#####じ"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"とけい",clue:"時間を知るための道具。柱にかけたり、うでにはめたりする。"},
+        {num:4,row:1,col:1,len:2,answer:"しち",clue:"6と8のあいだの数字。ラッキーセブンともいう。"},
+        {num:5,row:2,col:2,len:3,answer:"ごぼう",clue:"土の中で育つ、細長い茶色の根菜。きんぴらに使われる。"},
+        {num:8,row:3,col:3,len:2,answer:"うち",clue:"自分が住んでいる家や、その中のこと。"},
+        {num:9,row:4,col:4,len:2,answer:"わに",clue:"するどい歯を持つ、川や沼にすむ大きなは虫類。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"けし",clue:"赤や白の花をさかせる植物。実からは食用の種もとれる。"},
+        {num:3,row:0,col:2,len:3,answer:"いちご",clue:"赤い色で表面につぶつぶがある、甘酸っぱい果物。"},
+        {num:6,row:2,col:3,len:2,answer:"ぼう",clue:"旗などを立てるのに使う、まっすぐで細長い棒。"},
+        {num:7,row:2,col:4,len:3,answer:"うちわ",clue:"あおいで風を起こす、平たい形の道具。夏祭りでよく使う。"},
+        {num:10,row:4,col:5,len:2,answer:"にじ",clue:"雨上がりの空にかかる、7色に見えるアーチ。"}
+      ],
+      pickup:[{num:1,row:4,col:4},{num:2,row:1,col:1}], pickupAnswer:"わし"
+    },
+    {
+      id:7, title:"クロス⑦（むずかしい）", theme:"たいこ・くだもの・まつり",
+      grid:["たいこ###","#とお###","##りんご#","####まつ"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"たいこ",clue:"バチでたたいて音を出す、和太鼓などの楽器。"},
+        {num:4,row:1,col:1,len:2,answer:"とお",clue:"「1、2、3…」と数えて、9の次にくる数。"},
+        {num:5,row:2,col:2,len:3,answer:"りんご",clue:"赤くて丸い、木になる果物。皮をむいて食べたりジュースにしたりする。"},
+        {num:7,row:3,col:4,len:2,answer:"まつ",clue:"一年中緑の葉をつける木。お正月のかざりにも使われる。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"いと",clue:"はりに通して布をぬうときに使う、細長いもの。"},
+        {num:3,row:0,col:2,len:3,answer:"こおり",clue:"水がこおってできる、冷たくてかたいもの。"},
+        {num:6,row:2,col:4,len:2,answer:"ごま",clue:"小さなつぶで、油をしぼったりお菓子にふりかけたりする種。"}
+      ],
+      pickup:[{num:1,row:1,col:2},{num:2,row:3,col:4},{num:3,row:3,col:5},{num:4,row:2,col:2}], pickupAnswer:"おまつり"
+    }
+  ];
+
+  /* ---------- 保存（クリア済み一覧）---------- */
+  const SOLVED_KEY="crossword-solved";
+  function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+  function getSolved(){ const a=lsGet(SOLVED_KEY); return Array.isArray(a)?a:[]; }
+  function addSolved(id){ const a=getSolved(); if(a.indexOf(id)<0){ a.push(id); lsSet(SOLVED_KEY,a); } }
+
+  /* ---------- ゲーム状態 ---------- */
+  const G={ puzzle:null, rows:0, cols:0, cur:null, sel:null, dir:"across", done:false, hints:0 };
+
+  function isBlock(r,c){ return G.puzzle.grid[r][c]==="#"; }
+  function solChar(r,c){ return G.puzzle.grid[r][c]; }
+
+  function wordsAt(r,c){
+    let a=null,d=null;
+    for(const w of G.puzzle.across) if(w.row===r && c>=w.col && c<w.col+w.len){ a=w; break; }
+    for(const w of G.puzzle.down) if(w.col===c && r>=w.row && r<w.row+w.len){ d=w; break; }
+    return {a,d};
+  }
+  function wordCells(w,dir){
+    const cells=[];
+    for(let k=0;k<w.len;k++) cells.push(dir==="across" ? {r:w.row,c:w.col+k} : {r:w.row+k,c:w.col});
+    return cells;
+  }
+  function currentWord(){
+    if(!G.sel) return null;
+    const {a,d}=wordsAt(G.sel.r,G.sel.c);
+    if(G.dir==="across" && a) return {w:a,dir:"across"};
+    if(G.dir==="down" && d) return {w:d,dir:"down"};
+    if(a) return {w:a,dir:"across"};
+    if(d) return {w:d,dir:"down"};
+    return null;
+  }
+
+  function buildBoard(){
+    const board=$("board");
+    board.innerHTML="";
+    board.style.gridTemplateColumns="repeat("+G.cols+",1fr)";
+    board.style.gridTemplateRows="repeat("+G.rows+",1fr)";
+    for(let r=0;r<G.rows;r++){
+      for(let c=0;c<G.cols;c++){
+        const d=document.createElement("div");
+        d.dataset.r=r; d.dataset.c=c;
+        if(isBlock(r,c)){
+          d.className="cell block";
+        }else{
+          d.className="cell";
+          let num=null;
+          for(const w of G.puzzle.across) if(w.row===r && w.col===c){ num=w.num; break; }
+          if(num==null) for(const w of G.puzzle.down) if(w.row===r && w.col===c){ num=w.num; break; }
+          const pk=(G.puzzle.pickup||[]).find(x=>x.row===r && x.col===c);
+          d.innerHTML=(num!=null?'<span class="num">'+num+'</span>':"")+
+            (pk?'<span class="pk">'+pk.num+'</span>':"")+'<span class="ch"></span>';
+        }
+        board.appendChild(d);
+      }
+    }
+    sizeBoard();
+  }
+
+  function sizeBoard(){
+    const board=$("board"), wrap=board.parentElement;
+    const availW=wrap.clientWidth || 300;
+    const isLandscape=window.matchMedia("(orientation:landscape) and (max-height:600px)").matches;
+    const availH=isLandscape ? Math.max(120, wrap.clientHeight||(window.innerHeight-24)) : Math.max(180, window.innerHeight*0.4);
+    const cell=Math.max(20, Math.floor(Math.min(availW/G.cols, availH/G.rows)));
+    board.style.width=(cell*G.cols)+"px";
+    board.style.height=(cell*G.rows)+"px";
+  }
+
+  function buildClueLists(){
+    const al=$("acrossList"), dl=$("downList");
+    al.innerHTML=""; dl.innerHTML="";
+    G.puzzle.across.forEach(w=>{
+      const li=document.createElement("li");
+      li.dataset.num=w.num; li.dataset.dir="across";
+      li.innerHTML="<b>"+w.num+"</b>"+esc(w.clue);
+      al.appendChild(li);
+    });
+    G.puzzle.down.forEach(w=>{
+      const li=document.createElement("li");
+      li.dataset.num=w.num; li.dataset.dir="down";
+      li.innerHTML="<b>"+w.num+"</b>"+esc(w.clue);
+      dl.appendChild(li);
+    });
+  }
+
+  function wordDone(w,dir){
+    const cells=wordCells(w,dir);
+    return cells.every(({r,c})=>G.cur[r][c] && G.cur[r][c]===solChar(r,c));
+  }
+
+  function render(){
+    const cw=currentWord();
+    const curCells=cw ? wordCells(cw.w,cw.dir) : [];
+    const board=$("board");
+    for(let r=0;r<G.rows;r++){
+      for(let c=0;c<G.cols;c++){
+        const el=board.children[r*G.cols+c];
+        if(isBlock(r,c)) continue;
+        let cls="cell";
+        const v=G.cur[r][c];
+        const inWord=curCells.some(x=>x.r===r&&x.c===c);
+        if(inWord) cls+=" wordsel";
+        if(G.sel && G.sel.r===r && G.sel.c===c) cls+=" sel";
+        if(v){
+          if(v===solChar(r,c)) cls+=" correct"; else cls+=" bad";
+        }
+        el.className=cls;
+        el.querySelector(".ch").textContent=v||"";
+      }
+    }
+    // クルー一覧
+    document.querySelectorAll(".cluecol li").forEach(li=>{
+      const num=+li.dataset.num, dir=li.dataset.dir;
+      const list = dir==="across" ? G.puzzle.across : G.puzzle.down;
+      const w=list.find(x=>x.num===num);
+      li.classList.toggle("active", !!(cw && cw.w.num===num && cw.dir===dir));
+      li.classList.toggle("done", wordDone(w,dir));
+    });
+    // 現在のヒント表示
+    if(cw){
+      $("curNum").textContent=cw.w.num;
+      $("curText").textContent=(cw.dir==="across"?"よこ ":"たて ")+cw.w.num+"："+cw.w.clue;
+    }else{
+      $("curNum").textContent="–";
+      $("curText").textContent="マスを選んでください";
+    }
+    renderBonus();
+    positionHiddenInput();
+  }
+
+  function renderBonus(){
+    const pickup=G.puzzle.pickup;
+    const el=$("bonusLetters");
+    if(!pickup || !pickup.length){ el.innerHTML=""; return; }
+    const sorted=[...pickup].sort((a,b)=>a.num-b.num);
+    el.innerHTML=sorted.map(pk=>{
+      const v=G.cur[pk.row][pk.col];
+      return v ? '<span class="filled">'+v+'</span>' : '<span>　</span>';
+    }).join("");
+  }
+
+  function positionHiddenInput(){
+    if(!G.sel) return;
+    const idx=G.sel.r*G.cols+G.sel.c;
+    const cellEl=$("board").children[idx];
+    if(!cellEl) return;
+    const rect=cellEl.getBoundingClientRect();
+    const hi=$("hiddenInput");
+    hi.style.left=rect.left+"px";
+    hi.style.top=rect.top+"px";
+    hi.style.width=rect.width+"px";
+    hi.style.height=rect.height+"px";
+  }
+
+  function selectCell(r,c,forceDir){
+    if(isBlock(r,c)) return;
+    const {a,d}=wordsAt(r,c);
+    let dir;
+    if(forceDir && ((forceDir==="across"&&a)||(forceDir==="down"&&d))){
+      dir=forceDir;
+    }else if(G.sel && G.sel.r===r && G.sel.c===c && a && d){
+      dir = G.dir==="across" ? "down" : "across";
+    }else{
+      dir = (G.dir==="across"&&a) ? "across" : (G.dir==="down"&&d) ? "down" : (a?"across":"down");
+    }
+    G.sel={r,c}; G.dir=dir;
+    render();
+  }
+
+  function selectWord(num,dir){
+    const list = dir==="across" ? G.puzzle.across : G.puzzle.down;
+    const w=list.find(x=>x.num===num);
+    if(!w) return;
+    G.sel={r:w.row,c:w.col}; G.dir=dir;
+    render();
+  }
+
+  function advance(){
+    const cw=currentWord(); if(!cw) return;
+    const cells=wordCells(cw.w,cw.dir);
+    const idx=cells.findIndex(x=>x.r===G.sel.r&&x.c===G.sel.c);
+    if(idx>=0 && idx<cells.length-1){
+      G.sel=cells[idx+1];
+    }
+  }
+  function retreat(){
+    const cw=currentWord(); if(!cw) return;
+    const cells=wordCells(cw.w,cw.dir);
+    const idx=cells.findIndex(x=>x.r===G.sel.r&&x.c===G.sel.c);
+    if(idx>0) G.sel=cells[idx-1];
+  }
+  function moveDir(dr,dc){
+    if(!G.sel || G.done) return;
+    const nr=G.sel.r+dr, nc=G.sel.c+dc;
+    if(nr<0||nr>=G.rows||nc<0||nc>=G.cols||isBlock(nr,nc)) return;
+    selectCell(nr,nc);
+  }
+
+  function place(k){
+    if(!G.sel || G.done) return;
+    const {r,c}=G.sel;
+    G.cur[r][c]=k;
+    advance();
+    render();
+    checkWin();
+  }
+  function erase(){
+    if(!G.sel || G.done) return;
+    const {r,c}=G.sel;
+    if(G.cur[r][c]){ G.cur[r][c]=""; render(); return; }
+    retreat();
+    G.cur[G.sel.r][G.sel.c]="";
+    render();
+  }
+  function hint(){
+    if(!G.sel || G.done) return;
+    const {r,c}=G.sel;
+    G.cur[r][c]=solChar(r,c);
+    G.hints++;
+    render();
+    checkWin();
+  }
+
+  function checkWin(){
+    for(let r=0;r<G.rows;r++) for(let c=0;c<G.cols;c++){
+      if(isBlock(r,c)) continue;
+      if(G.cur[r][c]!==solChar(r,c)) return;
+    }
+    G.done=true;
+    $("hiddenInput").blur();
+    addSolved(G.puzzle.id);
+    renderPuzzleList();
+    if(window.BGStats){
+      BGStats.record("crossword", cur=>{
+        cur.clears=(cur.clears||0)+1;
+      });
+    }
+    toast("クリア！");
+    setTimeout(()=>{
+      $("ovTitle").textContent="クリア！";
+      const bonus=G.puzzle.pickupAnswer ? "　ボーナス「"+G.puzzle.pickupAnswer+"」" : "";
+      $("ovDetail").textContent=(G.puzzle.title)+"を解きました。ヒント使用 "+G.hints+"回"+bonus;
+      $("overlay").classList.add("show");
+    },500);
+  }
+
+  function startPuzzle(p){
+    G.puzzle=p; G.rows=p.grid.length; G.cols=p.grid[0].length;
+    G.cur=Array.from({length:G.rows},()=>Array(G.cols).fill(""));
+    G.sel=null; G.dir="across"; G.done=false; G.hints=0;
+    $("overlay").classList.remove("show");
+    $("playTitle").textContent=p.title;
+    composing=false; $("hiddenInput").value="";
+    buildBoard(); buildClueLists();
+    const first=p.across[0]||p.down[0];
+    const firstDir=p.across[0]?"across":"down";
+    selectCell(first.row,first.col,firstDir);
+    show("play");
+    if(window.BGStats){
+      BGStats.record("crossword", cur=>{ cur.plays=(cur.plays||0)+1; });
+    }
+  }
+
+  function renderPuzzleList(){
+    const solved=getSolved();
+    const wrap=$("puzzleList");
+    wrap.innerHTML="";
+    PUZZLES.forEach(p=>{
+      const done=solved.indexOf(p.id)>=0;
+      const b=document.createElement("button");
+      b.className="pcard"+(done?" done":"");
+      b.innerHTML=
+        '<span class="nm">'+esc(p.title)+'</span>'+
+        '<span class="sub">'+esc(p.theme)+'　／　'+p.grid.length+'×'+p.grid[0].length+'　／　ヒント'+(p.across.length+p.down.length)+'問</span>'+
+        (done?'<span class="check">クリア済み</span>':"");
+      b.addEventListener("click",()=>startPuzzle(p));
+      wrap.appendChild(b);
+    });
+  }
+
+  /* ---------- イベント ---------- */
+  const hiddenInput=$("hiddenInput");
+  let composing=false;
+  function commitText(text){
+    for(const ch of text){
+      if(ch==="\n"||ch==="\r") continue;
+      place(ch);
+    }
+  }
+  hiddenInput.addEventListener("compositionstart",()=>{ composing=true; });
+  hiddenInput.addEventListener("compositionend",()=>{
+    composing=false;
+    commitText(hiddenInput.value);
+    hiddenInput.value="";
+  });
+  hiddenInput.addEventListener("input",e=>{
+    if(composing || e.isComposing) return;
+    commitText(hiddenInput.value);
+    hiddenInput.value="";
+  });
+  hiddenInput.addEventListener("keydown",e=>{
+    if(e.isComposing) return;
+    if(e.key==="Backspace"){ e.preventDefault(); erase(); return; }
+    if(e.key==="Enter"){ e.preventDefault(); return; }
+    if(e.key==="ArrowLeft"){ e.preventDefault(); moveDir(0,-1); return; }
+    if(e.key==="ArrowRight"){ e.preventDefault(); moveDir(0,1); return; }
+    if(e.key==="ArrowUp"){ e.preventDefault(); moveDir(-1,0); return; }
+    if(e.key==="ArrowDown"){ e.preventDefault(); moveDir(1,0); return; }
+  });
+
+  $("board").addEventListener("click",e=>{
+    const c=e.target.closest(".cell"); if(!c || c.classList.contains("block") || G.done) return;
+    selectCell(+c.dataset.r,+c.dataset.c);
+    hiddenInput.focus({preventScroll:true});
+  });
+  $("eraseBtn").addEventListener("click",()=>{ erase(); hiddenInput.focus({preventScroll:true}); });
+  document.querySelectorAll(".cluecol").forEach(col=>{
+    col.addEventListener("click",e=>{
+      const li=e.target.closest("li"); if(!li) return;
+      selectWord(+li.dataset.num, li.dataset.dir);
+      hiddenInput.focus({preventScroll:true});
+    });
+  });
+  $("hintBtn").addEventListener("click",hint);
+  $("toSetup").addEventListener("click",()=>{ hiddenInput.blur(); renderPuzzleList(); show("setup"); });
+  $("ovAgain").addEventListener("click",()=>{ renderPuzzleList(); show("setup"); $("overlay").classList.remove("show"); });
+
+  window.addEventListener("resize",()=>{ if($("play").classList.contains("active")){ sizeBoard(); positionHiddenInput(); } });
+  window.addEventListener("orientationchange",()=>{ if($("play").classList.contains("active")) setTimeout(()=>{ sizeBoard(); positionHiddenInput(); },60); });
+
+  renderPuzzleList();
+})();
+</script>
+</body>
+</html>

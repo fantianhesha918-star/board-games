@@ -1,13 +1,13 @@
 /* チンチラのボードゲーム — オフライン対応 Service Worker
    デプロイのたびに VERSION を上げること（古いキャッシュを掃除するトリガー）。 */
-const VERSION = "2026-09-11b";
+const VERSION = "2026-09-13a";
 const CACHE = "bg-" + VERSION;
 
 const CORE = [
   "./",
   "./index.html", "./rules.html", "./trump.html", "./stats.html",
   "./daifugo.html", "./babanuki.html", "./sevens.html",
-  "./memory.html", "./solitaire.html", "./sudoku.html",
+  "./memory.html", "./solitaire.html", "./sudoku.html", "./crossword.html",
   "./pwa.js", "./stats.js", "./online.js", "./firebase-init.js",
   "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png",

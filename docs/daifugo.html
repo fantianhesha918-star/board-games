@@ -93,6 +93,10 @@
   .opp .t{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--line);color:var(--text-dim);}
   .opp .t.rich{background:var(--gold);color:#5b4413;}
   .opp .t.poor{background:#d9b3ac;color:#6b241b;}
+  .mytitle{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--line);color:var(--text-dim);white-space:nowrap;}
+  .mytitle:empty{display:none;padding:0;}
+  .mytitle.rich{background:var(--gold);color:#5b4413;}
+  .mytitle.poor{background:#d9b3ac;color:#6b241b;}
   .opp .cnt{color:var(--text-dim);font-weight:700;font-size:10.5px;}
   .opp .pass{color:var(--warn);font-size:9.5px;font-weight:800;}
 
@@ -143,11 +147,8 @@
   .overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:22px;padding:22px 20px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow);max-height:88vh;overflow-y:auto;}
   .modal h2{font-size:20px;margin:0 0 12px;}
-  .ovTrend{margin:-6px 0 14px;font-size:13.5px;font-weight:800;color:var(--text-dim);}
-  .ovTrend:empty{display:none;margin:0;}
-  .ovTrend b{color:var(--accent);}
   .modal .rank{list-style:none;padding:0;margin:0 0 18px;font-size:14px;text-align:left;}
-  .modal .rank li{display:flex;justify-content:space-between;padding:7px 9px;border-radius:9px;gap:8px;}
+  .modal .rank li{display:flex;flex-wrap:wrap;justify-content:space-between;padding:7px 9px;border-radius:9px;gap:4px 8px;}
   .modal .rank li:nth-child(odd){background:var(--surface-2);}
   .modal .rank li .ti{font-weight:800;}
   .modal .rank li .ti.rich{color:#a9852a;}
@@ -191,6 +192,7 @@
     #play .topbar{min-height:0;padding:4px 14px;}
     #play .topbar h1{font-size:15px;}
     #play .icon-btn,#play .back-btn{height:32px;}
+    .mytitle{font-size:10px;padding:2px 8px;}
     #play.screen{min-height:0;height:calc(100vh - var(--safe-v,0px));max-height:calc(100vh - var(--safe-v,0px));overflow:hidden;}
     .play{padding:3px 10px 4px;gap:4px;overflow:hidden;min-height:0;
       height:calc(100vh - 42px - var(--safe-v,0px));max-height:calc(100vh - 42px - var(--safe-v,0px));
@@ -321,6 +323,7 @@
     <div class="topbar">
       <a class="back-btn" href="#" id="toSetup">‹</a>
       <h1 id="playTitle">大富豪</h1>
+      <span class="mytitle" id="myTitleBadge"></span>
       <span class="spacer"></span>
       <button class="icon-btn" id="restartBtn">最初から</button>
     </div>
@@ -364,7 +367,6 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="ovResult">結果</h2>
-    <p class="ovTrend" id="ovTrend"></p>
     <ul class="rank" id="ovRank"></ul>
     <div class="row">
       <a class="ghost" href="index.html">ホーム</a>
@@ -479,7 +481,6 @@
     lastPlayer:-1, passCount:0, passed:[], finishers:[],
     over:false, busy:false, viewer:0,
     prevDaifugo:-1, gameNo:0, sel:[],
-    prevMyTitle:null,
     net:false, online:null
   };
 
@@ -551,7 +552,7 @@
     G.level=+getLevel();
     G.rensen = getRensen()==="on";
     G.rules=readRules();
-    G.gameNo=0; G.prevDaifugo=-1; G.prevMyTitle=null;
+    G.gameNo=0; G.prevDaifugo=-1; G._handSig=null;
     // 席順をランダムに（人間とCPUを毎回ばらけさせる。5飛ばし等で人間が必ず割を食うのを防ぐ）
     const roles=[];
     for(let k=0;k<hu;k++) roles.push(true);
@@ -576,6 +577,7 @@
     G.gameNo++;
     G.field=null; G.revolution=false; G.ebActive=false; G.lockSuits=null;
     G.passCount=0; G.passed=new Array(G.n).fill(false); G.finishers=[]; G.over=false; G.busy=true; G.sel=[];
+    G._handSig=null;
     G.players.forEach(p=>{ p.hand=[]; p.done=false; p.place=0; p.foul=false; p.miyako=false; });
     const deck=shuffle(newDeck());
     deck.forEach((c,idx)=>G.players[idx%G.n].hand.push(c));
@@ -620,12 +622,13 @@
       // 富豪側：任意のカードを返す（人間なら選択、CPUは弱い順）
       const rp=G.players[rich];
       let ret;
+      const poorTitle = G.players[poor].title || "相手";
       if(isHuman(rich)){
         if(G.humans>=2) await handoff(rich);
         G.viewer=rich;
-        setStatus(name(rich)+" → 大貧民へ渡すカードを "+cnt+" 枚選んでください");
+        setStatus(name(rich)+" → "+poorTitle+"へ渡すカードを "+cnt+" 枚選んでください");
         render();
-        ret=await pickCards(rich,cnt,"大貧民へ渡すカードを "+cnt+" 枚選んでください",true);
+        ret=await pickCards(rich,cnt,poorTitle+"へ渡すカードを "+cnt+" 枚選んでください",true);
       }else{
         ret=rp.hand.slice().sort((a,b)=>sortKeyFresh(a)-sortKeyFresh(b)).slice(0,cnt);
       }
@@ -811,9 +814,9 @@
       const three = cards.some(c=>!c.joker&&c.rank===3);
       if(G.rules.foul){
         if(jk) foul=true;
-        else if(two) foul=true;
+        else if(!G.revolution && two) foul=true;   // 通常時：2あがりは反則
+        else if(G.revolution && three) foul=true;  // 革命中：3あがりは反則（2は反則ではない）
         else if(G.rules.yakiri && real8) foul=true;
-        else if(G.revolution && three) foul=true;
         else if(lp.spade3) foul=true;
       }
     }
@@ -1081,9 +1084,9 @@
   }
   function foulFinish(cards){
     if(cards.some(c=>c.joker)) return true;
-    if(cards.some(c=>!c.joker&&c.rank===15)) return true;
+    if(!G.revolution && cards.some(c=>!c.joker&&c.rank===15)) return true; // 通常時：2あがり反則
+    if(G.revolution && cards.some(c=>!c.joker&&c.rank===3)) return true;   // 革命中：3あがり反則
     if(G.rules.yakiri && cards.some(c=>!c.joker&&c.rank===8)) return true;
-    if(G.revolution && cards.some(c=>!c.joker&&c.rank===3)) return true;
     return false;
   }
 
@@ -1099,7 +1102,8 @@
     const bad =G.finishers.filter(i=> G.players[i].foul ||  G.players[i].miyako);
     const order=good.concat(bad);
     order.forEach((idx,k)=>{ G.players[idx].place=k+1; });
-    // 称号
+    // 称号（上書きする前に「前回の称号」を全員分控えておく）
+    const prevTitles = G.players.map(p=>p.title||"");
     const n=G.n;
     order.forEach((idx,k)=>{
       let t="平民";
@@ -1129,13 +1133,8 @@
           if(G.players[mySeat].foul) cur.fouls=(cur.fouls||0)+1;
         });
       }
-      // 前回の順位→今回の順位（連戦中、席替えなしで続けている場合のみ）
-      document.getElementById("ovTrend").textContent =
-        G.prevMyTitle ? (G.prevMyTitle+" → "+myTitle) : "";
-      G.prevMyTitle = myTitle;
     }else{
       title = name(order[0])+" の勝ち";
-      document.getElementById("ovTrend").textContent="";
     }
     document.getElementById("ovResult").textContent=title;
     const ul=document.getElementById("ovRank"); ul.innerHTML="";
@@ -1144,7 +1143,10 @@
       const li=document.createElement("li");
       const cls = P.title==="大富豪"||P.title==="富豪" ? "rich" : (P.title==="大貧民"||P.title==="貧民" ? "poor":"");
       const tag = P.foul?"（反則）":P.miyako?"（都落ち）":"";
-      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+P.title+"</span><span>"+name(idx)+tag+"</span>";
+      // 前回の称号→今回の称号（連戦2戦目以降、全員分表示）
+      const prev = prevTitles[idx];
+      const titleTxt = prev ? (prev+" → "+P.title) : P.title;
+      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+titleTxt+"</span><span>"+name(idx)+tag+"</span>";
       ul.appendChild(li);
     });
     document.getElementById("ovAgain").textContent = G.rensen ? "次のゲームへ" : "もう一度";
@@ -1193,9 +1195,16 @@
       fc.innerHTML="<span class='fieldempty'>場は流れています（親の番）</span>";
     }
 
+    // 自分の現在の称号（連戦2戦目以降、前回の結果から引き継ぎ）
+    const myTitleEl=document.getElementById("myTitleBadge");
+    const myTitleNow=G.players[G.viewer].title;
+    const myTcls = myTitleNow==="大富豪"||myTitleNow==="富豪" ? "rich" : (myTitleNow==="大貧民"||myTitleNow==="貧民" ? "poor" : "");
+    myTitleEl.className="mytitle"+(myTcls?" "+myTcls:"");
+    myTitleEl.textContent=myTitleNow||"";
+
     // my hand
     const P=G.players[G.viewer];
-    const hand=document.getElementById("hand"); hand.innerHTML="";
+    const hand=document.getElementById("hand");
     const isTurn = G.turn===G.viewer && isHuman(G.viewer) && !G.over && !G.busy;
     const many=P.hand.length;
 
@@ -1224,24 +1233,32 @@
     if(isTurn && G.field) lbl += mustPass ? "  出せる札がありません → パス" : "  枠付き＝出せる札";
     document.getElementById("handLabel").textContent=lbl;
 
-    // 自分の手番は重なりを浅くしてタップしやすく（横持ちでも手札は横並びのまま）
-    const ov = isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12);
-    const setOv = (el,idx,v)=>{ el.style.marginLeft=(idx===0?0:v)+"px"; el.style.marginTop=""; };
-    P.hand.forEach((c,idx)=>{
-      const el=document.createElement("div");
-      let cls="card"+(G.sel.includes(c.id)?" sel":"");
-      if(playable) cls += playable.has(c.id) ? " ok" : " no";
-      el.className=cls;
-      el.style.backgroundImage="url("+cardImg(c)+")";
-      setOv(el,idx,ov);
-      el.dataset.id=c.id;
-      hand.appendChild(el);
-    });
-    // 選択カードの前後にすき間を作り、2枚目以降を選びやすく
-    Array.from(hand.children).forEach((el,idx)=>{
-      if(el.classList.contains("sel")) setOv(el,idx,10);
-      else if(idx>0 && hand.children[idx-1].classList.contains("sel")) setOv(el,idx,10);
-    });
+    // 手札の中身・選択・出せる札が前回の描画と同じなら作り直さない
+    // （CPUの番のたびに毎回自分の手札を作り直すとカードがチカチカして見えるため）
+    const handSig = P.hand.map(c=>c.id).join(",")+"|"+G.sel.join(",")+"|"+
+      (playable?[...playable].sort((a,b)=>a-b).join(","):"-")+"|"+isTurn;
+    if(G._handSig!==handSig){
+      G._handSig=handSig;
+      hand.innerHTML="";
+      // 自分の手番は重なりを浅くしてタップしやすく（横持ちでも手札は横並びのまま）
+      const ov = isTurn ? (many>18?-16:many>13?-11:-7) : (many>14?-24:many>10?-18:-12);
+      const setOv = (el,idx,v)=>{ el.style.marginLeft=(idx===0?0:v)+"px"; el.style.marginTop=""; };
+      P.hand.forEach((c,idx)=>{
+        const el=document.createElement("div");
+        let cls="card"+(G.sel.includes(c.id)?" sel":"");
+        if(playable) cls += playable.has(c.id) ? " ok" : " no";
+        el.className=cls;
+        el.style.backgroundImage="url("+cardImg(c)+")";
+        setOv(el,idx,ov);
+        el.dataset.id=c.id;
+        hand.appendChild(el);
+      });
+      // 選択カードの前後にすき間を作り、2枚目以降を選びやすく
+      Array.from(hand.children).forEach((el,idx)=>{
+        if(el.classList.contains("sel")) setOv(el,idx,10);
+        else if(idx>0 && hand.children[idx-1].classList.contains("sel")) setOv(el,idx,10);
+      });
+    }
 
     const playBtn=document.getElementById("playBtn"), passBtn=document.getElementById("passBtn");
     playBtn.disabled = !isTurn || G.sel.length===0;
@@ -1410,9 +1427,9 @@
     if(ns.cfg.rules.foul && ns._pl){
       const cw=ns._pl.cardsWere.map(idCard);
       if(cw.some(c=>c.joker)) foul=true;
-      else if(cw.some(c=>!c.joker&&c.rank===15)) foul=true;
+      else if(!ns.revolution && cw.some(c=>!c.joker&&c.rank===15)) foul=true; // 通常時：2あがり反則
+      else if(ns.revolution && cw.some(c=>!c.joker&&c.rank===3)) foul=true;  // 革命中：3あがり反則
       else if(ns.cfg.rules.yakiri && ns._pl.real8) foul=true;
-      else if(ns.revolution && cw.some(c=>!c.joker&&c.rank===3)) foul=true;
       else if(ns._pl.spade3) foul=true;
     }
     ns.foul[seat]=foul;
@@ -1705,6 +1722,8 @@
 
   /* ---- クライアント側の同期・描画 ---- */
   function applyNetSnapshot(s){
+    // ラウンド終了直前までの称号を控えておく（結果画面で「前回→今回」を出すため）
+    if(s.phase!=="roundover"){ G._netPrevTitles=(s.title||[]).slice(); }
     G.net=true;
     G.n=s.n;
     G.viewer=G.online.myIdx;
@@ -1818,11 +1837,15 @@
     finally{ G.online.cpuActing=false; }
   }
 
+  function poorTitleOf(s){
+    const seat = s.pending ? s.pending.poor : -1;
+    return (seat!=null && seat>=0 && s.title && s.title[seat]) ? s.title[seat] : "相手";
+  }
   function netStatus(s){
     if(s.phase==="roundover") return;
     if(s.phase==="exchange"){
       const r=s.pending?s.pending.awaitRich:-1;
-      setStatus(r===G.online.myIdx ? "カード交換：大貧民へ返すカードを選んでください" : "カード交換中…");
+      setStatus(r===G.online.myIdx ? "カード交換："+poorTitleOf(s)+"へ返すカードを選んでください" : "カード交換中…");
       return;
     }
     if(s.phase==="transfer"){
@@ -1846,7 +1869,6 @@
     if(!data){
       if(!G.online.ended){ G.online.ended=true; G.over=true;
         document.getElementById("ovResult").textContent="部屋が閉じられました";
-        document.getElementById("ovTrend").textContent="";
         document.getElementById("ovRank").innerHTML="<li><span>だれかが退出したか、部屋が削除されました</span></li>";
         document.getElementById("ovAgain").style.display="none";
         document.getElementById("overlay").classList.add("show"); }
@@ -1883,7 +1905,7 @@
       const needMe =
         (s.phase==="transfer" && s.pending && s.pending.from===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"transfer", msg:"左隣へ渡すカードを "+s.pending.cnt+" 枚"} :
         (s.phase==="discard" && s.pending && s.pending.from===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"discard", msg:"捨てるカードを "+s.pending.cnt+" 枚"} :
-        (s.phase==="exchange" && s.pending && s.pending.awaitRich===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"exchange", msg:"大貧民へ返すカードを "+s.pending.cnt+" 枚"} : null;
+        (s.phase==="exchange" && s.pending && s.pending.awaitRich===G.online.myIdx) ? {cnt:s.pending.cnt, kind:"exchange", msg:poorTitleOf(s)+"へ返すカードを "+s.pending.cnt+" 枚"} : null;
       if(needMe && !G.online.pickBusy && s.seq!==_pickSeq){
         _pickSeq=s.seq; G.online.pickBusy=true;
         pickCards(G.online.myIdx, needMe.cnt, needMe.msg).then(chosen=>{
@@ -1899,15 +1921,17 @@
   function showRoundOverlay(s, note){
     G.over=true;
     const order = s.order && s.order.length ? s.order : s.hands.map((_,i)=>i);
+    const prevTitles = G._netPrevTitles || [];
     document.getElementById("ovResult").textContent = note ? note : (name(order[0])+" の勝ち");
-    document.getElementById("ovTrend").textContent="";
     const ul=document.getElementById("ovRank"); ul.innerHTML="";
     order.forEach((idx,k)=>{
       const t=s.title[idx]||"";
       const cls = (t==="大富豪"||t==="富豪")?"rich":(t==="大貧民"||t==="貧民")?"poor":"";
       const tag = s.foul[idx]?"（反則）":s.miyako[idx]?"（都落ち）":"";
+      const prev = prevTitles[idx];
+      const titleTxt = prev ? (prev+" → "+t) : t;
       const li=document.createElement("li");
-      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+t+"</span><span>"+name(idx)+tag+"</span>";
+      li.innerHTML="<span class='ti "+cls+"'>"+(k+1)+"位 "+titleTxt+"</span><span>"+name(idx)+tag+"</span>";
       ul.appendChild(li);
     });
     const ov=document.getElementById("ovAgain");

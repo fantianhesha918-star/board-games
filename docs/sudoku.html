@@ -447,7 +447,7 @@
     G.cur=Int8Array.from(puzzle);
     G.given=Array.from(puzzle,v=>v!==0);
     G.notes=Array.from({length:81},()=>[]);
-    G.sel=-1; G.memo=false; G.mistakes=0; G.hints=0; G.hist=[]; G.hintAt=new Set(); G.done=false; G.picUrl=null;
+    G.sel=-1; G.memo=false; G.mistakes=0; G.hints=0; G.hist=[]; G.hintAt=new Set(); G.done=false; G.picUrl=null; G.wonAt=0;
     $("memoBtn").classList.remove("on");
     $("overlay").classList.remove("show");
     boardEl.classList.remove("solved","done-nopic");
@@ -479,7 +479,7 @@
     G.notes=(s.notes||[]).map(str=>str?str.split("").map(Number):[]);
     while(G.notes.length<81) G.notes.push([]);
     G.sel=-1; G.memo=!!s.memo; G.mistakes=s.mistakes|0; G.hints=s.hints|0;
-    G.hist=[]; G.hintAt=new Set(s.hintAt||[]); G.done=false;
+    G.hist=[]; G.hintAt=new Set(s.hintAt||[]); G.done=false; G.wonAt=0;
     G.picUrl=s.picUrl||null;
     $("memoBtn").classList.toggle("on",G.memo);
     $("overlay").classList.remove("show");
@@ -630,6 +630,7 @@
   function checkWin(){
     for(let i=0;i<81;i++) if(G.cur[i]!==G.solution[i]) return;
     G.done=true;
+    G.wonAt=Date.now(); // 完成させた瞬間のタップ自体で結果が開いてしまわないようにするための基準時刻
     stopTimer();
     lsDel(SAVE_KEY);
     if(G.picUrl){ addDex(picNo(G.picUrl)); renderDex(); }
@@ -677,7 +678,8 @@
   });
   $("play").addEventListener("click",()=>{
     // クリア後、イラストを見たあとのタップで結果モーダルを開く
-    if(G.done && !$("overlay").classList.contains("show")) showResultModal();
+    // （完成させた瞬間のクリック自体がここまでバブリングしてすぐ開いてしまわないよう、少し間を置く）
+    if(G.done && !$("overlay").classList.contains("show") && Date.now()-(G.wonAt||0)>400) showResultModal();
   });
 
   (function buildNumpad(){

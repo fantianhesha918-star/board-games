@@ -103,7 +103,8 @@
     sevens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="6" height="12" rx="1.3"/><rect x="9" y="6" width="6" height="12" rx="1.3"/><rect x="16" y="6" width="6" height="12" rx="1.3"/></svg>',
     memory:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.3"/><rect x="13" y="3" width="8" height="8" rx="1.3"/><rect x="3" y="13" width="8" height="8" rx="1.3"/><rect x="13" y="13" width="8" height="8" rx="1.3"/></svg>',
     solitaire:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="6" height="15" rx="1.3"/><rect x="9.5" y="5" width="6" height="10" rx="1.3"/><rect x="17" y="5" width="6" height="6" rx="1.3"/></svg>',
-    sudoku:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>'
+    sudoku:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>',
+    crossword:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><rect x="9" y="9" width="6" height="6" fill="currentColor" stroke="none"/></svg>'
   };
 
   function othelloCard(s){
@@ -192,6 +193,15 @@
     );
   }
 
+  function crosswordCard(s){
+    if(!s || !s.plays) return card("クロスワード", IC.crossword, empty);
+    return card("クロスワード", IC.crossword,
+      row("プレイ回数", s.plays+"回")+
+      row("クリア回数", (s.clears||0)+"回", "hi")+
+      row("クリア率", pct(s.clears||0, s.plays))
+    );
+  }
+
   function render(){
     const all = window.BGStats ? BGStats.getAll() : {};
     $("cards").innerHTML =
@@ -201,7 +211,8 @@
       sevensCard(all.sevens)+
       memoryCard(all.memory)+
       solitaireCard(all.solitaire)+
-      sudokuCard(all.sudoku);
+      sudokuCard(all.sudoku)+
+      crosswordCard(all.crossword);
   }
   render();
 
