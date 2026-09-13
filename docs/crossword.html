@@ -74,6 +74,16 @@
   .pcard .nm{font-weight:800;font-size:15.5px;}
   .pcard .sub{font-size:12px;color:var(--text-dim);font-weight:700;}
   .pcard .check{position:absolute;top:12px;right:14px;color:var(--accent);font-weight:800;font-size:13px;}
+  .fieldlabel{font-weight:800;font-size:13px;margin:0 0 8px;}
+  .resume{
+    display:none;flex-direction:column;gap:2px;text-align:left;
+    border:2px solid var(--accent);border-radius:16px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));
+    padding:14px 16px;cursor:pointer;color:var(--text);font:inherit;
+  }
+  .resume.show{display:flex;}
+  .resume:active{transform:scale(.98);}
+  .resume .rt{font-weight:800;font-size:15px;color:var(--accent);}
+  .resume .rs{font-size:12.5px;color:var(--text-dim);font-weight:700;}
 
   /* play */
   .play{flex:1;display:flex;flex-direction:column;gap:10px;padding:2px 14px 16px;min-height:0;}
@@ -113,6 +123,7 @@
   .actions button{flex:1;border:none;background:var(--surface);color:var(--text);border-radius:12px;padding:12px 0;
     font-size:14px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
   .actions button:active{transform:scale(.96);}
+  .actions button:disabled{opacity:.4;pointer-events:none;}
 
   .bonus{
     background:color-mix(in srgb,var(--pick) 12%,var(--surface-2));border:1px solid color-mix(in srgb,var(--pick) 40%,var(--line));
@@ -181,17 +192,31 @@
       <a class="icon-btn" href="rules.html#crossword">ルール</a>
     </div>
     <div class="setup">
+      <button class="resume" id="resumeBtn" type="button">
+        <span class="rt">前回のつづき</span>
+        <span class="rs" id="resumeInfo"></span>
+      </button>
       <div class="howto">
         <h3>遊び方</h3>
         <p>マスを選ぶとキーボードが立ち上がるので、かな入力で文字を入れます。<b>よこ／たて</b>のヒントを見ながら、すべてのマスを正しい文字で埋めるとクリアです。</p>
         <p>すでに文字が入っているマスをもう一度タップすると、<b>よこ⇔たて</b>の向きが切りかわります。ヒントの文字をタップしても、その言葉の先頭マスに移動します。</p>
         <p>マスの右下に<b>色つきの番号</b>がついているマスがあります。その番号の順番で文字を拾うと、もうひとつの<b>ボーナスの言葉</b>が浮かび上がります。</p>
       </div>
-      <div class="seg" id="segPzLevel">
-        <button data-val="all" class="on">すべて</button>
-        <button data-val="easy">やさしい</button>
-        <button data-val="normal">ふつう</button>
-        <button data-val="hard">むずかしい</button>
+      <div>
+        <p class="fieldlabel">ミス自動チェック</p>
+        <div class="seg" id="segCheck">
+          <button data-val="on" class="on">オン</button>
+          <button data-val="off">オフ</button>
+        </div>
+      </div>
+      <div>
+        <p class="fieldlabel">むずかしさ</p>
+        <div class="seg" id="segPzLevel">
+          <button data-val="all" class="on">すべて</button>
+          <button data-val="easy">やさしい</button>
+          <button data-val="normal">ふつう</button>
+          <button data-val="hard">むずかしい</button>
+        </div>
       </div>
       <div class="plist" id="puzzleList"></div>
     </div>
@@ -209,7 +234,10 @@
       <input id="hiddenInput" class="hidden-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-hidden="true">
       <div class="curclue"><span class="badge" id="curNum">–</span><span class="tx" id="curText">問題を選んでください</span></div>
       <div class="bonus"><span>ボーナス</span><span class="letters" id="bonusLetters"></span></div>
-      <div class="actions"><button type="button" id="eraseBtn">消す</button></div>
+      <div class="actions">
+        <button type="button" id="undoBtn">戻す</button>
+        <button type="button" id="eraseBtn">消す</button>
+      </div>
       <div class="cluewrap">
         <div class="cluecol"><h4>よこ</h4><ul id="acrossList"></ul></div>
         <div class="cluecol"><h4>たて</h4><ul id="downList"></ul></div>
@@ -451,15 +479,38 @@
     }
   ];
 
-  /* ---------- 保存（クリア済み一覧）---------- */
+  /* ---------- 保存（クリア済み一覧・進行中セーブ）---------- */
   const SOLVED_KEY="crossword-solved";
+  const SAVE_KEY="crossword-save";
   function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch{} }
   function getSolved(){ const a=lsGet(SOLVED_KEY); return Array.isArray(a)?a:[]; }
   function addSolved(id){ const a=getSolved(); if(a.indexOf(id)<0){ a.push(id); lsSet(SOLVED_KEY,a); } }
 
+  function seg(id){ const w=$(id);
+    w.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+      w.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); });
+    return ()=>w.querySelector("button.on").dataset.val; }
+  const getCheck=seg("segCheck");
+
   /* ---------- ゲーム状態 ---------- */
-  const G={ puzzle:null, rows:0, cols:0, cur:null, sel:null, dir:"across", done:false, hints:0 };
+  const G={ puzzle:null, rows:0, cols:0, cur:null, sel:null, dir:"across", done:false, hints:0, check:true, hist:[] };
+
+  let _saveT=0;
+  function saveState(){
+    if(!G.puzzle || G.done) return;
+    const s={ v:1, id:G.puzzle.id, cur:G.cur.map(row=>row.join(",")), hints:G.hints, check:G.check, ts:Date.now() };
+    lsSet(SAVE_KEY,s);
+  }
+  function scheduleSave(){ clearTimeout(_saveT); _saveT=setTimeout(saveState,250); }
+  function loadSave(){
+    const s=lsGet(SAVE_KEY);
+    if(!s || s.v!==1) return null;
+    const p=PUZZLES.find(x=>x.id===s.id);
+    if(!p) return null;
+    return {s,p};
+  }
 
   function isBlock(r,c){ return G.puzzle.grid[r][c]==="#"; }
   function solChar(r,c){ return G.puzzle.grid[r][c]; }
@@ -556,7 +607,7 @@
         const inWord=curCells.some(x=>x.r===r&&x.c===c);
         if(inWord) cls+=" wordsel";
         if(G.sel && G.sel.r===r && G.sel.c===c) cls+=" sel";
-        if(v){
+        if(v && G.check){
           if(v===solChar(r,c)) cls+=" correct"; else cls+=" bad";
         }
         el.className=cls;
@@ -581,6 +632,7 @@
     }
     renderBonus();
     positionHiddenInput();
+    $("undoBtn").disabled = G.hist.length===0;
   }
 
   function renderBonus(){
@@ -651,28 +703,48 @@
     selectCell(nr,nc);
   }
 
+  function pushHist(r,c){
+    G.hist.push({r,c,val:G.cur[r][c]});
+    if(G.hist.length>200) G.hist.shift();
+  }
+  function undo(){
+    if(G.done) return;
+    const h=G.hist.pop();
+    if(!h) return;
+    G.cur[h.r][h.c]=h.val;
+    G.sel={r:h.r,c:h.c};
+    render();
+    scheduleSave();
+  }
+
   function place(k){
     if(!G.sel || G.done) return;
     const {r,c}=G.sel;
+    pushHist(r,c);
     G.cur[r][c]=k;
     advance();
     render();
+    scheduleSave();
     checkWin();
   }
   function erase(){
     if(!G.sel || G.done) return;
     const {r,c}=G.sel;
-    if(G.cur[r][c]){ G.cur[r][c]=""; render(); return; }
+    if(G.cur[r][c]){ pushHist(r,c); G.cur[r][c]=""; render(); scheduleSave(); return; }
     retreat();
+    pushHist(G.sel.r,G.sel.c);
     G.cur[G.sel.r][G.sel.c]="";
     render();
+    scheduleSave();
   }
   function hint(){
     if(!G.sel || G.done) return;
     const {r,c}=G.sel;
+    pushHist(r,c);
     G.cur[r][c]=solChar(r,c);
     G.hints++;
     render();
+    scheduleSave();
     checkWin();
   }
 
@@ -683,11 +755,16 @@
     }
     G.done=true;
     $("hiddenInput").blur();
+    lsDel(SAVE_KEY);
     addSolved(G.puzzle.id);
     renderPuzzleList();
     if(window.BGStats){
+      const lvl=G.puzzle.level;
       BGStats.record("crossword", cur=>{
         cur.clears=(cur.clears||0)+1;
+        cur.byLevel=cur.byLevel||{};
+        const lv=cur.byLevel[lvl]=cur.byLevel[lvl]||{plays:0,clears:0};
+        lv.clears++;
       });
     }
     toast("クリア！");
@@ -699,10 +776,13 @@
     },500);
   }
 
-  function startPuzzle(p){
+  function startPuzzle(p,resume){
     G.puzzle=p; G.rows=p.grid.length; G.cols=p.grid[0].length;
-    G.cur=Array.from({length:G.rows},()=>Array(G.cols).fill(""));
-    G.sel=null; G.dir="across"; G.done=false; G.hints=0;
+    G.check = resume ? (resume.check!==false) : (getCheck()==="on");
+    G.cur = resume ? resume.cur.map(row=>row.split(",")) : Array.from({length:G.rows},()=>Array(G.cols).fill(""));
+    G.sel=null; G.dir="across"; G.done=false; G.hints = resume ? (resume.hints||0) : 0;
+    G.hist=[];
+    $("segCheck").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x.dataset.val===(G.check?"on":"off")));
     $("overlay").classList.remove("show");
     $("playTitle").textContent=p.title;
     composing=false; $("hiddenInput").value="";
@@ -711,9 +791,24 @@
     const firstDir=p.across[0]?"across":"down";
     selectCell(first.row,first.col,firstDir);
     show("play");
-    if(window.BGStats){
-      BGStats.record("crossword", cur=>{ cur.plays=(cur.plays||0)+1; });
+    if(!resume){
+      lsDel(SAVE_KEY);
+      if(window.BGStats){
+        BGStats.record("crossword", cur=>{
+          cur.plays=(cur.plays||0)+1;
+          cur.byLevel=cur.byLevel||{};
+          cur.byLevel[p.level]=cur.byLevel[p.level]||{plays:0,clears:0};
+          cur.byLevel[p.level].plays++;
+        });
+      }
     }
+    saveState();
+  }
+
+  function resumeGame(){
+    const found=loadSave();
+    if(!found) return;
+    startPuzzle(found.p, found.s);
   }
 
   const LV_LABEL={easy:"やさしい",normal:"ふつう",hard:"むずかしい"};
@@ -742,6 +837,24 @@
     pzLevelFilter=b.dataset.val;
     renderPuzzleList();
   });
+
+  function refreshSetupExtras(){
+    const found=loadSave();
+    const btn=$("resumeBtn");
+    if(found){
+      let done=0, total=0;
+      for(let r=0;r<found.p.grid.length;r++) for(let c=0;c<found.p.grid[0].length;c++){
+        if(found.p.grid[r][c]==="#") continue;
+        total++;
+        if(found.s.cur[r] && found.s.cur[r].split(",")[c]) done++;
+      }
+      $("resumeInfo").textContent = (LV_LABEL[found.p.level]||"")+" ／ "+found.p.title+" ／ あと"+Math.max(0,total-done)+"マス";
+      btn.classList.add("show");
+    }else{
+      btn.classList.remove("show");
+    }
+  }
+  $("resumeBtn").addEventListener("click",resumeGame);
 
   /* ---------- イベント ---------- */
   const hiddenInput=$("hiddenInput");
@@ -779,6 +892,7 @@
     hiddenInput.focus({preventScroll:true});
   });
   $("eraseBtn").addEventListener("click",()=>{ erase(); hiddenInput.focus({preventScroll:true}); });
+  $("undoBtn").addEventListener("click",()=>{ undo(); hiddenInput.focus({preventScroll:true}); });
   document.querySelectorAll(".cluecol").forEach(col=>{
     col.addEventListener("click",e=>{
       const li=e.target.closest("li"); if(!li) return;
@@ -787,13 +901,25 @@
     });
   });
   $("hintBtn").addEventListener("click",hint);
-  $("toSetup").addEventListener("click",()=>{ hiddenInput.blur(); renderPuzzleList(); show("setup"); });
-  $("ovAgain").addEventListener("click",()=>{ renderPuzzleList(); show("setup"); $("overlay").classList.remove("show"); });
+  $("toSetup").addEventListener("click",()=>{ hiddenInput.blur(); saveState(); renderPuzzleList(); refreshSetupExtras(); show("setup"); });
+  $("ovAgain").addEventListener("click",()=>{ renderPuzzleList(); refreshSetupExtras(); show("setup"); $("overlay").classList.remove("show"); });
 
   window.addEventListener("resize",()=>{ if($("play").classList.contains("active")){ sizeBoard(); positionHiddenInput(); } });
   window.addEventListener("orientationchange",()=>{ if($("play").classList.contains("active")) setTimeout(()=>{ sizeBoard(); positionHiddenInput(); },60); });
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveState(); });
+  window.addEventListener("pagehide",saveState);
+
+  lsSet("crossword-meta", {
+    total:PUZZLES.length,
+    byLevel:{
+      easy:PUZZLES.filter(p=>p.level==="easy").length,
+      normal:PUZZLES.filter(p=>p.level==="normal").length,
+      hard:PUZZLES.filter(p=>p.level==="hard").length
+    }
+  });
 
   renderPuzzleList();
+  refreshSetupExtras();
 })();
 </script>
 </body>
