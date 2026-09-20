@@ -127,14 +127,34 @@
 
   .bonus{
     background:color-mix(in srgb,var(--pick) 12%,var(--surface-2));border:1px solid color-mix(in srgb,var(--pick) 40%,var(--line));
-    border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--text-dim);
+    border-radius:12px;padding:9px 12px;font-size:12px;font-weight:800;color:var(--text-dim);
   }
-  .bonus .letters{display:flex;gap:4px;}
+  .bonus .bn-row{display:flex;align-items:center;gap:10px;}
+  .bonus .letters{display:flex;gap:4px;flex-wrap:wrap;}
   .bonus .letters span{
     min-width:22px;height:26px;border-radius:7px;background:var(--surface);color:var(--text);
     display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px var(--line);
   }
-  .bonus .letters span.filled{background:var(--pick);color:#fff;box-shadow:none;}
+  .bonus .bn-label{margin:0 0 7px;font-size:12px;font-weight:800;color:var(--text-dim);}
+  .bonus .bn-slots,.bonus .bn-tiles{display:flex;gap:5px;flex-wrap:wrap;}
+  .bonus .bn-slots{margin-bottom:8px;}
+  .bonus .bn-tile,.bonus .bn-slot{
+    min-width:28px;height:32px;padding:0 5px;border-radius:8px;font-size:16px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-family:inherit;
+  }
+  .bonus .bn-tile{background:var(--surface);color:var(--text);box-shadow:inset 0 0 0 1px var(--line);}
+  .bonus .bn-tile:active{transform:scale(.92);}
+  .bonus .bn-slot{background:transparent;color:var(--text);box-shadow:inset 0 0 0 2px dashed color-mix(in srgb,var(--pick) 55%,var(--line));}
+  .bonus .bn-slot.filled{background:var(--pick);color:#fff;box-shadow:none;cursor:pointer;}
+  .bonus.bn-success .bn-slot.filled{background:var(--accent);}
+  .bonus.bn-wrong .bn-slot.filled{background:var(--bad);}
+  .bonus .bn-actions{display:flex;gap:8px;margin-top:8px;}
+  .bonus .bn-actions button{border:none;background:var(--surface);color:var(--text-dim);border-radius:9px;
+    padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:inset 0 0 0 1px var(--line);}
+  .bonus .bn-actions button:active{transform:scale(.95);}
+  .bonus .bn-msg{margin:6px 0 0;font-size:12px;font-weight:800;}
+  .bonus.bn-success .bn-msg{color:var(--accent);}
+  .bonus.bn-wrong .bn-msg{color:var(--bad);}
 
   .cluewrap{display:flex;gap:10px;}
   .cluecol{flex:1;min-width:0;}
@@ -173,8 +193,8 @@
       display:grid;grid-template-columns:1fr 190px;grid-template-rows:auto auto auto 1fr;column-gap:10px;row-gap:6px;}
     .boardwrap{grid-column:1;grid-row:1/5;align-self:center;height:100%;min-height:0;}
     .curclue{grid-column:2;grid-row:1;align-self:start;font-size:11.5px;padding:7px 9px;}
-    .bonus{grid-column:2;grid-row:2;align-self:start;font-size:11px;padding:6px 8px;}
-    .bonus .letters span{min-width:18px;height:20px;font-size:12px;}
+    .bonus{grid-column:2;grid-row:2;align-self:start;font-size:11px;padding:6px 8px;max-height:38vh;overflow-y:auto;}
+    .bonus .letters span,.bonus .bn-tile,.bonus .bn-slot{min-width:18px;height:20px;font-size:12px;}
     .actions{grid-column:2;grid-row:3;align-self:start;}
     .actions button{padding:8px 0;font-size:12px;}
     .cluewrap{grid-column:2;grid-row:4;min-height:0;overflow-y:auto;}
@@ -200,7 +220,7 @@
         <h3>遊び方</h3>
         <p>マスを選ぶとキーボードが立ち上がるので、かな入力で文字を入れます。<b>よこ／たて</b>のヒントを見ながら、すべてのマスを正しい文字で埋めるとクリアです。</p>
         <p>すでに文字が入っているマスをもう一度タップすると、<b>よこ⇔たて</b>の向きが切りかわります。ヒントの文字をタップしても、その言葉の先頭マスに移動します。</p>
-        <p>マスの右下に<b>色つきの番号</b>がついているマスがあります。その番号の順番で文字を拾うと、もうひとつの<b>ボーナスの言葉</b>が浮かび上がります。</p>
+        <p>マスの右下に<b>色つきの丸</b>がついているマスがあります。クロスワードを解き終わると、それらのマスの文字がバラバラの順番で出てくるので、<b>タップして並びかえる</b>と、もうひとつの<b>ボーナスの言葉</b>が浮かび上がります。</p>
       </div>
       <div>
         <p class="fieldlabel">ミス自動チェック</p>
@@ -233,7 +253,7 @@
       <div class="boardwrap"><div id="board"></div></div>
       <input id="hiddenInput" class="hidden-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-hidden="true">
       <div class="curclue"><span class="badge" id="curNum">–</span><span class="tx" id="curText">問題を選んでください</span></div>
-      <div class="bonus"><span>ボーナス</span><span class="letters" id="bonusLetters"></span></div>
+      <div class="bonus" id="bonus"></div>
       <div class="actions">
         <button type="button" id="undoBtn">戻す</button>
         <button type="button" id="eraseBtn">消す</button>
@@ -271,211 +291,401 @@
   /* ---------- パズルデータ（しりとりでつながる交差クロスワード）---------- */
   const PUZZLES=[
     {
-      id:1, title:"クロス①", level:"normal", theme:"どうぶつ・くだもの",
-      grid:["りんご#####","##り#####","##らっぱ###","####ん###","####だちょう"],
+      id:1, title:"クロス①", level:"easy", theme:"ようふく・けんだま・いけ",
+      grid:["ようふく","#し#ち","い#え#","けんだま"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"りんご",clue:"赤くて丸い、木になる果物。皮をむいて食べたりジュースにしたりする。"},
-        {num:3,row:2,col:2,len:3,answer:"らっぱ",clue:"息をふきこんで音を出す、金色の管楽器。"},
-        {num:5,row:4,col:4,len:4,answer:"だちょう",clue:"首と脚がとても長く、走るのが速い、空を飛べない大きな鳥。"}
+        {num:1,row:0,col:0,len:4,answer:"ようふく",clue:"洋服、着る服のこと。"},
+        {num:6,row:3,col:0,len:4,answer:"けんだま",clue:"玉を皿や先にのせて遊ぶ、日本のおもちゃ。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:3,answer:"ごりら",clue:"大きくて力持ち、胸をたたくしぐさで知られる森の動物。"},
-        {num:4,row:2,col:4,len:3,answer:"ぱんだ",clue:"白と黒のもふもふ、笹を食べる人気者。"}
+        {num:2,row:0,col:1,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:3,row:0,col:3,len:2,answer:"くち",clue:"食べ物を食べたり話したりする部分。"},
+        {num:4,row:2,col:0,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"},
+        {num:5,row:2,col:2,len:2,answer:"えだ",clue:"木の幹から分かれて伸びている部分。"}
       ],
-      pickup:[{num:1,row:4,col:4},{num:2,row:3,col:4},{num:3,row:0,col:2}], pickupAnswer:"だんご"
+      pickup:[{num:1,row:0,col:2},{num:2,row:2,col:2}], pickupAnswer:"ふえ"
     },
     {
-      id:2, title:"クロス②", level:"normal", theme:"くだもの・どうぶつ",
-      grid:["すいか#####","##が#####","##みかづき##","#####つ##","#####ねずみ","#######か","#######ん"],
+      id:2, title:"クロス②", level:"easy", theme:"さくら・すいか・くすり",
+      grid:["く#みせ","さくら#","#すいか","とり#わ"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"すいか",clue:"夏によく食べる、緑と黒のしまもようの皮で中が赤い大きな果物。"},
-        {num:3,row:2,col:2,len:4,answer:"みかづき",clue:"夜空に浮かぶ、細い形をした月。"},
-        {num:5,row:4,col:5,len:3,answer:"ねずみ",clue:"チーズが好きだと言われる、耳が丸くて尻尾が長い小さな動物。"}
+        {num:2,row:0,col:2,len:2,answer:"みせ",clue:"品物を売っているところ。"},
+        {num:3,row:1,col:0,len:3,answer:"さくら",clue:"春にうすいピンク色の花をさかせる木。"},
+        {num:5,row:2,col:1,len:3,answer:"すいか",clue:"夏に食べる、緑と黒のしまもようの大きな果物。"},
+        {num:7,row:3,col:0,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:3,answer:"かがみ",clue:"顔や姿を映して見る、ガラスでできた道具。"},
-        {num:4,row:2,col:5,len:3,answer:"きつね",clue:"「コンコン」と鳴く、耳と尻尾がふさふさの、ずる賢いといわれる動物。"},
-        {num:6,row:4,col:7,len:3,answer:"みかん",clue:"冬によく食べる、オレンジ色で甘酸っぱい、皮が手でむける果物。"}
+        {num:1,row:0,col:0,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:2,row:0,col:2,len:3,answer:"みらい",clue:"これから先の、まだ来ていない時間。"},
+        {num:4,row:1,col:1,len:3,answer:"くすり",clue:"病気やけがを治すために飲む・つけるもの。"},
+        {num:6,row:2,col:3,len:2,answer:"かわ",clue:"水が流れている、海に注ぐ細長い地形。"}
       ],
-      pickup:[{num:1,row:0,col:0},{num:2,row:4,col:6},{num:3,row:2,col:5}], pickupAnswer:"すずき"
+      pickup:[{num:1,row:2,col:2},{num:2,row:2,col:3}], pickupAnswer:"いか"
     },
     {
-      id:3, title:"クロス③", level:"easy", theme:"うみのいきもの",
-      grid:["くじら##","##っ##","##こおり","####ぼ","####ん"],
+      id:3, title:"クロス③", level:"easy", theme:"しまうま・おてんき・あお",
+      grid:["しまうま","#ち#め","あ#も#","おてんき"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"くじら",clue:"海にすむ、とても体が大きいほ乳類。潮を吹き上げることもある。"},
-        {num:3,row:2,col:2,len:3,answer:"こおり",clue:"水が凍ってできる、冷たくてかたいもの。"}
+        {num:1,row:0,col:0,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"},
+        {num:6,row:3,col:0,len:4,answer:"おてんき",clue:"晴れや雨など、空の様子。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:3,answer:"らっこ",clue:"貝を石で割って食べることで知られる、仰向けに浮かぶ海の動物。"},
-        {num:4,row:2,col:4,len:3,answer:"りぼん",clue:"髪や贈り物を飾るときに使う、布でできた飾り。"}
+        {num:2,row:0,col:1,len:2,answer:"まち",clue:"たくさんの家やお店が集まっているところ。"},
+        {num:3,row:0,col:3,len:2,answer:"まめ",clue:"畑でとれる、小さくて丸い食べ物。"},
+        {num:4,row:2,col:0,len:2,answer:"あお",clue:"空や海のような色。"},
+        {num:5,row:2,col:2,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"}
       ],
-      pickup:[{num:1,row:2,col:3},{num:2,row:3,col:4},{num:3,row:4,col:4}], pickupAnswer:"おぼん"
+      pickup:[{num:1,row:2,col:0},{num:2,row:1,col:3}], pickupAnswer:"あめ"
     },
     {
-      id:4, title:"クロス④", level:"normal", theme:"たべもの・どうぶつ",
-      grid:["たまご##","##ぼ##","##うさぎ","####ゅ","####う","####に","####ゅ","####う"],
+      id:4, title:"クロス④", level:"easy", theme:"ちから・たいこ・かたち",
+      grid:["つ#みち","ちから#","#たいこ","まち#め"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"たまご",clue:"鶏が産む、殻に入った丸い食べ物。ゆでたり焼いたりして食べる。"},
-        {num:3,row:2,col:2,len:3,answer:"うさぎ",clue:"長い耳とふわふわの尻尾を持つ、ぴょんぴょん跳ねる動物。"}
+        {num:2,row:0,col:2,len:2,answer:"みち",clue:"人や車が通るところ。"},
+        {num:3,row:1,col:0,len:3,answer:"ちから",clue:"物を動かしたりする、体の力。"},
+        {num:5,row:2,col:1,len:3,answer:"たいこ",clue:"バチでたたいて音を出す楽器。"},
+        {num:7,row:3,col:0,len:2,answer:"まち",clue:"たくさんの家やお店が集まっているところ。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:3,answer:"ごぼう",clue:"土の中で育つ、細長い茶色の根菜。きんぴらなどに使われる。"},
-        {num:4,row:2,col:4,len:6,answer:"ぎゅうにゅう",clue:"牛からとれる、給食でもおなじみの白い飲み物。"}
+        {num:1,row:0,col:0,len:2,answer:"つち",clue:"畑や地面にある、植物を育てる土。"},
+        {num:2,row:0,col:2,len:3,answer:"みらい",clue:"これから先の、まだ来ていない時間。"},
+        {num:4,row:1,col:1,len:3,answer:"かたち",clue:"物の外側の様子、フォルム。"},
+        {num:6,row:2,col:3,len:2,answer:"こめ",clue:"ご飯のもとになる、白くて小さなつぶ。"}
       ],
-      pickup:[{num:1,row:2,col:2},{num:2,row:5,col:4}], pickupAnswer:"うに"
+      pickup:[{num:1,row:2,col:1},{num:2,row:2,col:3}], pickupAnswer:"たこ"
     },
     {
-      id:5, title:"クロス⑤", level:"hard", theme:"さくら・どうぶつ・わがし",
-      grid:["さくら####","#つく####","##だんご##","####り##","####らっぱ"],
+      id:5, title:"クロス⑤", level:"easy", theme:"みかた・くじら・もみじ",
+      grid:["くも#う","#みかた","くじら#","ち#すず"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"さくら",clue:"うすいピンク色の花をさかせる、日本を代表する春の木。"},
-        {num:4,row:1,col:1,len:2,answer:"つく",clue:"スイッチを入れると明かりが「〜」。船が港に着くときにも使うことば。"},
-        {num:5,row:2,col:2,len:3,answer:"だんご",clue:"米の粉を丸めてむした、くしに刺して食べることが多い和菓子。"},
-        {num:7,row:4,col:4,len:3,answer:"らっぱ",clue:"息をふきこんで音を出す、金色の管楽器。"}
+        {num:1,row:0,col:0,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:4,row:1,col:1,len:3,answer:"みかた",clue:"自分の側について助けてくれる人。"},
+        {num:6,row:2,col:0,len:3,answer:"くじら",clue:"海にすむ、とても大きな生き物。"},
+        {num:7,row:3,col:2,len:2,answer:"すず",clue:"ふると「チリン」と音が鳴る小さな鈴。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
-        {num:3,row:0,col:2,len:3,answer:"らくだ",clue:"背中にこぶがある、砂ばくを歩くのが得意な動物。"},
-        {num:6,row:2,col:4,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる、大きくて力持ちな森の動物。"}
+        {num:2,row:0,col:1,len:3,answer:"もみじ",clue:"秋に赤や黄色に色づくカエデの葉。"},
+        {num:3,row:0,col:3,len:2,answer:"うた",clue:"声に出してメロディーにのせるもの。"},
+        {num:5,row:1,col:2,len:3,answer:"からす",clue:"黒い羽で「カーカー」と鳴く鳥。"},
+        {num:6,row:2,col:0,len:2,answer:"くち",clue:"食べ物を食べたり話したりする部分。"}
       ],
-      pickup:[{num:1,row:3,col:4},{num:2,row:2,col:3},{num:3,row:2,col:4}], pickupAnswer:"りんご"
+      pickup:[{num:1,row:1,col:1},{num:2,row:3,col:0}], pickupAnswer:"みち"
     },
     {
-      id:6, title:"クロス⑥", level:"hard", theme:"とけい・やさい・どうぶつ",
-      grid:["とけい###","#しち###","##ごぼう#","###うち#","####わに","#####じ"],
+      id:6, title:"クロス⑥", level:"easy", theme:"たいよう・なわとび・すな",
+      grid:["た#すな","いす#わ","よ#おと","うま#び"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"とけい",clue:"時間を知るための道具。柱にかけたり、うでにはめたりする。"},
-        {num:4,row:1,col:1,len:2,answer:"しち",clue:"6と8のあいだの数字。ラッキーセブンともいう。"},
-        {num:5,row:2,col:2,len:3,answer:"ごぼう",clue:"土の中で育つ、細長い茶色の根菜。きんぴらに使われる。"},
-        {num:8,row:3,col:3,len:2,answer:"うち",clue:"自分が住んでいる家や、その中のこと。"},
-        {num:9,row:4,col:4,len:2,answer:"わに",clue:"するどい歯を持つ、川や沼にすむ大きなは虫類。"}
+        {num:2,row:0,col:2,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
+        {num:4,row:1,col:0,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
+        {num:5,row:2,col:2,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:6,row:3,col:0,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"けし",clue:"赤や白の花をさかせる植物。実からは食用の種もとれる。"},
-        {num:3,row:0,col:2,len:3,answer:"いちご",clue:"赤い色で表面につぶつぶがある、甘酸っぱい果物。"},
-        {num:6,row:2,col:3,len:2,answer:"ぼう",clue:"旗などを立てるのに使う、まっすぐで細長い棒。"},
-        {num:7,row:2,col:4,len:3,answer:"うちわ",clue:"あおいで風を起こす、平たい形の道具。夏祭りでよく使う。"},
-        {num:10,row:4,col:5,len:2,answer:"にじ",clue:"雨上がりの空にかかる、7色に見えるアーチ。"}
+        {num:1,row:0,col:0,len:4,answer:"たいよう",clue:"朝のぼって夜しずむ、明るく熱い星。"},
+        {num:3,row:0,col:3,len:4,answer:"なわとび",clue:"ひもをくるくる回して跳びこえる遊び。"}
       ],
-      pickup:[{num:1,row:4,col:4},{num:2,row:1,col:1}], pickupAnswer:"わし"
+      pickup:[{num:1,row:3,col:0},{num:2,row:0,col:0}], pickupAnswer:"うた"
     },
     {
-      id:7, title:"クロス⑦", level:"hard", theme:"たいこ・くだもの・まつり",
-      grid:["たいこ###","#とお###","##りんご#","####まつ"],
+      id:7, title:"クロス⑦", level:"easy", theme:"ようふく・りかしつ・とり",
+      grid:["よ#とり","うま#か","ふ#とし","くり#つ"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"たいこ",clue:"バチでたたいて音を出す、和太鼓などの楽器。"},
-        {num:4,row:1,col:1,len:2,answer:"とお",clue:"「1、2、3…」と数えて、9の次にくる数。"},
-        {num:5,row:2,col:2,len:3,answer:"りんご",clue:"赤くて丸い、木になる果物。皮をむいて食べたりジュースにしたりする。"},
-        {num:7,row:3,col:4,len:2,answer:"まつ",clue:"一年中緑の葉をつける木。お正月のかざりにも使われる。"}
+        {num:2,row:0,col:2,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:4,row:1,col:0,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:5,row:2,col:2,len:2,answer:"とし",clue:"1年、または生きてきた年数。"},
+        {num:6,row:3,col:0,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"いと",clue:"はりに通して布をぬうときに使う、細長いもの。"},
-        {num:3,row:0,col:2,len:3,answer:"こおり",clue:"水がこおってできる、冷たくてかたいもの。"},
-        {num:6,row:2,col:4,len:2,answer:"ごま",clue:"小さなつぶで、油をしぼったりお菓子にふりかけたりする種。"}
+        {num:1,row:0,col:0,len:4,answer:"ようふく",clue:"洋服、着る服のこと。"},
+        {num:3,row:0,col:3,len:4,answer:"りかしつ",clue:"実験や観察をするための教室。"}
       ],
-      pickup:[{num:1,row:1,col:2},{num:2,row:3,col:4},{num:3,row:3,col:5},{num:4,row:2,col:2}], pickupAnswer:"おまつり"
+      pickup:[{num:1,row:3,col:0},{num:2,row:1,col:1}], pickupAnswer:"くま"
     },
     {
-      id:8, title:"クロス⑧", level:"easy", theme:"どうぶつ・たべもの",
-      grid:["ねこ#","#まめ","##だ","##か"],
+      id:8, title:"クロス⑧", level:"easy", theme:"たまねぎ・とんかつ・たこ",
+      grid:["たこ#と","ま#もん","ねこ#か","ぎ#くつ"],
       across:[
-        {num:1,row:0,col:0,len:2,answer:"ねこ",clue:"「ニャー」と鳴く、しっぽがある人気のペット。"},
-        {num:3,row:1,col:1,len:2,answer:"まめ",clue:"畑でとれる、小さくて丸い食べ物。えだ豆や大豆など種類が多い。"}
+        {num:1,row:0,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
+        {num:3,row:1,col:2,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"},
+        {num:4,row:2,col:0,len:2,answer:"ねこ",clue:"「ニャー」と鳴く、しっぽがある人気のペット。"},
+        {num:5,row:3,col:2,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"こま",clue:"ひもを巻いて回して遊ぶ、くるくる回るおもちゃ。"},
-        {num:4,row:1,col:2,len:3,answer:"めだか",clue:"小川や田んぼにすむ、小さな淡水魚。"}
+        {num:1,row:0,col:0,len:4,answer:"たまねぎ",clue:"切ると涙が出る、丸い形の野菜。"},
+        {num:2,row:0,col:3,len:4,answer:"とんかつ",clue:"豚肉にころもをつけて油であげた料理。"}
       ],
-      pickup:[{num:1,row:3,col:2},{num:2,row:1,col:2}], pickupAnswer:"かめ"
+      pickup:[{num:1,row:1,col:2},{num:2,row:1,col:3},{num:3,row:3,col:2}], pickupAnswer:"もんく"
     },
     {
-      id:9, title:"クロス⑨", level:"easy", theme:"うみのいきもの・どうぶつ",
-      grid:["いか###","#にわとり","####す"],
+      id:9, title:"クロス⑨", level:"normal", theme:"くうこう・らくがき・みずうみ",
+      grid:["#かがみ","ら##ず","くうこう","が##み","きかい#"],
       across:[
-        {num:1,row:0,col:0,len:2,answer:"いか",clue:"海にすむ、10本の足と墨を持ついきもの。"},
-        {num:3,row:1,col:1,len:4,answer:"にわとり",clue:"コケコッコーと鳴く、たまごを産む鳥。"}
+        {num:1,row:0,col:1,len:3,answer:"かがみ",clue:"顔や姿をうつして見る道具。"},
+        {num:4,row:2,col:0,len:4,answer:"くうこう",clue:"飛行機が発着する場所。"},
+        {num:5,row:4,col:0,len:3,answer:"きかい",clue:"電気や力で動く、便利な装置。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
-        {num:4,row:1,col:4,len:2,answer:"りす",clue:"木の実が大好きな、ふさふさのしっぽを持つ小さな動物。"}
+        {num:2,row:0,col:3,len:4,answer:"みずうみ",clue:"陸に囲まれた、広くて大きな水たまり。"},
+        {num:3,row:1,col:0,len:4,answer:"らくがき",clue:"紙や壁に自由に絵や字をかくこと。"}
       ],
-      pickup:[{num:1,row:2,col:4},{num:2,row:0,col:0},{num:3,row:0,col:1}], pickupAnswer:"すいか"
+      pickup:[{num:1,row:2,col:1},{num:2,row:0,col:3}], pickupAnswer:"うみ"
     },
     {
-      id:10, title:"クロス⑩", level:"easy", theme:"いきもの・くらし",
-      grid:["たこ#","#いす","##い","##か"],
+      id:10, title:"クロス⑩", level:"normal", theme:"さんすう・にんじん・しぜん",
+      grid:["さんすう","ら#いし","#しか#","かぜ#ほ","にんじん"],
       across:[
-        {num:1,row:0,col:0,len:2,answer:"たこ",clue:"海にすむ、8本の足を持ついきもの。たこ焼きの具材にもなる。"},
-        {num:3,row:1,col:1,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"}
+        {num:1,row:0,col:0,len:4,answer:"さんすう",clue:"足し算や引き算などを習う教科。"},
+        {num:4,row:1,col:2,len:2,answer:"いし",clue:"地面や山にある、かたいもの。"},
+        {num:5,row:2,col:1,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
+        {num:6,row:3,col:0,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"},
+        {num:8,row:4,col:0,len:4,answer:"にんじん",clue:"オレンジ色をした、細長い根菜。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"こい",clue:"池や川にすむ、色あざやかなうろこを持つ魚。「〜のぼり」でも知られる。"},
-        {num:4,row:1,col:2,len:3,answer:"すいか",clue:"夏によく食べる、緑と黒のしまもようの皮で中が赤い大きな果物。"}
+        {num:1,row:0,col:0,len:2,answer:"さら",clue:"料理をのせる、平たい食器。"},
+        {num:2,row:0,col:2,len:3,answer:"すいか",clue:"夏に食べる、緑と黒のしまもようの大きな果物。"},
+        {num:3,row:0,col:3,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:5,row:2,col:1,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:6,row:3,col:0,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:7,row:3,col:3,len:2,answer:"ほん",clue:"文字や絵がかかれた、読むためのもの。"}
       ],
-      pickup:[{num:1,row:0,col:0},{num:2,row:1,col:1}], pickupAnswer:"たい"
+      pickup:[{num:1,row:1,col:2},{num:2,row:0,col:2}], pickupAnswer:"いす"
     },
     {
-      id:11, title:"クロス⑪", level:"normal", theme:"とり・くだもの・どうぶつ",
-      grid:["からす###","#くい###","##かもめ#","####が#","####ねこ"],
+      id:11, title:"クロス⑪", level:"normal", theme:"おんがく・こうえん・かに",
+      grid:["おんがく","と##り","#かに#","た##も","こうえん"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"からす",clue:"「カーカー」と鳴く、黒い羽の鳥。"},
-        {num:4,row:1,col:1,len:2,answer:"くい",clue:"地面に打ちこんで目印やささえにする、細長い棒。"},
-        {num:5,row:2,col:2,len:3,answer:"かもめ",clue:"海辺でよく見られる、白と灰色の海鳥。"},
-        {num:7,row:4,col:4,len:2,answer:"ねこ",clue:"「ニャー」と鳴く、しっぽがある人気のペット。"}
+        {num:1,row:0,col:0,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"},
+        {num:3,row:2,col:1,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:6,row:4,col:0,len:4,answer:"こうえん",clue:"すべり台やブランコがある、遊べる広場。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"らく",clue:"疲れやめんどうがなく、心や体が楽なこと。"},
-        {num:3,row:0,col:2,len:3,answer:"すいか",clue:"夏によく食べる、緑と黒のしまもようの皮で中が赤い大きな果物。"},
-        {num:6,row:2,col:4,len:3,answer:"めがね",clue:"目が悪い人が視力を助けるためにかける道具。"}
+        {num:1,row:0,col:0,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:2,row:0,col:3,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"},
+        {num:4,row:3,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
+        {num:5,row:3,col:3,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"}
       ],
-      pickup:[{num:1,row:3,col:4},{num:2,row:2,col:2}], pickupAnswer:"がか"
+      pickup:[{num:1,row:4,col:1},{num:2,row:3,col:0}], pickupAnswer:"うた"
     },
     {
-      id:12, title:"クロス⑫", level:"normal", theme:"どうぶつ・しぜん",
-      grid:["たぬき##","#まつ##","##ねずみ","####か","####ん"],
+      id:12, title:"クロス⑫", level:"normal", theme:"まほう・えがお・かえる",
+      grid:["にく#ぼ","#まほう","か##し","えがお#","る#とし"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"たぬき",clue:"しま模様のしっぽを持つ、いたずら者と言われる動物。"},
-        {num:4,row:1,col:1,len:2,answer:"まつ",clue:"一年中緑の葉をつける木。お正月のかざりにも使う。"},
-        {num:5,row:2,col:2,len:3,answer:"ねずみ",clue:"チーズが好きだと言われる、耳が丸くて尻尾が長い小さな動物。"}
+        {num:1,row:0,col:0,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:4,row:1,col:1,len:3,answer:"まほう",clue:"不思議な力で物事を起こすこと。"},
+        {num:6,row:3,col:0,len:3,answer:"えがお",clue:"にっこり笑った顔。"},
+        {num:8,row:4,col:2,len:2,answer:"とし",clue:"1年、または生きてきた年数。"}
       ],
       down:[
-        {num:2,row:0,col:1,len:2,answer:"ぬま",clue:"水が深くたまった、池よりも広くて底が泥深い場所。"},
-        {num:3,row:0,col:2,len:3,answer:"きつね",clue:"「コンコン」と鳴く、耳と尻尾がふさふさの動物。"},
-        {num:6,row:2,col:4,len:3,answer:"みかん",clue:"冬によく食べる、オレンジ色で甘酸っぱい、皮が手でむける果物。"}
+        {num:2,row:0,col:1,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:3,row:0,col:3,len:3,answer:"ぼうし",clue:"頭にかぶるもの。日よけにもなる。"},
+        {num:5,row:2,col:0,len:3,answer:"かえる",clue:"「ケロケロ」と鳴く生き物。"},
+        {num:7,row:3,col:2,len:2,answer:"おと",clue:"耳で聞こえるもの。"}
       ],
-      pickup:[{num:1,row:0,col:2},{num:2,row:1,col:2},{num:3,row:2,col:2}], pickupAnswer:"きつね"
+      pickup:[{num:1,row:1,col:2},{num:2,row:2,col:3}], pickupAnswer:"ほし"
     },
     {
-      id:13, title:"クロス⑬", level:"normal", theme:"さかな・とり・くらし",
-      grid:["さかな#####","##すずめ###","####ろうそく","####ん###"],
+      id:13, title:"クロス⑬", level:"normal", theme:"おにぎり・さんすう・らくがき",
+      grid:["おにぎり","###ゆ","さんすう","く###","らくがき"],
       across:[
-        {num:1,row:0,col:0,len:3,answer:"さかな",clue:"水の中を泳ぎ、えらで呼吸するいきもの。"},
-        {num:3,row:1,col:2,len:3,answer:"すずめ",clue:"茶色っぽい小さな体で、人家の近くによく見られる鳥。"},
-        {num:5,row:2,col:4,len:4,answer:"ろうそく",clue:"火をともして明かりにする、細長いろうの棒。"}
+        {num:1,row:0,col:0,len:4,answer:"おにぎり",clue:"ご飯を三角や丸に丸めた食べ物。"},
+        {num:3,row:2,col:0,len:4,answer:"さんすう",clue:"足し算や引き算などを習う教科。"},
+        {num:4,row:4,col:0,len:4,answer:"らくがき",clue:"紙や壁に自由に絵や字をかくこと。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:2,answer:"なす",clue:"むらさき色をした、夏が旬の野菜。"},
-        {num:4,row:1,col:4,len:3,answer:"めろん",clue:"あみ目模様の皮を持つ、甘くてジューシーな夏の果物。"}
+        {num:2,row:0,col:3,len:3,answer:"りゆう",clue:"そうなった、そうする、わけ。"},
+        {num:3,row:2,col:0,len:3,answer:"さくら",clue:"春にうすいピンク色の花をさかせる木。"}
       ],
-      pickup:[{num:1,row:2,col:7},{num:2,row:2,col:4}], pickupAnswer:"くろ"
+      pickup:[{num:1,row:3,col:0},{num:2,row:2,col:2},{num:3,row:0,col:3}], pickupAnswer:"くすり"
     },
     {
-      id:14, title:"クロス⑭", level:"hard", theme:"どうぶつ・くらし",
-      grid:["しまうま###","##にく###","###らいおん","####かに#"],
+      id:14, title:"クロス⑭", level:"normal", theme:"とんかつ・けんだま・みかん",
+      grid:["とんかつ","り#たき","#みち#","いか#う","けんだま"],
       across:[
-        {num:1,row:0,col:0,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た草食動物。"},
-        {num:4,row:1,col:2,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる、焼いたり煮たりして食べる食材。"},
-        {num:5,row:2,col:3,len:4,answer:"らいおん",clue:"たてがみを持つ、「百獣の王」と呼ばれる動物。"},
-        {num:8,row:3,col:4,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"}
+        {num:1,row:0,col:0,len:4,answer:"とんかつ",clue:"豚肉にころもをつけて油であげた料理。"},
+        {num:4,row:1,col:2,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:5,row:2,col:1,len:2,answer:"みち",clue:"人や車が通るところ。"},
+        {num:6,row:3,col:0,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:8,row:4,col:0,len:4,answer:"けんだま",clue:"玉を皿や先にのせて遊ぶ、日本のおもちゃ。"}
       ],
       down:[
-        {num:2,row:0,col:2,len:2,answer:"うに",clue:"とげとげのからを持つ、海にすむいきもの。すし種にもなる。"},
-        {num:3,row:0,col:3,len:3,answer:"まくら",clue:"ねむるときに頭の下に置く、やわらかい道具。"},
-        {num:6,row:2,col:4,len:2,answer:"いか",clue:"海にすむ、10本の足と墨を持ついきもの。"},
-        {num:7,row:2,col:5,len:2,answer:"おに",clue:"赤や青の体で角を持つ、節分に豆をまいて追い払う存在。"}
+        {num:1,row:0,col:0,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:2,row:0,col:2,len:3,answer:"かたち",clue:"物の外側の様子、フォルム。"},
+        {num:3,row:0,col:3,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"},
+        {num:5,row:2,col:1,len:3,answer:"みかん",clue:"冬に食べる、オレンジ色で皮が手でむける果物。"},
+        {num:6,row:3,col:0,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"},
+        {num:7,row:3,col:3,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"}
       ],
-      pickup:[{num:1,row:3,col:4},{num:2,row:2,col:3},{num:3,row:0,col:0}], pickupAnswer:"からし"
+      pickup:[{num:1,row:3,col:3},{num:2,row:2,col:1}], pickupAnswer:"うみ"
+    },
+    {
+      id:15, title:"クロス⑮", level:"normal", theme:"かいだん・ごりら・かかし",
+      grid:["ごりら#","##くも","かいだん","さる##","#かかし"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる動物。"},
+        {num:3,row:1,col:2,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:5,row:2,col:0,len:4,answer:"かいだん",clue:"上の階と下の階をつなぐ、段になった通路。"},
+        {num:7,row:3,col:0,len:2,answer:"さる",clue:"木登りが得意で、バナナが好きな動物。"},
+        {num:8,row:4,col:1,len:3,answer:"かかし",clue:"畑で鳥をおどかすために立てる人形。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"らくだ",clue:"背中にこぶがある、砂ばくを歩くのが得意な動物。"},
+        {num:4,row:1,col:3,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"},
+        {num:5,row:2,col:0,len:2,answer:"かさ",clue:"雨の日にさして体をぬらさないようにする道具。"},
+        {num:6,row:2,col:1,len:3,answer:"いるか",clue:"かしこくて泳ぎが得意な海の生き物。"}
+      ],
+      pickup:[{num:1,row:2,col:1},{num:2,row:2,col:0}], pickupAnswer:"いか"
+    },
+    {
+      id:16, title:"クロス⑯", level:"normal", theme:"ほしぞら・かいだん・しんごう",
+      grid:["ほしぞら","#あ##","かいだん","##ん#","しんごう"],
+      across:[
+        {num:1,row:0,col:0,len:4,answer:"ほしぞら",clue:"夜、星がたくさん見える空。"},
+        {num:3,row:2,col:0,len:4,answer:"かいだん",clue:"上の階と下の階をつなぐ、段になった通路。"},
+        {num:5,row:4,col:0,len:4,answer:"しんごう",clue:"赤・黄・青の色で車や人に合図をする装置。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:4,row:2,col:2,len:3,answer:"だんご",clue:"米の粉を丸めてむした和菓子。"}
+      ],
+      pickup:[{num:1,row:0,col:1},{num:2,row:2,col:0}], pickupAnswer:"しか"
+    },
+    {
+      id:17, title:"クロス⑰", level:"hard", theme:"かたつむり・いるか・まつり",
+      grid:["いるか#う","す#た#め","#まつり#","ゆ#む#く","か#りくつ"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"いるか",clue:"かしこくて泳ぎが得意な海の生き物。"},
+        {num:4,row:2,col:1,len:3,answer:"まつり",clue:"おみこしや屋台が出る、にぎやかな行事。"},
+        {num:7,row:4,col:2,len:3,answer:"りくつ",clue:"物事のすじ道。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
+        {num:2,row:0,col:2,len:5,answer:"かたつむり",clue:"殻を背負って、ゆっくり進む生き物。"},
+        {num:3,row:0,col:4,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
+        {num:5,row:3,col:0,len:2,answer:"ゆか",clue:"部屋の下、足で踏むところ。"},
+        {num:6,row:3,col:4,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"}
+      ],
+      pickup:[{num:1,row:3,col:4},{num:2,row:1,col:0},{num:3,row:2,col:3}], pickupAnswer:"くすり"
+    },
+    {
+      id:18, title:"クロス⑱", level:"hard", theme:"としょしつ・としょかん・べんとう",
+      grid:["べんとう#","##し#く","としょしつ","し#か##","#おんがく"],
+      across:[
+        {num:1,row:0,col:0,len:4,answer:"べんとう",clue:"おかずやご飯を入れて持っていく食事。"},
+        {num:4,row:2,col:0,len:5,answer:"としょしつ",clue:"学校で本を読んだり借りたりする部屋。"},
+        {num:5,row:4,col:1,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:5,answer:"としょかん",clue:"たくさんの本が置いてあり、読んだり借りたりできる場所。"},
+        {num:3,row:1,col:4,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:4,row:2,col:0,len:2,answer:"とし",clue:"1年、または生きてきた年数。"}
+      ],
+      pickup:[{num:1,row:1,col:2},{num:2,row:3,col:2}], pickupAnswer:"しか"
+    },
+    {
+      id:19, title:"クロス⑲", level:"hard", theme:"おかあさん・おかね・ろうか",
+      grid:["し#おかね","ろうか#こ","#しあい#","か#さかや","にほん#ま"],
+      across:[
+        {num:2,row:0,col:2,len:3,answer:"おかね",clue:"物を買うときに使う、紙や金属でできたもの。"},
+        {num:4,row:1,col:0,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:6,row:2,col:1,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:9,row:3,col:2,len:3,answer:"さかや",clue:"お酒を売っているお店。"},
+        {num:11,row:4,col:0,len:3,answer:"にほん",clue:"わたしたちが住んでいる国の名前。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"しろ",clue:"雪のような、明るい色。"},
+        {num:2,row:0,col:2,len:5,answer:"おかあさん",clue:"お母さんのこと。"},
+        {num:3,row:0,col:4,len:2,answer:"ねこ",clue:"「ニャー」と鳴く、しっぽがある人気のペット。"},
+        {num:5,row:1,col:1,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:7,row:2,col:3,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:8,row:3,col:0,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:10,row:3,col:4,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"}
+      ],
+      pickup:[{num:1,row:0,col:3},{num:2,row:1,col:2},{num:3,row:0,col:0}], pickupAnswer:"かかし"
+    },
+    {
+      id:20, title:"クロス⑳", level:"hard", theme:"としょかん・としょしつ・ぬいぐるみ",
+      grid:["としょかん","ま##ら#","としょしつ","#あ##き","ぬいぐるみ"],
+      across:[
+        {num:1,row:0,col:0,len:5,answer:"としょかん",clue:"たくさんの本が置いてあり、読んだり借りたりできる場所。"},
+        {num:3,row:2,col:0,len:5,answer:"としょしつ",clue:"学校で本を読んだり借りたりする部屋。"},
+        {num:6,row:4,col:0,len:5,answer:"ぬいぐるみ",clue:"布に綿をつめて作った、動物などの人形。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"とまと",clue:"赤くて丸い、夏によく食べる野菜。"},
+        {num:2,row:0,col:3,len:3,answer:"からし",clue:"ツンとからい、黄色い調味料。"},
+        {num:4,row:2,col:1,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:5,row:2,col:4,len:3,answer:"つきみ",clue:"満月をながめて楽しむこと。"}
+      ],
+      pickup:[{num:1,row:2,col:4},{num:2,row:3,col:4}], pickupAnswer:"つき"
+    },
+    {
+      id:21, title:"クロス㉑", level:"hard", theme:"おかあさん・おんぷ・ろうか",
+      grid:["しろ##が","#うし#ま","おかあさん","ん#いか#","ぷ##やま"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"しろ",clue:"雪のような、明るい色。"},
+        {num:4,row:1,col:1,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:6,row:2,col:0,len:5,answer:"おかあさん",clue:"お母さんのこと。"},
+        {num:8,row:3,col:2,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:9,row:4,col:3,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:3,row:0,col:4,len:3,answer:"がまん",clue:"つらいことをこらえること。"},
+        {num:5,row:1,col:2,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:6,row:2,col:0,len:3,answer:"おんぷ",clue:"音楽で、音の高さや長さを表す記号。"},
+        {num:7,row:2,col:3,len:3,answer:"さかや",clue:"お酒を売っているお店。"}
+      ],
+      pickup:[{num:1,row:1,col:1},{num:2,row:1,col:4}], pickupAnswer:"うま"
+    },
+    {
+      id:22, title:"クロス㉒", level:"hard", theme:"ゆうえんち・うさぎ・かえる",
+      grid:["うめ#しか","##かぜ#","ゆうえんち","#さる##","むぎ#いけ"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
+        {num:2,row:0,col:3,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
+        {num:3,row:1,col:2,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"},
+        {num:4,row:2,col:0,len:5,answer:"ゆうえんち",clue:"乗り物やアトラクションがたくさんある遊び場。"},
+        {num:6,row:3,col:1,len:2,answer:"さる",clue:"木登りが得意で、バナナが好きな動物。"},
+        {num:7,row:4,col:0,len:2,answer:"むぎ",clue:"パンやうどんの原料になる穀物。"},
+        {num:8,row:4,col:3,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"}
+      ],
+      down:[
+        {num:2,row:0,col:3,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:3,row:1,col:2,len:3,answer:"かえる",clue:"「ケロケロ」と鳴く生き物。"},
+        {num:5,row:2,col:1,len:3,answer:"うさぎ",clue:"長い耳を持つ、ぴょんぴょん跳ねる動物。"}
+      ],
+      pickup:[{num:1,row:2,col:0},{num:2,row:0,col:4}], pickupAnswer:"ゆか"
+    },
+    {
+      id:23, title:"クロス㉓", level:"hard", theme:"おばあさん・おかあさん・やおや",
+      grid:["#やおや#","こ#か#れ","おばあさん","り#さ#が","#おんぷ#"],
+      across:[
+        {num:1,row:0,col:1,len:3,answer:"やおや",clue:"野菜や果物を売っているお店。"},
+        {num:5,row:2,col:0,len:5,answer:"おばあさん",clue:"おばあさんのこと。"},
+        {num:6,row:4,col:1,len:3,answer:"おんぷ",clue:"音楽で、音の高さや長さを表す記号。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:5,answer:"おかあさん",clue:"お母さんのこと。"},
+        {num:3,row:1,col:0,len:3,answer:"こおり",clue:"水が凍ってできるもの。"},
+        {num:4,row:1,col:4,len:3,answer:"れんが",clue:"土を焼いて作った、家を建てるための固い材料。"}
+      ],
+      pickup:[{num:1,row:2,col:2},{num:2,row:1,col:2}], pickupAnswer:"あか"
+    },
+    {
+      id:24, title:"クロス㉔", level:"hard", theme:"としょかん・ゆきだるま・きょうだい",
+      grid:["お#き#ほ","としょかん","##う##","ゆきだるま","め#い#ち"],
+      across:[
+        {num:4,row:1,col:0,len:5,answer:"としょかん",clue:"たくさんの本が置いてあり、読んだり借りたりできる場所。"},
+        {num:5,row:3,col:0,len:5,answer:"ゆきだるま",clue:"雪を丸めて重ねて作る、雪の人形。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:2,row:0,col:2,len:5,answer:"きょうだい",clue:"兄弟や姉妹のこと。"},
+        {num:3,row:0,col:4,len:2,answer:"ほん",clue:"文字や絵がかかれた、読むためのもの。"},
+        {num:5,row:3,col:0,len:2,answer:"ゆめ",clue:"眠っているときに見る、ふしぎな出来事。"},
+        {num:6,row:3,col:4,len:2,answer:"まち",clue:"たくさんの家やお店が集まっているところ。"}
+      ],
+      pickup:[{num:1,row:1,col:3},{num:2,row:0,col:0}], pickupAnswer:"かお"
     }
   ];
 
@@ -495,7 +705,8 @@
   const getCheck=seg("segCheck");
 
   /* ---------- ゲーム状態 ---------- */
-  const G={ puzzle:null, rows:0, cols:0, cur:null, sel:null, dir:"across", done:false, hints:0, check:true, hist:[] };
+  const G={ puzzle:null, rows:0, cols:0, cur:null, sel:null, dir:"across", done:false, hints:0, check:true, hist:[],
+    bonusPhase:false, bonusTiles:null, bonusSlots:null, bonusSolved:false, bonusWrong:false };
 
   let _saveT=0;
   function saveState(){
@@ -554,7 +765,7 @@
           if(num==null) for(const w of G.puzzle.down) if(w.row===r && w.col===c){ num=w.num; break; }
           const pk=(G.puzzle.pickup||[]).find(x=>x.row===r && x.col===c);
           d.innerHTML=(num!=null?'<span class="num">'+num+'</span>':"")+
-            (pk?'<span class="pk">'+pk.num+'</span>':"")+'<span class="ch"></span>';
+            (pk?'<span class="pk"></span>':"")+'<span class="ch"></span>';
         }
         board.appendChild(d);
       }
@@ -637,13 +848,31 @@
 
   function renderBonus(){
     const pickup=G.puzzle.pickup;
-    const el=$("bonusLetters");
+    const el=$("bonus");
+    el.classList.remove("bn-success","bn-wrong");
     if(!pickup || !pickup.length){ el.innerHTML=""; return; }
-    const sorted=[...pickup].sort((a,b)=>a.num-b.num);
-    el.innerHTML=sorted.map(pk=>{
-      const v=G.cur[pk.row][pk.col];
-      return v ? '<span class="filled">'+v+'</span>' : '<span>　</span>';
+    if(!G.bonusPhase){
+      el.innerHTML='<div class="bn-row"><span>ボーナス</span><span class="letters">'+
+        pickup.map(()=>'<span>　</span>').join("")+'</span></div>';
+      return;
+    }
+    const slotsHtml=G.bonusSlots.map((tileIdx,i)=>{
+      if(tileIdx==null) return '<button type="button" class="bn-slot" data-slot="'+i+'"></button>';
+      const t=G.bonusTiles[tileIdx];
+      return '<button type="button" class="bn-slot filled" data-slot="'+i+'">'+esc(t.letter)+'</button>';
     }).join("");
+    const tilesHtml=G.bonusTiles.map((t,i)=>t.used?"":'<button type="button" class="bn-tile" data-tile="'+i+'">'+esc(t.letter)+'</button>').join("");
+    let msg="";
+    if(G.bonusSolved) msg='<p class="bn-msg">せいかい！「'+esc(G.puzzle.pickupAnswer)+'」</p>';
+    else if(G.bonusWrong) msg='<p class="bn-msg">ちがうみたい…もう一度！</p>';
+    el.innerHTML=
+      '<p class="bn-label">文字をタップして、ボーナスの言葉を作ろう</p>'+
+      '<div class="bn-slots">'+slotsHtml+'</div>'+
+      '<div class="bn-tiles">'+tilesHtml+'</div>'+
+      msg+
+      (G.bonusSolved ? "" : '<div class="bn-actions"><button type="button" data-act="reset">やり直す</button><button type="button" data-act="skip">こたえをみる</button></div>');
+    if(G.bonusSolved) el.classList.add("bn-success");
+    else if(G.bonusWrong) el.classList.add("bn-wrong");
   }
 
   function positionHiddenInput(){
@@ -768,12 +997,85 @@
       });
     }
     toast("クリア！");
+    const hasBonus = !!(G.puzzle.pickup && G.puzzle.pickup.length && G.puzzle.pickupAnswer);
     setTimeout(()=>{
-      $("ovTitle").textContent="クリア！";
-      const bonus=G.puzzle.pickupAnswer ? "　ボーナス「"+G.puzzle.pickupAnswer+"」" : "";
-      $("ovDetail").textContent=(G.puzzle.title)+"を解きました。ヒント使用 "+G.hints+"回"+bonus;
-      $("overlay").classList.add("show");
+      if(hasBonus) startBonusPhase();
+      else showCompletionOverlay();
     },500);
+  }
+
+  function showCompletionOverlay(){
+    $("ovTitle").textContent="クリア！";
+    const bonus=G.puzzle.pickupAnswer && G.bonusSolved ? "　ボーナス「"+G.puzzle.pickupAnswer+"」" : "";
+    $("ovDetail").textContent=(G.puzzle.title)+"を解きました。ヒント使用 "+G.hints+"回"+bonus;
+    $("overlay").classList.add("show");
+  }
+
+  function shuffleArr(a){
+    const b=[...a];
+    for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; }
+    return b;
+  }
+  function startBonusPhase(){
+    const pickup=G.puzzle.pickup;
+    G.bonusTiles=shuffleArr(pickup.map(pk=>({letter:G.cur[pk.row][pk.col],used:false})));
+    G.bonusSlots=new Array(pickup.length).fill(null);
+    G.bonusSolved=false; G.bonusWrong=false; G.bonusPhase=true;
+    renderBonus();
+  }
+  function bonusPlaceTile(tileIdx){
+    if(!G.bonusPhase || G.bonusSolved) return;
+    const t=G.bonusTiles[tileIdx];
+    if(!t || t.used) return;
+    const slot=G.bonusSlots.findIndex(x=>x==null);
+    if(slot<0) return;
+    G.bonusSlots[slot]=tileIdx; t.used=true; G.bonusWrong=false;
+    renderBonus();
+    if(G.bonusSlots.every(x=>x!=null)) bonusCheck();
+  }
+  function bonusRemoveSlot(slotIdx){
+    if(!G.bonusPhase || G.bonusSolved) return;
+    const tileIdx=G.bonusSlots[slotIdx];
+    if(tileIdx==null) return;
+    G.bonusTiles[tileIdx].used=false; G.bonusSlots[slotIdx]=null; G.bonusWrong=false;
+    renderBonus();
+  }
+  function bonusCheck(){
+    const built=G.bonusSlots.map(i=>G.bonusTiles[i].letter).join("");
+    if(built===G.puzzle.pickupAnswer){
+      G.bonusSolved=true;
+      renderBonus();
+      setTimeout(showCompletionOverlay,700);
+    }else{
+      G.bonusWrong=true;
+      renderBonus();
+      setTimeout(()=>{
+        G.bonusTiles.forEach(t=>t.used=false);
+        G.bonusSlots=new Array(G.bonusSlots.length).fill(null);
+        G.bonusWrong=false;
+        renderBonus();
+      },900);
+    }
+  }
+  function bonusReset(){
+    if(!G.bonusPhase || G.bonusSolved) return;
+    G.bonusTiles.forEach(t=>t.used=false);
+    G.bonusSlots=new Array(G.bonusSlots.length).fill(null);
+    G.bonusWrong=false;
+    renderBonus();
+  }
+  function bonusSkip(){
+    if(!G.bonusPhase || G.bonusSolved) return;
+    G.bonusTiles.forEach(t=>t.used=false);
+    G.bonusSlots=new Array(G.bonusSlots.length).fill(null);
+    const ans=[...G.puzzle.pickupAnswer];
+    for(let i=0;i<ans.length;i++){
+      const ti=G.bonusTiles.findIndex(t=>!t.used && t.letter===ans[i]);
+      if(ti>=0){ G.bonusTiles[ti].used=true; G.bonusSlots[i]=ti; }
+    }
+    G.bonusSolved=true;
+    renderBonus();
+    setTimeout(showCompletionOverlay,700);
   }
 
   function startPuzzle(p,resume){
@@ -782,6 +1084,7 @@
     G.cur = resume ? resume.cur.map(row=>row.split(",")) : Array.from({length:G.rows},()=>Array(G.cols).fill(""));
     G.sel=null; G.dir="across"; G.done=false; G.hints = resume ? (resume.hints||0) : 0;
     G.hist=[];
+    G.bonusPhase=false; G.bonusTiles=null; G.bonusSlots=null; G.bonusSolved=false; G.bonusWrong=false;
     $("segCheck").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x.dataset.val===(G.check?"on":"off")));
     $("overlay").classList.remove("show");
     $("playTitle").textContent=p.title;
@@ -901,6 +1204,17 @@
     });
   });
   $("hintBtn").addEventListener("click",hint);
+  $("bonus").addEventListener("click",e=>{
+    const tileBtn=e.target.closest(".bn-tile");
+    if(tileBtn){ bonusPlaceTile(+tileBtn.dataset.tile); return; }
+    const slotBtn=e.target.closest(".bn-slot");
+    if(slotBtn){ bonusRemoveSlot(+slotBtn.dataset.slot); return; }
+    const actBtn=e.target.closest("[data-act]");
+    if(actBtn){
+      if(actBtn.dataset.act==="reset") bonusReset();
+      else if(actBtn.dataset.act==="skip") bonusSkip();
+    }
+  });
   $("toSetup").addEventListener("click",()=>{ hiddenInput.blur(); saveState(); renderPuzzleList(); refreshSetupExtras(); show("setup"); });
   $("ovAgain").addEventListener("click",()=>{ renderPuzzleList(); refreshSetupExtras(); show("setup"); $("overlay").classList.remove("show"); });
 
