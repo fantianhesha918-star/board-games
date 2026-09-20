@@ -197,10 +197,10 @@
     if(!s || !s.plays) return card("クロスワード", IC.crossword, empty);
     let meta={}; try{ meta=JSON.parse(localStorage.getItem("crossword-meta"))||{}; }catch{}
     let solved=[]; try{ const a=JSON.parse(localStorage.getItem("crossword-solved")); if(Array.isArray(a)) solved=a; }catch{}
-    const LV={easy:"やさしい",normal:"ふつう",hard:"むずかしい"};
+    const LV={easy:"やさしい",normal:"ふつう",hard:"むずかしい",oni:"鬼"};
     const by=s.byLevel||{};
     let lvHtml="";
-    ["easy","normal","hard"].forEach(k=>{
+    ["easy","normal","hard","oni"].forEach(k=>{
       const v=by[k]; if(!v || !v.plays) return;
       const total=meta.byLevel ? meta.byLevel[k] : null;
       lvHtml += row(LV[k]+"（プレイ "+v.plays+"）", "クリア "+(v.clears||0)+(total?"／"+total:"")+"問");
