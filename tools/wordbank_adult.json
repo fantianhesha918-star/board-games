@@ -2713,5 +2713,1075 @@
     "answer": "ばじとうふう",
     "clue": "人の意見を聞き流して、まったく気にしないこと。",
     "cat": "kanyouku"
+  },
+  {
+    "answer": "とんぼ",
+    "clue": "細長い体と大きな二対の羽を持つ、水辺を飛ぶ昆虫。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "せみ",
+    "clue": "夏に木の上で鳴く、羽の透き通った昆虫。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "はち",
+    "clue": "針を持ち、群れで巣を作る昆虫。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "くも",
+    "clue": "糸を出して巣を張り、虫を捕まえる生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "かえる",
+    "clue": "水辺に住み、鳴き声とジャンプが特徴の生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "へび",
+    "clue": "足がなく、細長い体でくねりながら進む生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "とかげ",
+    "clue": "体が細長く、尻尾が長い爬虫類。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "きつね",
+    "clue": "耳が尖り、尻尾がふさふさした野生動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "たぬき",
+    "clue": "日本の昔話にもよく登場する、丸い顔の野生動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "うさぎ",
+    "clue": "長い耳とジャンプ力が特徴の動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "いのしし",
+    "clue": "山に住む、鋭い牙を持つ野生の豚に似た動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "くま",
+    "clue": "冬眠する、力の強い大きな野生動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "さる",
+    "clue": "木に登るのが得意な、人間に近い動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "ぞう",
+    "clue": "長い鼻を持つ、陸上で最も大きな動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "とら",
+    "clue": "しま模様の毛皮を持つ、大型のネコ科動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "わし",
+    "clue": "鋭い爪とくちばしを持つ、大型の猛禽類。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "たか",
+    "clue": "空高く飛び、獲物を狙う猛禽類。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "つばめ",
+    "clue": "春に日本へ渡ってくる、尾の割れた鳥。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "からす",
+    "clue": "全身が黒く、鳴き声が特徴的な鳥。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "すずめ",
+    "clue": "人家の近くでよく見かける、小さな茶色い鳥。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "はと",
+    "clue": "平和の象徴とされる、首を振って歩く鳥。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "かも",
+    "clue": "水辺に群れで浮かぶ、渡り鳥の一種。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "りす",
+    "clue": "木の実を集める、ふさふさした尻尾の小動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "もぐら",
+    "clue": "地面の下にトンネルを掘って暮らす動物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "こうもり",
+    "clue": "夜に飛び回る、翼を持つほ乳類。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "いるか",
+    "clue": "海に住み、知能が高いとされる海の生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "くじら",
+    "clue": "海にすむ、地球上で最も大きな生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "さんご",
+    "clue": "海の中で成長する、石のような骨格を持つ生き物。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "かせき",
+    "clue": "大昔の生物の体や跡が、地層に残ったもの。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "りくち",
+    "clue": "海に対して、陸である土地のこと。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "かいがん",
+    "clue": "海に接している、陸の端の部分。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "みさき",
+    "clue": "陸地が海に向かって突き出ている場所。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "しま",
+    "clue": "周りを水に囲まれた陸地。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "わん",
+    "clue": "陸地に入り込んだ、丸く湾曲した海。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "みずべ",
+    "clue": "川や池など、水のある場所のほとり。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "つゆあけ",
+    "clue": "梅雨の季節が終わること。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "はれま",
+    "clue": "雨や曇りの合間の、天気が良い時間。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "かんぱ",
+    "clue": "急に冷たい空気が流れ込んでくる現象。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "もうしょ",
+    "clue": "うだるように暑い、真夏の暑さ。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "ごうう",
+    "clue": "短時間に激しく降る、大量の雨。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "きこうへんどう",
+    "clue": "地球規模で気候が長期的に変わっていくこと。",
+    "cat": "shizen"
+  },
+  {
+    "answer": "えび",
+    "clue": "殻に包まれた、曲がった体を持つ甲殻類の食材。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "かに",
+    "clue": "はさみを持つ甲殻類で、鍋などに使われる食材。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "あじ",
+    "clue": "塩焼きや刺身で食べられる、青魚の一種。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "さば",
+    "clue": "味噌煮や塩焼きで食べられる、青魚の一種。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "まぐろ",
+    "clue": "刺身や寿司でよく食べられる、大型の魚。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "たこ",
+    "clue": "足が八本ある、刺身や酢の物で食べられる海の生き物。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "いか",
+    "clue": "足が十本ある、刺身や焼き物で食べられる海の生き物。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "かつお",
+    "clue": "たたきなどで食べられる、回遊する魚。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "ひらめ",
+    "clue": "体が平たい、高級魚とされる白身魚。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "たらこ",
+    "clue": "タラの卵を塩漬けにした食品。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "さんま",
+    "clue": "秋の味覚として塩焼きで人気の、細長い魚。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "からし",
+    "clue": "おでんや納豆に添える、辛みのある調味料。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "さとう",
+    "clue": "甘みをつけるために使われる、白い調味料。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "こしょう",
+    "clue": "料理に香りと辛みを加える、粒状の香辛料。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "さんしょう",
+    "clue": "うなぎにかける、ぴりっとした香りの香辛料。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "とうがらし",
+    "clue": "辛みの強い、料理に使われる赤い実。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "つくだに",
+    "clue": "魚介や海藻を醤油と砂糖で煮詰めた保存食。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "ひもの",
+    "clue": "魚を開いて干した保存食。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "くんせい",
+    "clue": "食材を煙でいぶして風味をつける調理法。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "かんづめ",
+    "clue": "食品を缶に密封して長期保存できるようにしたもの。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "かりんとう",
+    "clue": "小麦粉の生地を揚げて蜜をからめた、素朴なお菓子。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "たいやき",
+    "clue": "魚の形をした型で焼く、あん入りのお菓子。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "だんご",
+    "clue": "米の粉をこねて丸め、蒸したり焼いたりする和菓子。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "くしだんご",
+    "clue": "串に刺した、団子のお菓子。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "みたらしだんご",
+    "clue": "甘辛いたれをからめた、串に刺した団子。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "むぎちゃ",
+    "clue": "麦を煎じて作る、夏によく飲まれるお茶。",
+    "cat": "gourmet"
+  },
+  {
+    "answer": "そふ",
+    "clue": "父または母の父親。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "そぼ",
+    "clue": "父または母の母親。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "まご",
+    "clue": "自分の子どもの、さらに子ども。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "いとこ",
+    "clue": "おじやおばの子どもにあたる親戚。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "おい",
+    "clue": "兄弟姉妹の息子。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "めい",
+    "clue": "兄弟姉妹の娘。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きょうだい",
+    "clue": "同じ親から生まれた、兄や弟。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しまい",
+    "clue": "同じ親から生まれた、姉や妹。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ふうふ",
+    "clue": "結婚している男女、夫と妻。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "かぞく",
+    "clue": "親子や夫婦など、共に暮らす血縁の集まり。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しんせき",
+    "clue": "血縁やつながりのある、家族以外の親族。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きょう",
+    "clue": "今過ごしている、この日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "あす",
+    "clue": "今日の次の日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きのう",
+    "clue": "今日の前の日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "あさって",
+    "clue": "明日の次の日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "せんしゅう",
+    "clue": "今の週の、一つ前の週。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "らいしゅう",
+    "clue": "今の週の、次の週。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "こんげつ",
+    "clue": "今過ごしている、この月。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "らいねん",
+    "clue": "今の年の、次の年。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きょねん",
+    "clue": "今の年の、一つ前の年。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しゅうまつ",
+    "clue": "土曜日と日曜日のこと。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "へいじつ",
+    "clue": "土日や祝日ではない、ふだんの日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きゅうじつ",
+    "clue": "仕事や学校が休みになる日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しゅくじつ",
+    "clue": "国で定められた、お祝いの休日。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "でんしゃ",
+    "clue": "レールの上を走る、電気で動く乗り物。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "じてんしゃ",
+    "clue": "ペダルをこいで走る、二輪の乗り物。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "じどうしゃ",
+    "clue": "エンジンで走る、四輪の乗り物。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ひこうき",
+    "clue": "空を飛んで人や荷物を運ぶ乗り物。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しんかんせん",
+    "clue": "日本の主要都市を結ぶ、高速で走る鉄道。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "こうそくどうろ",
+    "clue": "車が高速で走れるよう作られた道路。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ふみきり",
+    "clue": "道路と線路が交わる場所。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "こうさてん",
+    "clue": "道路と道路が交わる場所。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しんごう",
+    "clue": "色の変化で車や人の進み方を伝える装置。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ほどう",
+    "clue": "人が歩くために作られた道。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "おうだんほどう",
+    "clue": "歩行者が道路を渡るための場所。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "はさみ",
+    "clue": "紙や布を切るための、刃が二枚ある道具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "かなづち",
+    "clue": "釘を打ち込むための道具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "のこぎり",
+    "clue": "木材などを切るための、ぎざぎざの刃を持つ道具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "くぎ",
+    "clue": "木材などを固定するために打ち込む、金属の棒。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ねじ",
+    "clue": "回しながら締めて物を固定する、螺旋状の金具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ものさし",
+    "clue": "長さを測るための、まっすぐな道具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "せんぬき",
+    "clue": "びんの栓を開けるための道具。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "あか",
+    "clue": "信号や血の色として知られる、暖色の一つ。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "あお",
+    "clue": "空や海を思わせる、寒色の一つ。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "きいろ",
+    "clue": "レモンやひまわりのような、明るい色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "みどり",
+    "clue": "葉っぱや草のような色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "むらさき",
+    "clue": "赤と青が混ざった、上品な印象の色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "しろ",
+    "clue": "雪や紙のような、最も明るい色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "くろ",
+    "clue": "墨や夜のような、最も暗い色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "ちゃいろ",
+    "clue": "木の幹やコーヒーのような色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "はいいろ",
+    "clue": "灰のような、白と黒の中間の色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "こんいろ",
+    "clue": "深い青に近い、濃い色。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "まる",
+    "clue": "角のない、円の形。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "さんかく",
+    "clue": "三本の辺で囲まれた図形。",
+    "cat": "seikatsu"
+  },
+  {
+    "answer": "あたま",
+    "clue": "体の一番上にある、脳を収めている部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "かた",
+    "clue": "首と腕の付け根の部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ひじ",
+    "clue": "腕の中央にある、曲げ伸ばしできる関節。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "てくび",
+    "clue": "手と腕をつなぐ関節部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ゆび",
+    "clue": "手や足の先にある、細長い部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "せなか",
+    "clue": "体の後ろ側、腰から肩までの部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "こし",
+    "clue": "上半身と下半身をつなぐ、体の中央部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ひざ",
+    "clue": "足の中央にある、曲げ伸ばしできる関節。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "あしくび",
+    "clue": "足と、すねをつなぐ関節部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "かかと",
+    "clue": "足の裏の、後ろ側の部分。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "のうみそ",
+    "clue": "物を考える働きをする、頭の中の器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "しんぞう",
+    "clue": "血液を全身に送り出す、体の中心的な器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "はい",
+    "clue": "呼吸をするための、胸の中にある器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "かんぞう",
+    "clue": "体内の毒を分解する、腹部右側の大きな器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "じんぞう",
+    "clue": "血液をろ過して尿を作る器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ちょう",
+    "clue": "食べたものを消化・吸収する、細長い器官。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ほね",
+    "clue": "体を支える、硬い組織。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "きんにく",
+    "clue": "体を動かすために縮んだり伸びたりする組織。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ひふ",
+    "clue": "体の表面をおおう組織。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ちょうかく",
+    "clue": "音を感じ取る、耳の感覚。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "きゅうかく",
+    "clue": "においを感じ取る、鼻の感覚。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "みかく",
+    "clue": "味を感じ取る、舌の感覚。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "しょっかく",
+    "clue": "物に触れて感じ取る感覚。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ずつう",
+    "clue": "頭が痛む症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ふくつう",
+    "clue": "お腹が痛む症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "めまい",
+    "clue": "視界がぐらぐらと揺れるように感じる症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "はきけ",
+    "clue": "胃の中のものを吐きそうになる感じ。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "げり",
+    "clue": "便がゆるく、水っぽくなる症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "べんぴ",
+    "clue": "便が出にくくなる症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ひやけ",
+    "clue": "日光に当たって肌が黒くなること。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "にきび",
+    "clue": "皮脂が原因で肌にできる、赤い吹き出物。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "しっしん",
+    "clue": "皮膚に赤みやかゆみが出る症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "じんましん",
+    "clue": "皮膚に急にみみずばれができ、かゆくなる症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "かふんしょう",
+    "clue": "花粉が原因で起こる、くしゃみや鼻水の症状。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ぜんそく",
+    "clue": "息苦しさやせきの発作が起こる、呼吸器の病気。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "とうにょう",
+    "clue": "血液中の糖の値が高くなる病気の略称。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "こうけつあつ",
+    "clue": "血圧が正常より高い状態。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ていけつあつ",
+    "clue": "血圧が正常より低い状態。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "ひまん",
+    "clue": "脂肪が体に必要以上について太っている状態。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "びょうき",
+    "clue": "体の調子が悪くなること。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "けんこうしんだん",
+    "clue": "体に異常がないか、定期的に調べる検査。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "たいじゅう",
+    "clue": "体の重さ。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "たいりょく",
+    "clue": "体を動かし続けられる力。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "きんりょく",
+    "clue": "筋肉が発揮する力。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "じゅうなんせい",
+    "clue": "体を柔らかく曲げ伸ばしできる性質。",
+    "cat": "kenkou"
+  },
+  {
+    "answer": "がくしゅう",
+    "clue": "知識や技術を学び身につけること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "きおく",
+    "clue": "経験したことを頭の中にとどめておくこと。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "りかい",
+    "clue": "物事の意味や内容を正しくつかむこと。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "あんき",
+    "clue": "忘れないように、頭の中に覚えこむこと。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "しゅうちゅう",
+    "clue": "一つのことに、気持ちや意識を集めること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "こうさつ",
+    "clue": "物事を詳しく調べて、深く考えること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "けんきゅう",
+    "clue": "物事を深く調べ、明らかにしようとすること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "じっけん",
+    "clue": "仮説を確かめるために、実際に試してみること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "かんさつ",
+    "clue": "物事の様子を、注意深く見ること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "すいろん",
+    "clue": "分かっていることから、筋道を立てて考えを進めること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ろんぶん",
+    "clue": "研究の内容や結果をまとめた文章。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ちしき",
+    "clue": "学んだり経験したりして得た、物事の情報。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ちえ",
+    "clue": "物事をうまく処理する、頭の働き。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "はつめい",
+    "clue": "今までになかったものを、新しく作り出すこと。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "はっけん",
+    "clue": "今まで知られていなかったことを、見つけ出すこと。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "こうぞう",
+    "clue": "物事を組み立てている、しくみや仕組み。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "たいけい",
+    "clue": "考えや知識を、まとまった一つの仕組みにしたもの。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ほうそく",
+    "clue": "物事の間に成り立つ、変わらない決まり。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "げんそく",
+    "clue": "物事の基本となる、大切な決まり。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "きじゅん",
+    "clue": "物事を比べたり決めたりするときの、もとになるもの。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ひょうか",
+    "clue": "物事の価値や出来ばえを、判断すること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "すいそく",
+    "clue": "はっきりしないことを、こうだろうと考えること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "よち",
+    "clue": "物事が起こる、まだ残されている余裕。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "こんらん",
+    "clue": "物事が入り乱れて、まとまりがつかなくなること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "せいり",
+    "clue": "乱れているものを、整えてきちんとすること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "とういつ",
+    "clue": "ばらばらのものを、一つにまとめること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ちょくせつ",
+    "clue": "間に何もはさまず、じかに関わること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "かんせつ",
+    "clue": "間に何かをはさんで、遠回しに関わること。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "ぜんご",
+    "clue": "物事の前と後ろ、または前後関係。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "じゅんじょ",
+    "clue": "物事を並べるときの、正しい順番。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "だんかい",
+    "clue": "物事が進んでいく、区切られた一つ一つの過程。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "けいろ",
+    "clue": "物事が進んでいく、たどる道すじ。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "じそんしん",
+    "clue": "自分を大切に思う、誇りの気持ち。",
+    "cat": "shikou"
+  },
+  {
+    "answer": "がりょうてんせい",
+    "clue": "最後の仕上げを加えて、物事を完成させること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "しょうしんしょうめい",
+    "clue": "間違いなく本物であること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "ぜったいぜつめい",
+    "clue": "逃げ場がないほど、追いつめられた状態。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "たいぜんじじゃく",
+    "clue": "何が起きても、落ち着いていて動じない様子。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "きゅうたいいぜん",
+    "clue": "昔からの状態のままで、少しも進歩がないこと。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "しめんそか",
+    "clue": "周りが敵ばかりで、味方が誰もいない状況。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "がしんしょうたん",
+    "clue": "目的を果たすために、苦労を重ねて努力すること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "せいてんはくじつ",
+    "clue": "疑いが晴れて、身の潔白がはっきりすること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "ふろうふし",
+    "clue": "いつまでも年を取らず、死なないこと。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "いきしょうちん",
+    "clue": "元気をなくして、しょんぼりすること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "いきとうごう",
+    "clue": "互いの気持ちがぴったり合うこと。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "しょしかんてつ",
+    "clue": "最初に決めた志を、最後まで貫き通すこと。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "ふきゅうふめつ",
+    "clue": "いつまでも滅びず、価値が失われないこと。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "かんぜんむけつ",
+    "clue": "欠けたところが全くなく、完全であること。",
+    "cat": "kanyouku"
+  },
+  {
+    "answer": "しんしんきえい",
+    "clue": "その分野に新しく現れ、勢いが盛んなこと。",
+    "cat": "kanyouku"
   }
 ]
