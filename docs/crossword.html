@@ -250,16 +250,6 @@
           <button data-val="off">オフ</button>
         </div>
       </div>
-      <div>
-        <p class="fieldlabel">むずかしさ</p>
-        <div class="seg" id="segPzLevel">
-          <button data-val="all" class="on">すべて</button>
-          <button data-val="easy">やさしい</button>
-          <button data-val="normal">ふつう</button>
-          <button data-val="hard">むずかしい</button>
-          <button data-val="oni">鬼</button>
-        </div>
-      </div>
       <div class="plist" id="puzzleList"></div>
     </div>
   </section>
@@ -318,7 +308,7 @@
   /* ---------- パズルデータ（しりとりでつながる交差クロスワード）---------- */
   const PUZZLES=[
     {
-      id:1, title:"クロス①", level:"easy", theme:"ようふく・けんだま・いけ",
+      id:1, title:"クロス①", theme:"ようふく・けんだま・いけ",
       grid:["ようふく","#し#ち","い#え#","けんだま"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"ようふく",clue:"洋服、着る服のこと。"},
@@ -333,7 +323,7 @@
       pickup:[{num:1,row:0,col:2},{num:2,row:2,col:2}], pickupAnswer:"ふえ"
     },
     {
-      id:2, title:"クロス②", level:"easy", theme:"さくら・すいか・くすり",
+      id:2, title:"クロス②", theme:"さくら・すいか・くすり",
       grid:["く#みせ","さくら#","#すいか","とり#わ"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"みせ",clue:"品物を売っているところ。"},
@@ -350,7 +340,7 @@
       pickup:[{num:1,row:2,col:2},{num:2,row:2,col:3}], pickupAnswer:"いか"
     },
     {
-      id:3, title:"クロス③", level:"easy", theme:"しまうま・おてんき・あお",
+      id:3, title:"クロス③", theme:"しまうま・おてんき・あお",
       grid:["しまうま","#ち#め","あ#も#","おてんき"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"},
@@ -365,7 +355,7 @@
       pickup:[{num:1,row:2,col:0},{num:2,row:1,col:3}], pickupAnswer:"あめ"
     },
     {
-      id:4, title:"クロス④", level:"easy", theme:"ちから・たいこ・かたち",
+      id:4, title:"クロス④", theme:"ちから・たいこ・かたち",
       grid:["つ#みち","ちから#","#たいこ","まち#め"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"みち",clue:"人や車が通るところ。"},
@@ -382,7 +372,7 @@
       pickup:[{num:1,row:2,col:1},{num:2,row:2,col:3}], pickupAnswer:"たこ"
     },
     {
-      id:5, title:"クロス⑤", level:"easy", theme:"みかた・くじら・もみじ",
+      id:5, title:"クロス⑤", theme:"みかた・くじら・もみじ",
       grid:["くも#う","#みかた","くじら#","ち#すず"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
@@ -399,7 +389,7 @@
       pickup:[{num:1,row:1,col:1},{num:2,row:3,col:0}], pickupAnswer:"みち"
     },
     {
-      id:6, title:"クロス⑥", level:"easy", theme:"たいよう・なわとび・すな",
+      id:6, title:"クロス⑥", theme:"たいよう・なわとび・すな",
       grid:["た#すな","いす#わ","よ#おと","うま#び"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
@@ -414,7 +404,7 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:0,col:0}], pickupAnswer:"うた"
     },
     {
-      id:7, title:"クロス⑦", level:"easy", theme:"ようふく・りかしつ・とり",
+      id:7, title:"クロス⑦", theme:"ようふく・りかしつ・とり",
       grid:["よ#とり","うま#か","ふ#とし","くり#つ"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
@@ -429,7 +419,7 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:1,col:1}], pickupAnswer:"くま"
     },
     {
-      id:8, title:"クロス⑧", level:"easy", theme:"たまねぎ・とんかつ・たこ",
+      id:8, title:"クロス⑧", theme:"たまねぎ・とんかつ・たこ",
       grid:["たこ#と","ま#もん","ねこ#か","ぎ#くつ"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
@@ -444,7 +434,7 @@
       pickup:[{num:1,row:1,col:2},{num:2,row:1,col:3},{num:3,row:3,col:2}], pickupAnswer:"もんく"
     },
     {
-      id:9, title:"クロス⑨", level:"normal", theme:"くうこう・らくがき・みずうみ",
+      id:9, title:"クロス⑨", theme:"くうこう・らくがき・みずうみ",
       grid:["#かがみ","ら##ず","くうこう","が##み","きかい#"],
       across:[
         {num:1,row:0,col:1,len:3,answer:"かがみ",clue:"顔や姿をうつして見る道具。"},
@@ -458,7 +448,7 @@
       pickup:[{num:1,row:2,col:1},{num:2,row:0,col:3}], pickupAnswer:"うみ"
     },
     {
-      id:10, title:"クロス⑩", level:"normal", theme:"さんすう・にんじん・しぜん",
+      id:10, title:"クロス⑩", theme:"さんすう・にんじん・しぜん",
       grid:["さんすう","ら#いし","#しか#","かぜ#ほ","にんじん"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"さんすう",clue:"足し算や引き算などを習う教科。"},
@@ -478,23 +468,25 @@
       pickup:[{num:1,row:1,col:2},{num:2,row:0,col:2}], pickupAnswer:"いす"
     },
     {
-      id:11, title:"クロス⑪", level:"normal", theme:"おんがく・こうえん・かに",
-      grid:["おんがく","と##り","#かに#","た##も","こうえん"],
+      id:11, title:"クロス⑪", theme:"おんがく・こうえん・たま",
+      grid:["おんがく","と##り","#かに#","たま#も","こうえん"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"},
         {num:3,row:2,col:1,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:4,row:3,col:0,len:2,answer:"たま",clue:"まるい形をしたもの。ボールのこと。"},
         {num:6,row:4,col:0,len:4,answer:"こうえん",clue:"すべり台やブランコがある、遊べる広場。"}
       ],
       down:[
         {num:1,row:0,col:0,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
         {num:2,row:0,col:3,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"},
+        {num:3,row:2,col:1,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
         {num:4,row:3,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
         {num:5,row:3,col:3,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"}
       ],
       pickup:[{num:1,row:4,col:1},{num:2,row:3,col:0}], pickupAnswer:"うた"
     },
     {
-      id:12, title:"クロス⑫", level:"normal", theme:"まほう・えがお・かえる",
+      id:12, title:"クロス⑫", theme:"まほう・えがお・かえる",
       grid:["にく#ぼ","#まほう","か##し","えがお#","る#とし"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
@@ -511,7 +503,7 @@
       pickup:[{num:1,row:1,col:2},{num:2,row:2,col:3}], pickupAnswer:"ほし"
     },
     {
-      id:13, title:"クロス⑬", level:"normal", theme:"おにぎり・さんすう・らくがき",
+      id:13, title:"クロス⑬", theme:"おにぎり・さんすう・らくがき",
       grid:["おにぎり","###ゆ","さんすう","く###","らくがき"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"おにぎり",clue:"ご飯を三角や丸に丸めた食べ物。"},
@@ -525,7 +517,7 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:2,col:2},{num:3,row:0,col:3}], pickupAnswer:"くすり"
     },
     {
-      id:14, title:"クロス⑭", level:"normal", theme:"とんかつ・けんだま・みかん",
+      id:14, title:"クロス⑭", theme:"とんかつ・けんだま・みかん",
       grid:["とんかつ","り#たき","#みち#","いか#う","けんだま"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"とんかつ",clue:"豚肉にころもをつけて油であげた料理。"},
@@ -545,7 +537,7 @@
       pickup:[{num:1,row:3,col:3},{num:2,row:2,col:1}], pickupAnswer:"うみ"
     },
     {
-      id:15, title:"クロス⑮", level:"normal", theme:"かいだん・ごりら・かかし",
+      id:15, title:"クロス⑮", theme:"かいだん・ごりら・かかし",
       grid:["ごりら#","##くも","かいだん","さる##","#かかし"],
       across:[
         {num:1,row:0,col:0,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる動物。"},
@@ -563,7 +555,7 @@
       pickup:[{num:1,row:2,col:1},{num:2,row:2,col:0}], pickupAnswer:"いか"
     },
     {
-      id:16, title:"クロス⑯", level:"normal", theme:"ほしぞら・かいだん・しんごう",
+      id:16, title:"クロス⑯", theme:"ほしぞら・かいだん・しんごう",
       grid:["ほしぞら","#あ##","かいだん","##ん#","しんごう"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"ほしぞら",clue:"夜、星がたくさん見える空。"},
@@ -577,24 +569,28 @@
       pickup:[{num:1,row:0,col:1},{num:2,row:2,col:0}], pickupAnswer:"しか"
     },
     {
-      id:17, title:"クロス⑰", level:"hard", theme:"かたつむり・いるか・まつり",
-      grid:["いるか#う","す#た#め","#まつり#","ゆ#む#く","か#りくつ"],
+      id:17, title:"クロス⑰", theme:"かたつむり・いるか・まつり",
+      grid:["いるか#う","す#たかめ","#まつり#","ゆるむ#く","か#りくつ"],
       across:[
         {num:1,row:0,col:0,len:3,answer:"いるか",clue:"かしこくて泳ぎが得意な海の生き物。"},
-        {num:4,row:2,col:1,len:3,answer:"まつり",clue:"おみこしや屋台が出る、にぎやかな行事。"},
-        {num:7,row:4,col:2,len:3,answer:"りくつ",clue:"物事のすじ道。"}
+        {num:4,row:1,col:2,len:3,answer:"たかめ",clue:"ふつうより少し高いこと。「おんどがたかめ」のように使う。"},
+        {num:6,row:2,col:1,len:3,answer:"まつり",clue:"おみこしや屋台が出る、にぎやかな行事。"},
+        {num:7,row:3,col:0,len:3,answer:"ゆるむ",clue:"きつく結んだものなどがゆるくなること。"},
+        {num:9,row:4,col:2,len:3,answer:"りくつ",clue:"物事のすじ道。"}
       ],
       down:[
         {num:1,row:0,col:0,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
         {num:2,row:0,col:2,len:5,answer:"かたつむり",clue:"殻を背負って、ゆっくり進む生き物。"},
         {num:3,row:0,col:4,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
-        {num:5,row:3,col:0,len:2,answer:"ゆか",clue:"部屋の下、足で踏むところ。"},
-        {num:6,row:3,col:4,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"}
+        {num:5,row:1,col:3,len:2,answer:"かり",clue:"生き物や木の実をつかまえに行くこと。「いちごがり」のように使う。"},
+        {num:6,row:2,col:1,len:2,answer:"まる",clue:"まんまるい形。◯のかたち。"},
+        {num:7,row:3,col:0,len:2,answer:"ゆか",clue:"部屋の下、足で踏むところ。"},
+        {num:8,row:3,col:4,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"}
       ],
       pickup:[{num:1,row:3,col:4},{num:2,row:1,col:0},{num:3,row:2,col:3}], pickupAnswer:"くすり"
     },
     {
-      id:18, title:"クロス⑱", level:"hard", theme:"としょしつ・としょかん・べんとう",
+      id:18, title:"クロス⑱", theme:"としょしつ・としょかん・べんとう",
       grid:["べんとう#","##し#く","としょしつ","し#か##","#おんがく"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"べんとう",clue:"おかずやご飯を入れて持っていく食事。"},
@@ -609,7 +605,7 @@
       pickup:[{num:1,row:1,col:2},{num:2,row:3,col:2}], pickupAnswer:"しか"
     },
     {
-      id:19, title:"クロス⑲", level:"hard", theme:"おかあさん・おかね・ろうか",
+      id:19, title:"クロス⑲", theme:"おかあさん・おかね・ろうか",
       grid:["し#おかね","ろうか#こ","#しあい#","か#さかや","にほん#ま"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"おかね",clue:"物を買うときに使う、紙や金属でできたもの。"},
@@ -630,7 +626,7 @@
       pickup:[{num:1,row:0,col:3},{num:2,row:1,col:2},{num:3,row:0,col:0}], pickupAnswer:"かかし"
     },
     {
-      id:20, title:"クロス⑳", level:"hard", theme:"としょかん・としょしつ・ぬいぐるみ",
+      id:20, title:"クロス⑳", theme:"としょかん・としょしつ・ぬいぐるみ",
       grid:["としょかん","ま##ら#","としょしつ","#あ##き","ぬいぐるみ"],
       across:[
         {num:1,row:0,col:0,len:5,answer:"としょかん",clue:"たくさんの本が置いてあり、読んだり借りたりできる場所。"},
@@ -646,7 +642,7 @@
       pickup:[{num:1,row:2,col:4},{num:2,row:3,col:4}], pickupAnswer:"つき"
     },
     {
-      id:21, title:"クロス㉑", level:"hard", theme:"おかあさん・おんぷ・ろうか",
+      id:21, title:"クロス㉑", theme:"おかあさん・おんぷ・ろうか",
       grid:["しろ##が","#うし#ま","おかあさん","ん#いか#","ぷ##やま"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"しろ",clue:"雪のような、明るい色。"},
@@ -665,26 +661,24 @@
       pickup:[{num:1,row:1,col:1},{num:2,row:1,col:4}], pickupAnswer:"うま"
     },
     {
-      id:22, title:"クロス㉒", level:"hard", theme:"ゆうえんち・うさぎ・かえる",
-      grid:["うめ#しか","##かぜ#","ゆうえんち","#さる##","むぎ#いけ"],
+      id:22, title:"クロス㉒", theme:"ゆうえんち・うさぎ・かえる",
+      grid:["###しか","##かぜ#","ゆうえんち","#さる##","むぎ###"],
       across:[
-        {num:1,row:0,col:0,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
-        {num:2,row:0,col:3,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
-        {num:3,row:1,col:2,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"},
-        {num:4,row:2,col:0,len:5,answer:"ゆうえんち",clue:"乗り物やアトラクションがたくさんある遊び場。"},
-        {num:6,row:3,col:1,len:2,answer:"さる",clue:"木登りが得意で、バナナが好きな動物。"},
-        {num:7,row:4,col:0,len:2,answer:"むぎ",clue:"パンやうどんの原料になる穀物。"},
-        {num:8,row:4,col:3,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"}
+        {num:1,row:0,col:3,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
+        {num:2,row:1,col:2,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"},
+        {num:3,row:2,col:0,len:5,answer:"ゆうえんち",clue:"乗り物やアトラクションがたくさんある遊び場。"},
+        {num:5,row:3,col:1,len:2,answer:"さる",clue:"木登りが得意で、バナナが好きな動物。"},
+        {num:6,row:4,col:0,len:2,answer:"むぎ",clue:"パンやうどんの原料になる穀物。"}
       ],
       down:[
-        {num:2,row:0,col:3,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
-        {num:3,row:1,col:2,len:3,answer:"かえる",clue:"「ケロケロ」と鳴く生き物。"},
-        {num:5,row:2,col:1,len:3,answer:"うさぎ",clue:"長い耳を持つ、ぴょんぴょん跳ねる動物。"}
+        {num:1,row:0,col:3,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:2,row:1,col:2,len:3,answer:"かえる",clue:"「ケロケロ」と鳴く生き物。"},
+        {num:4,row:2,col:1,len:3,answer:"うさぎ",clue:"長い耳を持つ、ぴょんぴょん跳ねる動物。"}
       ],
       pickup:[{num:1,row:2,col:0},{num:2,row:0,col:4}], pickupAnswer:"ゆか"
     },
     {
-      id:23, title:"クロス㉓", level:"hard", theme:"おばあさん・おかあさん・やおや",
+      id:23, title:"クロス㉓", theme:"おばあさん・おかあさん・やおや",
       grid:["#やおや#","こ#か#れ","おばあさん","り#さ#が","#おんぷ#"],
       across:[
         {num:1,row:0,col:1,len:3,answer:"やおや",clue:"野菜や果物を売っているお店。"},
@@ -699,7 +693,7 @@
       pickup:[{num:1,row:2,col:2},{num:2,row:1,col:2}], pickupAnswer:"あか"
     },
     {
-      id:24, title:"クロス㉔", level:"hard", theme:"としょかん・ゆきだるま・きょうだい",
+      id:24, title:"クロス㉔", theme:"としょかん・ゆきだるま・きょうだい",
       grid:["お#き#ほ","としょかん","##う##","ゆきだるま","め#い#ち"],
       across:[
         {num:4,row:1,col:0,len:5,answer:"としょかん",clue:"たくさんの本が置いてあり、読んだり借りたりできる場所。"},
@@ -715,7 +709,7 @@
       pickup:[{num:1,row:1,col:3},{num:2,row:0,col:0}], pickupAnswer:"かお"
     },
     {
-      id:25, title:"クロス25", level:"normal", theme:"ひこうき・ともだち・しんごう",
+      id:25, title:"クロス25", theme:"ひこうき・ともだち・しんごう",
       grid:["ひこうき","#ど##","ともだち","##ん#","しんごう"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"ひこうき",clue:"空を飛ぶ、翼とエンジンを持つ大きな乗り物。"},
@@ -729,7 +723,7 @@
       pickup:[{num:1,row:2,col:1},{num:2,row:2,col:3}], pickupAnswer:"もち"
     },
     {
-      id:26, title:"クロス26", level:"normal", theme:"おんがく・にじいろ・もみじ",
+      id:26, title:"クロス26", theme:"おんがく・にじいろ・もみじ",
       grid:["おんがく","と#まち","#もん#","かみ#い","にじいろ"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"},
@@ -749,39 +743,43 @@
       pickup:[{num:1,row:4,col:0},{num:2,row:0,col:3}], pickupAnswer:"にく"
     },
     {
-      id:27, title:"クロス27", level:"normal", theme:"そうじき・こうえん・とり",
-      grid:["そうじき","ら##ば","#とり#","た##び","こうえん"],
+      id:27, title:"クロス27", theme:"そうじき・こうえん・かめ",
+      grid:["そうじき","ら##ば","#かめ#","たま#び","こうえん"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"そうじき",clue:"部屋のごみを吸いとる機械。"},
-        {num:3,row:2,col:1,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:3,row:2,col:1,len:2,answer:"かめ",clue:"こうらを持ち、ゆっくり歩く生き物。"},
+        {num:4,row:3,col:0,len:2,answer:"たま",clue:"まるい形をしたもの。ボールのこと。"},
         {num:6,row:4,col:0,len:4,answer:"こうえん",clue:"すべり台やブランコがある、遊べる広場。"}
       ],
       down:[
         {num:1,row:0,col:0,len:2,answer:"そら",clue:"雲や太陽が見える、頭の上に広がる場所。"},
         {num:2,row:0,col:3,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:3,row:2,col:1,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
         {num:4,row:3,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
         {num:5,row:3,col:3,len:2,answer:"びん",clue:"ガラスでできた、飲み物などを入れる入れ物。"}
       ],
       pickup:[{num:1,row:4,col:2},{num:2,row:3,col:3}], pickupAnswer:"えび"
     },
     {
-      id:28, title:"クロス28", level:"normal", theme:"しまうま・たなばた・なべ",
-      grid:["しまうま","も##め","#なべ#","か##う","たなばた"],
+      id:28, title:"クロス28", theme:"しまうま・たなばた・みず",
+      grid:["しまうま","も##め","#みず#","かん#う","たなばた"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"},
-        {num:3,row:2,col:1,len:2,answer:"なべ",clue:"料理をにたり煮込んだりする道具。"},
+        {num:3,row:2,col:1,len:2,answer:"みず",clue:"海や川、コップにも入っている透明な液体。"},
+        {num:4,row:3,col:0,len:2,answer:"かん",clue:"ジュースなどが入っている、金属の入れ物。"},
         {num:6,row:4,col:0,len:4,answer:"たなばた",clue:"7月7日、短冊に願い事を書く行事。"}
       ],
       down:[
         {num:1,row:0,col:0,len:2,answer:"しも",clue:"冬の朝、地面や草につく白いもの。"},
         {num:2,row:0,col:3,len:2,answer:"まめ",clue:"畑でとれる、小さくて丸い食べ物。"},
+        {num:3,row:2,col:1,len:3,answer:"みんな",clue:"そこにいる人たち全員のこと。"},
         {num:4,row:3,col:0,len:2,answer:"かた",clue:"うでのつけね、体の上の部分。"},
         {num:5,row:3,col:3,len:2,answer:"うた",clue:"声に出してメロディーにのせるもの。"}
       ],
       pickup:[{num:1,row:0,col:0},{num:2,row:3,col:0}], pickupAnswer:"しか"
     },
     {
-      id:29, title:"クロス29", level:"normal", theme:"みずうみ・るすばん・からす",
+      id:29, title:"クロス29", theme:"みずうみ・るすばん・からす",
       grid:["みずうみ","み#ちず","#かわ#","さら#も","るすばん"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"みずうみ",clue:"陸に囲まれた、広くて大きな水たまり。"},
@@ -801,23 +799,25 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:4,col:3},{num:3,row:4,col:1},{num:4,row:0,col:2}], pickupAnswer:"さんすう"
     },
     {
-      id:30, title:"クロス30", level:"normal", theme:"うちゅう・しまうま・のり",
-      grid:["うちゅう","め##み","#のり#","す##く","しまうま"],
+      id:30, title:"クロス30", theme:"うちゅう・しまうま・ひも",
+      grid:["うちゅう","め##み","#ひも#","する#く","しまうま"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"うちゅう",clue:"星や太陽が浮かぶ、広い広い空間。"},
-        {num:3,row:2,col:1,len:2,answer:"のり",clue:"ごはんに巻く、黒くて薄い食べ物。またはくっつける道具。"},
+        {num:3,row:2,col:1,len:2,answer:"ひも",clue:"物をしばったり結んだりする細長いもの。"},
+        {num:4,row:3,col:0,len:2,answer:"する",clue:"何かの動作を行うこと。"},
         {num:6,row:4,col:0,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"}
       ],
       down:[
         {num:1,row:0,col:0,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
         {num:2,row:0,col:3,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:3,row:2,col:1,len:3,answer:"ひるま",clue:"太陽が出ている、朝から夕方までの時間。"},
         {num:4,row:3,col:0,len:2,answer:"すし",clue:"酢めしの上に魚などをのせた料理。"},
         {num:5,row:3,col:3,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"}
       ],
       pickup:[{num:1,row:0,col:0},{num:2,row:4,col:1}], pickupAnswer:"うま"
     },
     {
-      id:31, title:"クロス31", level:"normal", theme:"たいいく・ひなた・いるか",
+      id:31, title:"クロス31", theme:"たいいく・ひなた・いるか",
       grid:["ひ#くび","な#ら#","たいいく","#る#も","あか#り"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"くび",clue:"頭と体をつなぐ部分。"},
@@ -833,7 +833,7 @@
       pickup:[{num:1,row:2,col:0},{num:2,row:3,col:1}], pickupAnswer:"たる"
     },
     {
-      id:32, title:"クロス32", level:"normal", theme:"すいえい・さんすう・たいくつ",
+      id:32, title:"クロス32", theme:"すいえい・さんすう・たいくつ",
       grid:["さけ##","ん#ふた","すいえい","うし#く","##くつ"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"さけ",clue:"お米から作るお酒。または魚のさけ。"},
@@ -851,7 +851,7 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:1,col:3}], pickupAnswer:"うた"
     },
     {
-      id:33, title:"クロス33", level:"normal", theme:"にじいろ・とんかつ・おてんき",
+      id:33, title:"クロス33", theme:"にじいろ・とんかつ・おてんき",
       grid:["にじいろ","#か##","とんかつ","##ば#","おてんき"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"にじいろ",clue:"虹のような、いろいろな色が並ぶ様子。"},
@@ -865,7 +865,7 @@
       pickup:[{num:1,row:4,col:0},{num:2,row:2,col:0}], pickupAnswer:"おと"
     },
     {
-      id:34, title:"クロス34", level:"hard", theme:"れいぞうこ・れきし・しあい",
+      id:34, title:"クロス34", theme:"れいぞうこ・れきし・しあい",
       grid:["い#れきし","しあい#も","#かぞく#","は#うちわ","たいこ#く"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"れきし",clue:"昔あったできごとを調べて学ぶこと。"},
@@ -886,7 +886,7 @@
       pickup:[{num:1,row:0,col:0},{num:2,row:3,col:4}], pickupAnswer:"いわ"
     },
     {
-      id:35, title:"クロス35", level:"hard", theme:"ふゆやすみ・おべんとう・ゆかた",
+      id:35, title:"クロス35", theme:"ふゆやすみ・おべんとう・ゆかた",
       grid:["ふ##かお","ゆかた#べ","や#く#ん","す#みなと","みせ##う"],
       across:[
         {num:2,row:0,col:3,len:2,answer:"かお",clue:"目・鼻・口がある、頭の前の部分。"},
@@ -902,7 +902,7 @@
       pickup:[{num:1,row:3,col:0},{num:2,row:3,col:3}], pickupAnswer:"すな"
     },
     {
-      id:36, title:"クロス36", level:"hard", theme:"おにごっこ・かたつむり・としょかん",
+      id:36, title:"クロス36", theme:"おにごっこ・かたつむり・としょかん",
       grid:["お#かかと","に#た#し","ご#つ#ょ","っ#む#か","こおり#ん"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"かかと",clue:"足の裏の、うしろ側の部分。"},
@@ -916,7 +916,7 @@
       pickup:[{num:1,row:1,col:2},{num:2,row:1,col:0}], pickupAnswer:"たに"
     },
     {
-      id:37, title:"クロス37", level:"hard", theme:"すいえい・しんごう・けしき",
+      id:37, title:"クロス37", theme:"すいえい・しんごう・けしき",
       grid:["は#けしき","いす#ん#","#いちご#","#え#うし","さいふ#ろ"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"けしき",clue:"山や海など、目に見える外の様子。"},
@@ -934,7 +934,7 @@
       pickup:[{num:1,row:1,col:0},{num:2,row:0,col:4}], pickupAnswer:"いき"
     },
     {
-      id:38, title:"クロス38", level:"hard", theme:"としょしつ・かぶとむし・かたつむり",
+      id:38, title:"クロス38", theme:"としょしつ・かぶとむし・かたつむり",
       grid:["かみ#あか","ぶ###た","としょしつ","む###む","しも#はり"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"かみ",clue:"頭に生えている毛。"},
@@ -950,7 +950,7 @@
       pickup:[{num:1,row:0,col:3},{num:2,row:4,col:4}], pickupAnswer:"あり"
     },
     {
-      id:39, title:"クロス39", level:"hard", theme:"ゆうえんち・しまうま・うんどう",
+      id:39, title:"クロス39", theme:"ゆうえんち・しまうま・うんどう",
       grid:["け#ゆうひ","しまうま#","き#え#ぼ","#うんどう","かたち#し"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"ゆうひ",clue:"夕方、西にしずむ太陽。"},
@@ -968,7 +968,7 @@
       pickup:[{num:1,row:0,col:3},{num:2,row:1,col:0}], pickupAnswer:"うし"
     },
     {
-      id:40, title:"クロス40", level:"hard", theme:"ゆうえんち・しまうま・うんどう",
+      id:40, title:"クロス40", theme:"ゆうえんち・しまうま・うんどう",
       grid:["け#ゆかた","しまうま#","き#え#の","#うんどう","かたち#か"],
       across:[
         {num:2,row:0,col:2,len:3,answer:"ゆかた",clue:"夏祭りなどで着る、涼しい着物。"},
@@ -986,7 +986,7 @@
       pickup:[{num:1,row:0,col:3},{num:2,row:0,col:4}], pickupAnswer:"かた"
     },
     {
-      id:41, title:"クロス41", level:"hard", theme:"ゆうえんち・みずうみ・うんどう",
+      id:41, title:"クロス41", theme:"ゆうえんち・みずうみ・うんどう",
       grid:["なみ##か","#ず#うた","ゆうえんち","かみ#ど#","た##うま"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"なみ",clue:"海や川の水面が上下にゆれ動くもの。"},
@@ -1004,7 +1004,7 @@
       pickup:[{num:1,row:0,col:4},{num:2,row:1,col:4}], pickupAnswer:"かた"
     },
     {
-      id:42, title:"クロス42", level:"hard", theme:"おにごっこ・たまごやき・おおかみ",
+      id:42, title:"クロス42", theme:"おにごっこ・たまごやき・おおかみ",
       grid:["#いた#く","お#ま#う","おにごっこ","か#や#う","み#きり#"],
       across:[
         {num:1,row:0,col:1,len:2,answer:"いた",clue:"木や金属を、うすく平らにしたもの。"},
@@ -1019,7 +1019,7 @@
       pickup:[{num:1,row:0,col:2},{num:2,row:4,col:2}], pickupAnswer:"たき"
     },
     {
-      id:43, title:"クロス43", level:"oni", theme:"とんかつ・おりがみ・おんがく",
+      id:43, title:"クロス43", theme:"とんかつ・おりがみ・おんがく",
       grid:["まと##り","ど#お#く","#とんかつ","おりがみ#","ん#く#し","ぷ##いろ"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"まと",clue:"矢や玉を当てる、ねらう目印。"},
@@ -1039,25 +1039,29 @@
       pickup:[{num:1,row:5,col:3},{num:2,row:4,col:4}], pickupAnswer:"いし"
     },
     {
-      id:44, title:"クロス44", level:"oni", theme:"りかしつ・かみなり・なわとび",
-      grid:["いし#すな","##か#わ","り#みなと","かたな#び","し#り##","つの#しか"],
+      id:44, title:"クロス44", theme:"りかしつ・かみなり・なわとび",
+      grid:["いし#すな","#たか#わ","り#みなと","かたな#び","し#りか#","つの#しか"],
       across:[
         {num:1,row:0,col:0,len:2,answer:"いし",clue:"地面や山にある、かたいもの。"},
-        {num:2,row:0,col:3,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
-        {num:6,row:2,col:2,len:3,answer:"みなと",clue:"船が出入りする、海沿いの施設があるところ。"},
-        {num:7,row:3,col:0,len:3,answer:"かたな",clue:"武士が腰にさしていた刃物。"},
-        {num:8,row:5,col:0,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
-        {num:9,row:5,col:3,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"}
+        {num:3,row:0,col:3,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
+        {num:5,row:1,col:1,len:2,answer:"たか",clue:"するどいつめとくちばしを持つ、空高く飛ぶ鳥。"},
+        {num:8,row:2,col:2,len:3,answer:"みなと",clue:"船が出入りする、海沿いの施設があるところ。"},
+        {num:9,row:3,col:0,len:3,answer:"かたな",clue:"武士が腰にさしていた刃物。"},
+        {num:10,row:4,col:2,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:12,row:5,col:0,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
+        {num:13,row:5,col:3,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"}
       ],
       down:[
-        {num:3,row:0,col:4,len:4,answer:"なわとび",clue:"ひもをくるくる回して跳びこえる遊び。"},
-        {num:4,row:1,col:2,len:4,answer:"かみなり",clue:"ピカッと光ってゴロゴロと音がするもの。"},
-        {num:5,row:2,col:0,len:4,answer:"りかしつ",clue:"実験や観察をするための教室。"}
+        {num:2,row:0,col:1,len:2,answer:"した",clue:"物の低いほう。または口の中にある味を感じる部分。"},
+        {num:4,row:0,col:4,len:4,answer:"なわとび",clue:"ひもをくるくる回して跳びこえる遊び。"},
+        {num:6,row:1,col:2,len:4,answer:"かみなり",clue:"ピカッと光ってゴロゴロと音がするもの。"},
+        {num:7,row:2,col:0,len:4,answer:"りかしつ",clue:"実験や観察をするための教室。"},
+        {num:11,row:4,col:3,len:2,answer:"かし",clue:"あまくておいしい、おやつのこと。"}
       ],
       pickup:[{num:1,row:0,col:0},{num:2,row:1,col:4}], pickupAnswer:"いわ"
     },
     {
-      id:45, title:"クロス45", level:"oni", theme:"おおかみ・みずうみ・おふとん",
+      id:45, title:"クロス45", theme:"おおかみ・みずうみ・おふとん",
       grid:["おおかみ#","#ふた##","まと#たこ","めん#いし","##みそ#","#みずうみ"],
       across:[
         {num:1,row:0,col:0,len:4,answer:"おおかみ",clue:"「ウォーン」と鳴く、犬に似た野生の動物。"},
@@ -1080,7 +1084,7 @@
       pickup:[{num:1,row:0,col:2},{num:2,row:0,col:0}], pickupAnswer:"かお"
     },
     {
-      id:46, title:"クロス46", level:"oni", theme:"はやし・さかな・らくだ",
+      id:46, title:"クロス46", theme:"はやし・さかな・らくだ",
       grid:["#さじ#け","あか#ほし","#なみ#き","は#そら#","やま#くぎ","し#えだ#"],
       across:[
         {num:1,row:0,col:1,len:2,answer:"さじ",clue:"スプーンのこと。"},
@@ -1102,7 +1106,7 @@
       pickup:[{num:1,row:2,col:1},{num:2,row:2,col:2},{num:3,row:5,col:3}], pickupAnswer:"なみだ"
     },
     {
-      id:47, title:"クロス47", level:"oni", theme:"はくさい・らいおん・まくら",
+      id:47, title:"クロス47", theme:"はくさい・らいおん・まくら",
       grid:["は##かま","くろ#ぞ#","さ#まくら","いのち#い","#う#かお","いか##ん"],
       across:[
         {num:2,row:0,col:3,len:2,answer:"かま",clue:"ご飯をたいたり湯をわかしたりする道具。"},
@@ -1122,7 +1126,7 @@
       pickup:[{num:1,row:1,col:0},{num:2,row:0,col:4}], pickupAnswer:"くま"
     },
     {
-      id:48, title:"クロス48", level:"oni", theme:"あかちゃん・なつやすみ・しあい",
+      id:48, title:"クロス48", theme:"あかちゃん・なつやすみ・しあい",
       grid:["し#く#ほし","あかちゃん#","い####な","#なつやすみ","かみ#ね#だ"],
       across:[
         {num:3,row:0,col:4,len:2,answer:"ほし",clue:"夜空にきらきら光る天体。"},
@@ -1141,7 +1145,7 @@
       pickup:[{num:1,row:3,col:3},{num:2,row:1,col:1},{num:3,row:1,col:4}], pickupAnswer:"やかん"
     },
     {
-      id:49, title:"クロス49", level:"oni", theme:"かいだん・こうえん・からあげ",
+      id:49, title:"クロス49", theme:"かいだん・こうえん・からあげ",
       grid:["#は#べ#お","かいだん#ふ","ら#いと#と","あ#こうえん","げ#ん#き#"],
       across:[
         {num:4,row:1,col:0,len:4,answer:"かいだん",clue:"上の階と下の階をつなぐ、段になった通路。"},
@@ -1159,7 +1163,7 @@
       pickup:[{num:1,row:1,col:1},{num:2,row:4,col:4}], pickupAnswer:"いき"
     },
     {
-      id:50, title:"クロス50", level:"oni", theme:"ようちえん・たけとんぼ・しあい",
+      id:50, title:"クロス50", theme:"ようちえん・たけとんぼ・しあい",
       grid:["よ#はい#た","うめ#る#け","ち#しか#と","え#あ#ぱん","ん#いす#ぼ"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
@@ -1177,7 +1181,7 @@
       pickup:[{num:1,row:0,col:3},{num:2,row:1,col:5}], pickupAnswer:"いけ"
     },
     {
-      id:51, title:"クロス51", level:"oni", theme:"なつやすみ・ゆきだるま・くうき",
+      id:51, title:"クロス51", theme:"なつやすみ・ゆきだるま・くうき",
       grid:["な#やま#ゆ","つち#くうき","や#さら#だ","すいか#ひる","み#なべ#ま"],
       across:[
         {num:2,row:0,col:2,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"},
@@ -1197,7 +1201,7 @@
       pickup:[{num:1,row:3,col:2},{num:2,row:4,col:3}], pickupAnswer:"かべ"
     },
     {
-      id:52, title:"クロス52", level:"oni", theme:"ともだち・はくさい・とまと",
+      id:52, title:"クロス52", theme:"ともだち・はくさい・とまと",
       grid:["#とまと#ま","かもめ#はち","#だ##く#","もち#あさひ","り#きかい#"],
       across:[
         {num:1,row:0,col:1,len:3,answer:"とまと",clue:"赤くて丸い、夏によく食べる野菜。"},
@@ -1216,6 +1220,1745 @@
         {num:7,row:3,col:3,len:2,answer:"あか",clue:"トマトや消防車のような色。"}
       ],
       pickup:[{num:1,row:4,col:2},{num:2,row:4,col:0}], pickupAnswer:"きり"
+    },
+    {
+      id:53, title:"クロス53", theme:"おうだんほどう・ずがこうさく・おしょうがつ",
+      grid:["つ###わ##い","ちず#にく#おと","#がまん#ほし#","#こ#じ##ょ#","おうだんほどう#","#さ##し#が#","#くま#ぞ#つき","##る#ら##ば"],
+      across:[
+        {num:4,row:1,col:0,len:2,answer:"ちず",clue:"道や場所を表した図。"},
+        {num:6,row:1,col:3,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:7,row:1,col:6,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:8,row:2,col:1,len:3,answer:"がまん",clue:"つらいことをこらえること。"},
+        {num:9,row:2,col:5,len:2,answer:"ほし",clue:"夜空にきらきら光る天体。"},
+        {num:10,row:4,col:0,len:7,answer:"おうだんほどう",clue:"人が道路をわたるための、しま模様の場所。"},
+        {num:12,row:6,col:1,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:14,row:6,col:6,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"つち",clue:"畑や地面にある、植物を育てる土。"},
+        {num:2,row:0,col:4,len:2,answer:"わく",clue:"物のまわりを囲む、四角いふち。"},
+        {num:3,row:0,col:7,len:2,answer:"いと",clue:"ぬい物や糸電話に使う、細長いもの。"},
+        {num:5,row:1,col:1,len:6,answer:"ずがこうさく",clue:"絵をかいたり物を作ったりする学校の教科。"},
+        {num:6,row:1,col:3,len:4,answer:"にんじん",clue:"オレンジ色をした、細長い根菜。"},
+        {num:7,row:1,col:6,len:6,answer:"おしょうがつ",clue:"1月1日から始まる、新しい年をいわう行事。"},
+        {num:11,row:4,col:4,len:4,answer:"ほしぞら",clue:"夜、星がたくさん見える空。"},
+        {num:13,row:6,col:2,len:2,answer:"まる",clue:"まんまるい形。◯のかたち。"},
+        {num:15,row:6,col:7,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"}
+      ],
+      pickup:[{num:1,row:2,col:2},{num:2,row:1,col:7}], pickupAnswer:"まと"
+    },
+    {
+      id:54, title:"クロス54", theme:"そつぎょうしき・ずがこうさく・つきみだんご",
+      grid:["#ずがこうさく#","たこ#め#い##","#うし##ふ#も","#し##ゆ#つち","そつぎょうしき#","####え#みず","つきみだんご##","き#そ#ち###"],
+      across:[
+        {num:1,row:0,col:1,len:6,answer:"ずがこうさく",clue:"絵をかいたり物を作ったりする学校の教科。"},
+        {num:4,row:1,col:0,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
+        {num:5,row:2,col:1,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:8,row:3,col:6,len:2,answer:"つち",clue:"畑や地面にある、植物を育てる土。"},
+        {num:9,row:4,col:0,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:10,row:5,col:6,len:2,answer:"みず",clue:"海や川、コップにも入っている透明な液体。"},
+        {num:11,row:6,col:0,len:6,answer:"つきみだんご",clue:"お月見のときにお供えする、丸い団子。"},
+        {num:13,row:6,col:3,len:3,answer:"だんご",clue:"米の粉を丸めてむした和菓子。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:5,answer:"ずこうしつ",clue:"絵をかいたり工作をしたりする教室。"},
+        {num:2,row:0,col:3,len:2,answer:"こめ",clue:"ご飯のもとになる、白くて小さなつぶ。"},
+        {num:3,row:0,col:5,len:3,answer:"さいふ",clue:"お金を入れて持ち歩く道具。"},
+        {num:6,row:2,col:7,len:2,answer:"もち",clue:"米をついて作る、のびるやわらかい食べ物。"},
+        {num:7,row:3,col:4,len:5,answer:"ゆうえんち",clue:"乗り物やアトラクションがたくさんある遊び場。"},
+        {num:8,row:3,col:6,len:3,answer:"つきみ",clue:"満月をながめて楽しむこと。"},
+        {num:11,row:6,col:0,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"},
+        {num:12,row:6,col:2,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"}
+      ],
+      pickup:[{num:1,row:0,col:6},{num:2,row:4,col:1}], pickupAnswer:"くつ"
+    },
+    {
+      id:55, title:"クロス55", theme:"りゅうせいぐん・たいいくさい・どうぶつえん",
+      grid:["###おにぎり","うた#と##ゅ","#なべ#かまう","きば##ぞ#せ","#たいいくさい","######ぐ","#どうぶつえん","##み##き#"],
+      across:[
+        {num:1,row:0,col:3,len:4,answer:"おにぎり",clue:"ご飯を三角や丸に丸めた食べ物。"},
+        {num:3,row:1,col:0,len:2,answer:"うた",clue:"声に出してメロディーにのせるもの。"},
+        {num:5,row:2,col:1,len:2,answer:"なべ",clue:"料理をにたり煮込んだりする道具。"},
+        {num:6,row:2,col:4,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
+        {num:7,row:3,col:0,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:8,row:4,col:1,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:9,row:6,col:1,len:6,answer:"どうぶつえん",clue:"いろいろな動物が見られる施設。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:2,row:0,col:6,len:7,answer:"りゅうせいぐん",clue:"たくさんの流れ星が一度に見られる現象。"},
+        {num:4,row:1,col:1,len:4,answer:"たなばた",clue:"7月7日、短冊に願い事を書く行事。"},
+        {num:6,row:2,col:4,len:3,answer:"かぞく",clue:"お父さんやお母さん、きょうだいなど。"},
+        {num:10,row:6,col:2,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:11,row:6,col:5,len:2,answer:"えき",clue:"電車が止まる場所。"}
+      ],
+      pickup:[{num:1,row:1,col:1},{num:2,row:7,col:5}], pickupAnswer:"たき"
+    },
+    {
+      id:56, title:"クロス56", theme:"そつぎょうしき・たいようけい・たいいくさい",
+      grid:["#さ#みそ#い#","はい##つ#いか","#ふた#ぎ#ん#","##い#ょ#かわ","#たいようけい#","か#く#し###","か#さ#きば##","しあい#####"],
+      across:[
+        {num:2,row:0,col:3,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"},
+        {num:5,row:1,col:0,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:6,row:1,col:6,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:7,row:2,col:1,len:2,answer:"ふた",clue:"入れ物の口をふさぐ、かぶせるもの。"},
+        {num:9,row:3,col:6,len:2,answer:"かわ",clue:"水が流れている、海に注ぐ細長い地形。"},
+        {num:10,row:4,col:1,len:6,answer:"たいようけい",clue:"太陽とそのまわりを回る星たちの集まり。"},
+        {num:12,row:6,col:4,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:13,row:7,col:0,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:3,answer:"さいふ",clue:"お金を入れて持ち歩く道具。"},
+        {num:3,row:0,col:4,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:4,row:0,col:6,len:5,answer:"いいんかい",clue:"クラスや学校の仕事を分担して行うグループ。"},
+        {num:8,row:2,col:2,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:11,row:5,col:0,len:3,answer:"かかし",clue:"畑で鳥をおどかすために立てる人形。"}
+      ],
+      pickup:[{num:1,row:5,col:2},{num:2,row:0,col:1}], pickupAnswer:"くさ"
+    },
+    {
+      id:57, title:"クロス57", theme:"おうだんほどう・りゅうせいぐん・おんがくしつ",
+      grid:["ひる#ほ#た#くび","る#おんがくしつ#","まほう##み##り","##だ#ぼ###ゅ","#てんとうむし#う","##ほ#し#か#せ","#まど##にく#い","##うめ##け#ぐ","###ん#らいおん"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"ひる",clue:"太陽が高く昇っている時間帯。"},
+        {num:4,row:0,col:7,len:2,answer:"くび",clue:"頭と体をつなぐ部分。"},
+        {num:5,row:1,col:2,len:6,answer:"おんがくしつ",clue:"歌ったり楽器を演奏したりする教室。"},
+        {num:6,row:2,col:0,len:3,answer:"まほう",clue:"不思議な力で物事を起こすこと。"},
+        {num:9,row:4,col:1,len:6,answer:"てんとうむし",clue:"背中に丸い模様がある、小さくて丸い虫。"},
+        {num:12,row:6,col:1,len:2,answer:"まど",clue:"外の景色が見えるように、壁に開けたガラスの部分。"},
+        {num:13,row:6,col:5,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:14,row:7,col:2,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
+        {num:16,row:8,col:5,len:4,answer:"らいおん",clue:"たてがみを持つ「百獣の王」と呼ばれる動物。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"ひるま",clue:"太陽が出ている、朝から夕方までの時間。"},
+        {num:2,row:0,col:3,len:2,answer:"ほん",clue:"文字や絵がかかれた、読むためのもの。"},
+        {num:3,row:0,col:5,len:3,answer:"たくみ",clue:"手先が器用で、物を作るのが上手なこと。"},
+        {num:4,row:0,col:7,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:5,row:1,col:2,len:7,answer:"おうだんほどう",clue:"人が道路をわたるための、しま模様の場所。"},
+        {num:7,row:2,col:8,len:7,answer:"りゅうせいぐん",clue:"たくさんの流れ星が一度に見られる現象。"},
+        {num:8,row:3,col:4,len:3,answer:"ぼうし",clue:"頭にかぶるもの。日よけにもなる。"},
+        {num:10,row:4,col:4,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:11,row:4,col:6,len:5,answer:"しかくけい",clue:"4つの辺と4つの角がある図形。"},
+        {num:15,row:7,col:3,len:2,answer:"めん",clue:"細長い形をした、うどんやそばなどの食べ物。"}
+      ],
+      pickup:[{num:1,row:2,col:2},{num:2,row:0,col:5}], pickupAnswer:"うた"
+    },
+    {
+      id:58, title:"クロス58", theme:"かんじれんしゅう・きゅうしょく・うんどうかい",
+      grid:["きゅうしょく#たこ","ば#さ##じかん#","#くぎ##ら#じ#","り###べ##ょ#","かんじれんしゅう#","####と##びん","#うんどうかい##","くま###ま#とし","ち###こうもり#"],
+      across:[
+        {num:1,row:0,col:0,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:4,row:0,col:7,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
+        {num:5,row:1,col:5,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"},
+        {num:6,row:2,col:1,len:2,answer:"くぎ",clue:"木材をつなぐときに打ちこむ、細長い金属。"},
+        {num:9,row:4,col:0,len:8,answer:"かんじれんしゅう",clue:"漢字を書いて覚えるための練習。"},
+        {num:10,row:5,col:7,len:2,answer:"びん",clue:"ガラスでできた、飲み物などを入れる入れ物。"},
+        {num:11,row:6,col:1,len:6,answer:"うんどうかい",clue:"かけっこや玉入れをする、学校の秋の行事。"},
+        {num:13,row:7,col:0,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:14,row:7,col:7,len:2,answer:"とし",clue:"1年、または生きてきた年数。"},
+        {num:15,row:8,col:4,len:4,answer:"こうもり",clue:"夜空を飛ぶ、羽を持つほ乳類。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:2,row:0,col:2,len:3,answer:"うさぎ",clue:"長い耳を持つ、ぴょんぴょん跳ねる動物。"},
+        {num:3,row:0,col:5,len:3,answer:"くじら",clue:"海にすむ、とても大きな生き物。"},
+        {num:4,row:0,col:7,len:6,answer:"たんじょうび",clue:"生まれた日を毎年いわう日。"},
+        {num:7,row:3,col:0,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:8,row:3,col:4,len:4,answer:"べんとう",clue:"おかずやご飯を入れて持っていく食事。"},
+        {num:11,row:6,col:1,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:12,row:6,col:5,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
+        {num:13,row:7,col:0,len:2,answer:"くち",clue:"食べ物を食べたり話したりする部分。"},
+        {num:14,row:7,col:7,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"}
+      ],
+      pickup:[{num:1,row:8,col:6},{num:2,row:8,col:7}], pickupAnswer:"もり"
+    },
+    {
+      id:59, title:"クロス59", theme:"すいぞくかん・たいいくさい・がくげいかい",
+      grid:["おりがみ##たき#","ん#く#か#け##","ぷ#げ#ぞ#とまと","#すいぞくかん#り","##か###ぼ##","たいいくさい###","ま##ぎ#しも##"],
+      across:[
+        {num:1,row:0,col:0,len:4,answer:"おりがみ",clue:"四角い紙を折っていろいろな形を作る遊び。"},
+        {num:3,row:0,col:6,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:5,row:2,col:6,len:3,answer:"とまと",clue:"赤くて丸い、夏によく食べる野菜。"},
+        {num:7,row:3,col:1,len:6,answer:"すいぞくかん",clue:"魚やイルカなど、水の生き物が見られる施設。"},
+        {num:8,row:5,col:0,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:11,row:6,col:5,len:2,answer:"しも",clue:"冬の朝、地面や草につく白いもの。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"おんぷ",clue:"音楽で、音の高さや長さを表す記号。"},
+        {num:2,row:0,col:2,len:6,answer:"がくげいかい",clue:"劇や合唱などを発表する、学校の行事。"},
+        {num:3,row:0,col:6,len:5,answer:"たけとんぼ",clue:"竹の棒を両手でこすって飛ばすおもちゃ。"},
+        {num:4,row:1,col:4,len:3,answer:"かぞく",clue:"お父さんやお母さん、きょうだいなど。"},
+        {num:6,row:2,col:8,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:8,row:5,col:0,len:2,answer:"たま",clue:"まるい形をしたもの。ボールのこと。"},
+        {num:9,row:5,col:3,len:2,answer:"くぎ",clue:"木材をつなぐときに打ちこむ、細長い金属。"},
+        {num:10,row:5,col:5,len:2,answer:"いし",clue:"地面や山にある、かたいもの。"}
+      ],
+      pickup:[{num:1,row:1,col:4},{num:2,row:0,col:0}], pickupAnswer:"かお"
+    },
+    {
+      id:60, title:"クロス60", theme:"しんりんよく・としょいいん・うんどうかい",
+      grid:["か#おかね#と","みなと#こおり","#べ###ん#","ほ##う#が#","しんりんよく#","ぞ##ど###","ら#こうもり#","#と#か###","としょいいん#"],
+      across:[
+        {num:2,row:0,col:2,len:3,answer:"おかね",clue:"物を買うときに使う、紙や金属でできたもの。"},
+        {num:5,row:1,col:0,len:3,answer:"みなと",clue:"船が出入りする、海沿いの施設があるところ。"},
+        {num:7,row:1,col:4,len:3,answer:"こおり",clue:"水が凍ってできるもの。"},
+        {num:11,row:4,col:0,len:6,answer:"しんりんよく",clue:"森の中を歩いて気分をリフレッシュすること。"},
+        {num:12,row:6,col:2,len:4,answer:"こうもり",clue:"夜空を飛ぶ、羽を持つほ乳類。"},
+        {num:14,row:8,col:0,len:6,answer:"としょいいん",clue:"図書室の本の貸し出しなどを行う係の人。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"かみ",clue:"頭に生えている毛。"},
+        {num:2,row:0,col:2,len:2,answer:"おと",clue:"耳で聞こえるもの。"},
+        {num:3,row:0,col:4,len:2,answer:"ねこ",clue:"「ニャー」と鳴く、しっぽがある人気のペット。"},
+        {num:4,row:0,col:6,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:6,row:1,col:1,len:2,answer:"なべ",clue:"料理をにたり煮込んだりする道具。"},
+        {num:8,row:1,col:5,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"},
+        {num:9,row:3,col:0,len:4,answer:"ほしぞら",clue:"夜、星がたくさん見える空。"},
+        {num:10,row:3,col:3,len:6,answer:"うんどうかい",clue:"かけっこや玉入れをする、学校の秋の行事。"},
+        {num:13,row:7,col:1,len:2,answer:"とし",clue:"1年、または生きてきた年数。"}
+      ],
+      pickup:[{num:1,row:0,col:3},{num:2,row:8,col:1}], pickupAnswer:"かし"
+    },
+    {
+      id:61, title:"クロス61", theme:"たいいくさい・がくげいかい・はくぶつかん",
+      grid:["が#たいよう#に#は","くうき##み#くすり","げ#######い#","いるか##は#たかめ","か#たいいくさい#ん","い#ぐ##ぶ#そ##","##る#くつ#うし#","#やま##か#ふ##","#ね##ぱん#くろ#"],
+      across:[
+        {num:2,row:0,col:2,len:4,answer:"たいよう",clue:"朝のぼって夜しずむ、明るく熱い星。"},
+        {num:6,row:1,col:0,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"},
+        {num:7,row:1,col:7,len:3,answer:"くすり",clue:"病気やけがを治すために飲む・つけるもの。"},
+        {num:9,row:3,col:0,len:3,answer:"いるか",clue:"かしこくて泳ぎが得意な海の生き物。"},
+        {num:12,row:3,col:7,len:3,answer:"たかめ",clue:"ふつうより少し高いこと。「おんどがたかめ」のように使う。"},
+        {num:14,row:4,col:2,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:15,row:6,col:4,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:16,row:6,col:7,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:17,row:7,col:1,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"},
+        {num:18,row:8,col:4,len:2,answer:"ぱん",clue:"小麦粉をこねて焼いた食べ物。"},
+        {num:19,row:8,col:7,len:2,answer:"くろ",clue:"夜のような、暗い色。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:6,answer:"がくげいかい",clue:"劇や合唱などを発表する、学校の行事。"},
+        {num:2,row:0,col:2,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:3,row:0,col:5,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:4,row:0,col:7,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:5,row:0,col:9,len:2,answer:"はり",clue:"ぬい物や時計についている、細くとがったもの。"},
+        {num:8,row:1,col:8,len:3,answer:"すいか",clue:"夏に食べる、緑と黒のしまもようの大きな果物。"},
+        {num:10,row:3,col:2,len:5,answer:"かたぐるま",clue:"人を肩の上に乗せて運ぶこと。"},
+        {num:11,row:3,col:5,len:6,answer:"はくぶつかん",clue:"歴史や科学の資料が展示されている施設。"},
+        {num:12,row:3,col:7,len:6,answer:"たいそうふく",clue:"体育のときに着る運動用の服。"},
+        {num:13,row:3,col:9,len:2,answer:"めん",clue:"細長い形をした、うどんやそばなどの食べ物。"},
+        {num:17,row:7,col:1,len:2,answer:"やね",clue:"家の上にかぶさっている部分。"}
+      ],
+      pickup:[{num:1,row:0,col:3},{num:2,row:3,col:2}], pickupAnswer:"いか"
+    },
+    {
+      id:62, title:"クロス62", theme:"じゆうけんきゅう・うんどうじょう・うんどうかい",
+      grid:["#や####のうか","おおかみ####が","#や#そら##うみ","た#ま#いた#ん#","ん#ほ#お##ど#","じゆうけんきゅう#","ょ####か#じ#","うんどうかい#ょ#","び##さ##くうき","##むぎ#かさ#ば"],
+      across:[
+        {num:2,row:0,col:6,len:3,answer:"のうか",clue:"お米や野菜を作る仕事をしている家。"},
+        {num:4,row:1,col:0,len:4,answer:"おおかみ",clue:"「ウォーン」と鳴く、犬に似た野生の動物。"},
+        {num:5,row:1,col:2,len:2,answer:"かみ",clue:"頭に生えている毛。"},
+        {num:7,row:2,col:3,len:2,answer:"そら",clue:"雲や太陽が見える、頭の上に広がる場所。"},
+        {num:9,row:2,col:7,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:12,row:3,col:4,len:2,answer:"いた",clue:"木や金属を、うすく平らにしたもの。"},
+        {num:13,row:5,col:0,len:8,answer:"じゆうけんきゅう",clue:"夏休みなどに、自分でテーマを決めて調べる宿題。"},
+        {num:15,row:7,col:0,len:6,answer:"うんどうかい",clue:"かけっこや玉入れをする、学校の秋の行事。"},
+        {num:17,row:8,col:6,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"},
+        {num:19,row:9,col:2,len:2,answer:"むぎ",clue:"パンやうどんの原料になる穀物。"},
+        {num:20,row:9,col:5,len:2,answer:"かさ",clue:"雨の日にさして体をぬらさないようにする道具。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:3,answer:"やおや",clue:"野菜や果物を売っているお店。"},
+        {num:3,row:0,col:8,len:3,answer:"かがみ",clue:"顔や姿をうつして見る道具。"},
+        {num:6,row:1,col:3,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"},
+        {num:8,row:2,col:4,len:4,answer:"らいおん",clue:"たてがみを持つ「百獣の王」と呼ばれる動物。"},
+        {num:9,row:2,col:7,len:7,answer:"うんどうじょう",clue:"かけっこやボール遊びをする、広い運動用の場所。"},
+        {num:10,row:3,col:0,len:6,answer:"たんじょうび",clue:"生まれた日を毎年いわう日。"},
+        {num:11,row:3,col:2,len:3,answer:"まほう",clue:"不思議な力で物事を起こすこと。"},
+        {num:14,row:5,col:5,len:3,answer:"きかい",clue:"電気や力で動く、便利な装置。"},
+        {num:16,row:7,col:3,len:3,answer:"うさぎ",clue:"長い耳を持つ、ぴょんぴょん跳ねる動物。"},
+        {num:17,row:8,col:6,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:18,row:8,col:8,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"}
+      ],
+      pickup:[{num:1,row:3,col:5},{num:2,row:5,col:5}], pickupAnswer:"たき"
+    },
+    {
+      id:63, title:"クロス63", theme:"そつぎょうしき・おしょうがつ・きゅうしょく",
+      grid:["##に#######","かぞく#か####お","ま##えにっき#ほし","うた#き##ゅ##ょ","#い####う##う","#そつぎょうしき#が","#う####ょ#くつ","#ふ###ふくろう#","#くも#いた##きり","###さけ####か"],
+      across:[
+        {num:2,row:1,col:0,len:3,answer:"かぞく",clue:"お父さんやお母さん、きょうだいなど。"},
+        {num:5,row:2,col:3,len:4,answer:"えにっき",clue:"絵と文で毎日の出来事を記録するもの。"},
+        {num:7,row:2,col:8,len:2,answer:"ほし",clue:"夜空にきらきら光る天体。"},
+        {num:8,row:3,col:0,len:2,answer:"うた",clue:"声に出してメロディーにのせるもの。"},
+        {num:10,row:5,col:1,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:11,row:6,col:8,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:12,row:7,col:5,len:4,answer:"ふくろう",clue:"夜に活動する、丸い目をした鳥。"},
+        {num:13,row:8,col:1,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:14,row:8,col:4,len:2,answer:"いた",clue:"木や金属を、うすく平らにしたもの。"},
+        {num:15,row:8,col:8,len:2,answer:"きり",clue:"空気中の水分でまわりが白くかすむ天気。"},
+        {num:17,row:9,col:3,len:2,answer:"さけ",clue:"お米から作るお酒。または魚のさけ。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:2,row:1,col:0,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
+        {num:3,row:1,col:4,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:4,row:1,col:9,len:6,answer:"おしょうがつ",clue:"1月1日から始まる、新しい年をいわう行事。"},
+        {num:5,row:2,col:3,len:2,answer:"えき",clue:"電車が止まる場所。"},
+        {num:6,row:2,col:6,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:9,row:3,col:1,len:6,answer:"たいそうふく",clue:"体育のときに着る運動用の服。"},
+        {num:11,row:6,col:8,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"},
+        {num:12,row:7,col:5,len:2,answer:"ふた",clue:"入れ物の口をふさぐ、かぶせるもの。"},
+        {num:14,row:8,col:4,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"},
+        {num:16,row:8,col:9,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"}
+      ],
+      pickup:[{num:1,row:7,col:6},{num:2,row:9,col:3}], pickupAnswer:"くさ"
+    },
+    {
+      id:64, title:"クロス64", theme:"そつぎょうしき・りっぽうたい・りかじっけん",
+      grid:["はい#みそ####","#とり#つきみ#が","##か#ぎ#せ#く","##じ#ょ###げ","#りっぽうたい#い","さ#け#し#ろうか","じかん#きり##い","#ぜ#ぱ#くうき#","##とんかつ#ば#"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:3,row:0,col:3,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"},
+        {num:5,row:1,col:1,len:2,answer:"とり",clue:"羽とくちばしを持ち、空を飛ぶいきもの。"},
+        {num:7,row:1,col:4,len:3,answer:"つきみ",clue:"満月をながめて楽しむこと。"},
+        {num:10,row:4,col:1,len:6,answer:"りっぽうたい",clue:"サイコロのような、6つの正方形でできた立体。"},
+        {num:13,row:5,col:6,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:14,row:6,col:0,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"},
+        {num:15,row:6,col:1,len:2,answer:"かん",clue:"ジュースなどが入っている、金属の入れ物。"},
+        {num:16,row:6,col:4,len:2,answer:"きり",clue:"空気中の水分でまわりが白くかすむ天気。"},
+        {num:19,row:7,col:5,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"},
+        {num:21,row:8,col:2,len:4,answer:"とんかつ",clue:"豚肉にころもをつけて油であげた料理。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"いと",clue:"ぬい物や糸電話に使う、細長いもの。"},
+        {num:4,row:0,col:4,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:6,row:1,col:2,len:6,answer:"りかじっけん",clue:"理科の授業で、道具を使って調べること。"},
+        {num:8,row:1,col:6,len:2,answer:"みせ",clue:"品物を売っているところ。"},
+        {num:9,row:1,col:8,len:6,answer:"がくげいかい",clue:"劇や合唱などを発表する、学校の行事。"},
+        {num:11,row:4,col:6,len:2,answer:"いろ",clue:"赤・青・黄色など、目で見分けられるもの。"},
+        {num:12,row:5,col:0,len:2,answer:"さじ",clue:"スプーンのこと。"},
+        {num:15,row:6,col:1,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"},
+        {num:17,row:6,col:5,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:18,row:7,col:3,len:2,answer:"ぱん",clue:"小麦粉をこねて焼いた食べ物。"},
+        {num:20,row:7,col:7,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"}
+      ],
+      pickup:[{num:1,row:0,col:0},{num:2,row:1,col:2}], pickupAnswer:"はり"
+    },
+    {
+      id:65, title:"クロス65", theme:"こうちょうしつ・かんさつにっき・おしょうがつ",
+      grid:["########う#","####あお#かまう","#####しぜん##","#ひ#は#ょ#さいふ","#こうちょうしつ#え","#う###が#にく#","つき#りくつ#っ##","#ぐ##す##きり#","ひも#もり###かし"],
+      across:[
+        {num:2,row:1,col:4,len:2,answer:"あお",clue:"空や海のような色。"},
+        {num:4,row:1,col:7,len:3,answer:"かまう",clue:"気にかけたり、世話をしたりすること。"},
+        {num:5,row:2,col:5,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:8,row:3,col:7,len:3,answer:"さいふ",clue:"お金を入れて持ち歩く道具。"},
+        {num:10,row:4,col:1,len:7,answer:"こうちょうしつ",clue:"校長先生がいる部屋。"},
+        {num:11,row:5,col:7,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:12,row:6,col:0,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"},
+        {num:13,row:6,col:3,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:15,row:7,col:7,len:2,answer:"きり",clue:"空気中の水分でまわりが白くかすむ天気。"},
+        {num:17,row:8,col:0,len:2,answer:"ひも",clue:"物をしばったり結んだりする細長いもの。"},
+        {num:18,row:8,col:3,len:2,answer:"もり",clue:"木がたくさん集まっているところ。"},
+        {num:19,row:8,col:8,len:2,answer:"かし",clue:"あまくておいしい、おやつのこと。"}
+      ],
+      down:[
+        {num:1,row:0,col:8,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:3,row:1,col:5,len:6,answer:"おしょうがつ",clue:"1月1日から始まる、新しい年をいわう行事。"},
+        {num:4,row:1,col:7,len:7,answer:"かんさつにっき",clue:"植物や生き物のようすを観察して書く記録。"},
+        {num:6,row:3,col:1,len:6,answer:"ひこうきぐも",clue:"飛行機が飛んだあとに空にできる、細長い雲。"},
+        {num:7,row:3,col:3,len:2,answer:"はち",clue:"花のみつを集める、飛ぶ虫。刺すこともある。"},
+        {num:9,row:3,col:9,len:2,answer:"ふえ",clue:"息をふきこんで音を出す楽器。"},
+        {num:14,row:6,col:4,len:3,answer:"くすり",clue:"病気やけがを治すために飲む・つけるもの。"},
+        {num:16,row:7,col:8,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"}
+      ],
+      pickup:[{num:1,row:2,col:5},{num:2,row:1,col:7}], pickupAnswer:"しか"
+    },
+    {
+      id:66, title:"クロス66", theme:"こうちょうしつ・はくぶつかん・おんがくしつ",
+      grid:["#しろくま##こ#","##う#としょしつ","##かに#も##の","###くり####","##た#く#お#り","#はくぶつかん#っ","た#み###が#ぽ","きり###ふくろう","#ゆ####し#た","こうちょうしつ#い"],
+      across:[
+        {num:1,row:0,col:1,len:4,answer:"しろくま",clue:"北極にすむ、白い毛の大きなくま。"},
+        {num:5,row:1,col:4,len:5,answer:"としょしつ",clue:"学校で本を読んだり借りたりする部屋。"},
+        {num:8,row:2,col:2,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:10,row:3,col:3,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"},
+        {num:15,row:5,col:1,len:6,answer:"はくぶつかん",clue:"歴史や科学の資料が展示されている施設。"},
+        {num:17,row:7,col:0,len:2,answer:"きり",clue:"空気中の水分でまわりが白くかすむ天気。"},
+        {num:19,row:7,col:5,len:4,answer:"ふくろう",clue:"夜に活動する、丸い目をした鳥。"},
+        {num:20,row:7,col:6,len:2,answer:"くろ",clue:"夜のような、暗い色。"},
+        {num:21,row:9,col:0,len:7,answer:"こうちょうしつ",clue:"校長先生がいる部屋。"}
+      ],
+      down:[
+        {num:2,row:0,col:2,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:3,row:0,col:4,len:2,answer:"まと",clue:"矢や玉を当てる、ねらう目印。"},
+        {num:4,row:0,col:7,len:2,answer:"こし",clue:"体の真ん中あたり、体を曲げるところ。"},
+        {num:6,row:1,col:5,len:2,answer:"しも",clue:"冬の朝、地面や草につく白いもの。"},
+        {num:7,row:1,col:8,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
+        {num:9,row:2,col:3,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:11,row:3,col:4,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:12,row:4,col:2,len:3,answer:"たくみ",clue:"手先が器用で、物を作るのが上手なこと。"},
+        {num:13,row:4,col:6,len:6,answer:"おんがくしつ",clue:"歌ったり楽器を演奏したりする教室。"},
+        {num:14,row:4,col:8,len:6,answer:"りっぽうたい",clue:"サイコロのような、6つの正方形でできた立体。"},
+        {num:16,row:6,col:0,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:18,row:7,col:1,len:3,answer:"りゆう",clue:"そうなった、そうする、わけ。"}
+      ],
+      pickup:[{num:1,row:2,col:5},{num:2,row:5,col:6}], pickupAnswer:"もん"
+    },
+    {
+      id:67, title:"クロス67", theme:"うんどうじょう・くわがたむし・きゅうしょく",
+      grid:["###くわがたむし#","###ら##こ#たか","##さいふ####み","####く#えき##","##お#ろ##ゅ#じ","#うんどうじょう#か","ゆ#が####しぜん","かぞく####ょ##","た#しあい##くま#","#くつ#ろうか#ど#"],
+      across:[
+        {num:1,row:0,col:3,len:6,answer:"くわがたむし",clue:"はさみのような大あごを持つ、黒い甲虫。"},
+        {num:4,row:1,col:8,len:2,answer:"たか",clue:"するどいつめとくちばしを持つ、空高く飛ぶ鳥。"},
+        {num:6,row:2,col:2,len:3,answer:"さいふ",clue:"お金を入れて持ち歩く道具。"},
+        {num:8,row:3,col:6,len:2,answer:"えき",clue:"電車が止まる場所。"},
+        {num:12,row:5,col:1,len:7,answer:"うんどうじょう",clue:"かけっこやボール遊びをする、広い運動用の場所。"},
+        {num:15,row:6,col:7,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:16,row:7,col:0,len:3,answer:"かぞく",clue:"お父さんやお母さん、きょうだいなど。"},
+        {num:17,row:8,col:2,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:19,row:8,col:7,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:21,row:9,col:1,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:22,row:9,col:4,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:3,answer:"くらい",clue:"光が少なくて見えにくい様子。"},
+        {num:2,row:0,col:6,len:2,answer:"たこ",clue:"8本の足を持ついきもの。たこ焼きの具にも。"},
+        {num:3,row:0,col:8,len:2,answer:"した",clue:"物の低いほう。または口の中にある味を感じる部分。"},
+        {num:5,row:1,col:9,len:2,answer:"かみ",clue:"頭に生えている毛。"},
+        {num:7,row:2,col:4,len:4,answer:"ふくろう",clue:"夜に活動する、丸い目をした鳥。"},
+        {num:9,row:3,col:7,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:10,row:4,col:2,len:6,answer:"おんがくしつ",clue:"歌ったり楽器を演奏したりする教室。"},
+        {num:11,row:4,col:9,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"},
+        {num:13,row:5,col:9,len:2,answer:"かん",clue:"ジュースなどが入っている、金属の入れ物。"},
+        {num:14,row:6,col:0,len:3,answer:"ゆかた",clue:"夏祭りなどで着る、涼しい着物。"},
+        {num:18,row:8,col:4,len:2,answer:"いろ",clue:"赤・青・黄色など、目で見分けられるもの。"},
+        {num:20,row:8,col:8,len:2,answer:"まど",clue:"外の景色が見えるように、壁に開けたガラスの部分。"}
+      ],
+      pickup:[{num:1,row:6,col:7},{num:2,row:9,col:4}], pickupAnswer:"しろ"
+    },
+    {
+      id:68, title:"クロス68", theme:"かんじれんしゅう・きゅうしょく・しんりんよく",
+      grid:["##かんじれんしゅう","##た##ん#ん#ま","#みち##が#りか#","か#####びん##","りくつ##す#よ##","##きゅうしょく#は","#みみ#わ###した","さ#だ#ば#く#あ#","じかん#きょうだい#","##ご###き###"],
+      across:[
+        {num:1,row:0,col:2,len:8,answer:"かんじれんしゅう",clue:"漢字を書いて覚えるための練習。"},
+        {num:5,row:2,col:1,len:2,answer:"みち",clue:"人や車が通るところ。"},
+        {num:6,row:2,col:7,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:8,row:3,col:6,len:2,answer:"びん",clue:"ガラスでできた、飲み物などを入れる入れ物。"},
+        {num:9,row:4,col:0,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:10,row:4,col:1,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:13,row:5,col:2,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:16,row:6,col:1,len:2,answer:"みみ",clue:"音を聞くための体の部分。"},
+        {num:17,row:6,col:8,len:2,answer:"した",clue:"物の低いほう。または口の中にある味を感じる部分。"},
+        {num:20,row:8,col:0,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"},
+        {num:21,row:8,col:4,len:5,answer:"きょうだい",clue:"兄弟や姉妹のこと。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:3,answer:"かたち",clue:"物の外側の様子、フォルム。"},
+        {num:2,row:0,col:5,len:3,answer:"れんが",clue:"土を焼いて作った、家を建てるための固い材料。"},
+        {num:3,row:0,col:7,len:6,answer:"しんりんよく",clue:"森の中を歩いて気分をリフレッシュすること。"},
+        {num:4,row:0,col:9,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:7,row:3,col:0,len:2,answer:"かり",clue:"生き物や木の実をつかまえに行くこと。「いちごがり」のように使う。"},
+        {num:11,row:4,col:2,len:6,answer:"つきみだんご",clue:"お月見のときにお供えする、丸い団子。"},
+        {num:12,row:4,col:5,len:2,answer:"すし",clue:"酢めしの上に魚などをのせた料理。"},
+        {num:14,row:5,col:4,len:4,answer:"うわばき",clue:"学校の中ではきかえる、うわ用のくつ。"},
+        {num:15,row:5,col:9,len:2,answer:"はた",clue:"風になびく、しるしのついた布。"},
+        {num:17,row:6,col:8,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:18,row:7,col:0,len:2,answer:"さじ",clue:"スプーンのこと。"},
+        {num:19,row:7,col:6,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"}
+      ],
+      pickup:[{num:1,row:0,col:9},{num:2,row:6,col:1}], pickupAnswer:"うみ"
+    },
+    {
+      id:69, title:"クロス69", theme:"りかじっけん・たいそうふく・としょいいん",
+      grid:["と#に####かに#","しろくま##くさ#ず","ょ##ともだち##が","い#は#み##う#こ","い#りかじっけん#う","ん##り###ど#さ","####たいそうふく","#####と##た#"],
+      across:[
+        {num:3,row:0,col:7,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:4,row:1,col:0,len:4,answer:"しろくま",clue:"北極にすむ、白い毛の大きなくま。"},
+        {num:5,row:1,col:2,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:7,row:1,col:6,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:9,row:2,col:3,len:4,answer:"ともだち",clue:"仲良しの、いっしょに遊ぶ人。"},
+        {num:13,row:4,col:2,len:6,answer:"りかじっけん",clue:"理科の授業で、道具を使って調べること。"},
+        {num:15,row:6,col:4,len:6,answer:"たいそうふく",clue:"体育のときに着る運動用の服。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:6,answer:"としょいいん",clue:"図書室の本の貸し出しなどを行う係の人。"},
+        {num:2,row:0,col:2,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:3,row:0,col:7,len:2,answer:"かさ",clue:"雨の日にさして体をぬらさないようにする道具。"},
+        {num:6,row:1,col:3,len:2,answer:"まと",clue:"矢や玉を当てる、ねらう目印。"},
+        {num:7,row:1,col:6,len:2,answer:"くち",clue:"食べ物を食べたり話したりする部分。"},
+        {num:8,row:1,col:9,len:6,answer:"ずがこうさく",clue:"絵をかいたり物を作ったりする学校の教科。"},
+        {num:10,row:2,col:4,len:3,answer:"もみじ",clue:"秋に赤や黄色に色づくカエデの葉。"},
+        {num:11,row:3,col:2,len:2,answer:"はり",clue:"ぬい物や時計についている、細くとがったもの。"},
+        {num:12,row:3,col:7,len:4,answer:"うんどう",clue:"体を動かすこと。"},
+        {num:14,row:4,col:3,len:2,answer:"かり",clue:"生き物や木の実をつかまえに行くこと。「いちごがり」のように使う。"},
+        {num:16,row:6,col:5,len:2,answer:"いと",clue:"ぬい物や糸電話に使う、細長いもの。"},
+        {num:17,row:6,col:8,len:2,answer:"ふた",clue:"入れ物の口をふさぐ、かぶせるもの。"}
+      ],
+      pickup:[{num:1,row:2,col:4},{num:2,row:4,col:2}], pickupAnswer:"もり"
+    },
+    {
+      id:70, title:"クロス70", theme:"しゃぼんだま・ゆきがっせん・りかじっけん",
+      grid:["しゃぼんだま##","ろ####くま#","くつ#ごりら#く","ま###か##じ","####じ#さら","#ゆきがっせん#","た#ば#け#か#","なべ#ほん#くも","ば#こし##け#","たかめ#にじいろ"],
+      across:[
+        {num:1,row:0,col:0,len:6,answer:"しゃぼんだま",clue:"石けん水をストローで吹いて作る、丸くて光る玉。"},
+        {num:3,row:1,col:5,len:2,answer:"くま",clue:"冬に冬眠する、大きくて力の強い動物。"},
+        {num:4,row:2,col:0,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:5,row:2,col:3,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる動物。"},
+        {num:8,row:4,col:6,len:2,answer:"さら",clue:"料理をのせる、平たい食器。"},
+        {num:9,row:5,col:1,len:6,answer:"ゆきがっせん",clue:"雪玉を投げ合って遊ぶこと。"},
+        {num:12,row:7,col:0,len:2,answer:"なべ",clue:"料理をにたり煮込んだりする道具。"},
+        {num:13,row:7,col:3,len:2,answer:"ほん",clue:"文字や絵がかかれた、読むためのもの。"},
+        {num:14,row:7,col:6,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:15,row:8,col:2,len:2,answer:"こし",clue:"体の真ん中あたり、体を曲げるところ。"},
+        {num:16,row:9,col:0,len:3,answer:"たかめ",clue:"ふつうより少し高いこと。「おんどがたかめ」のように使う。"},
+        {num:17,row:9,col:1,len:2,answer:"かめ",clue:"こうらを持ち、ゆっくり歩く生き物。"},
+        {num:18,row:9,col:4,len:4,answer:"にじいろ",clue:"虹のような、いろいろな色が並ぶ様子。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:4,answer:"しろくま",clue:"北極にすむ、白い毛の大きなくま。"},
+        {num:2,row:0,col:5,len:3,answer:"まくら",clue:"寝るときに頭の下に置くもの。"},
+        {num:6,row:2,col:4,len:6,answer:"りかじっけん",clue:"理科の授業で、道具を使って調べること。"},
+        {num:7,row:2,col:7,len:3,answer:"くじら",clue:"海にすむ、とても大きな生き物。"},
+        {num:8,row:4,col:6,len:6,answer:"さんかくけい",clue:"3つの辺と3つの角がある図形。"},
+        {num:10,row:5,col:2,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:11,row:6,col:0,len:4,answer:"たなばた",clue:"7月7日、短冊に願い事を書く行事。"},
+        {num:13,row:7,col:3,len:2,answer:"ほし",clue:"夜空にきらきら光る天体。"},
+        {num:15,row:8,col:2,len:2,answer:"こめ",clue:"ご飯のもとになる、白くて小さなつぶ。"}
+      ],
+      pickup:[{num:1,row:2,col:4},{num:2,row:9,col:1}], pickupAnswer:"りか"
+    },
+    {
+      id:71, title:"クロス71", theme:"じゅうりょく・しんりんよく・しゃぼんだま",
+      grid:["#ゆ#####たくみ#","たかめ###はい#ず#","き#い#こ##いす##","##じゅうりょく#の#","くらい#も####う#","う#しんりんよく#かし","き#ん####さじ#ろ","#り#みらい##か#く","#かがみ#しゃぼんだま","#し#####う#ん#","くつ#かぶとむし#ご#"],
+      across:[
+        {num:2,row:0,col:7,len:3,answer:"たくみ",clue:"手先が器用で、物を作るのが上手なこと。"},
+        {num:4,row:1,col:0,len:3,answer:"たかめ",clue:"ふつうより少し高いこと。「おんどがたかめ」のように使う。"},
+        {num:6,row:1,col:6,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:8,row:2,col:7,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
+        {num:9,row:3,col:2,len:6,answer:"じゅうりょく",clue:"物を地面に向かって引っぱる力。"},
+        {num:11,row:4,col:0,len:3,answer:"くらい",clue:"光が少なくて見えにくい様子。"},
+        {num:12,row:5,col:2,len:6,answer:"しんりんよく",clue:"森の中を歩いて気分をリフレッシュすること。"},
+        {num:14,row:5,col:9,len:2,answer:"かし",clue:"あまくておいしい、おやつのこと。"},
+        {num:16,row:6,col:7,len:2,answer:"さじ",clue:"スプーンのこと。"},
+        {num:19,row:7,col:3,len:3,answer:"みらい",clue:"これから先の、まだ来ていない時間。"},
+        {num:21,row:8,col:1,len:3,answer:"かがみ",clue:"顔や姿をうつして見る道具。"},
+        {num:22,row:8,col:5,len:6,answer:"しゃぼんだま",clue:"石けん水をストローで吹いて作る、丸くて光る玉。"},
+        {num:25,row:10,col:0,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:26,row:10,col:3,len:5,answer:"かぶとむし",clue:"つのを持つ、力の強い黒い甲虫。カブトムシ。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:2,answer:"ゆか",clue:"部屋の下、足で踏むところ。"},
+        {num:2,row:0,col:7,len:4,answer:"たいいく",clue:"体を動かして運動する授業。"},
+        {num:3,row:0,col:9,len:2,answer:"みず",clue:"海や川、コップにも入っている透明な液体。"},
+        {num:4,row:1,col:0,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:5,row:1,col:2,len:6,answer:"めいじいしん",clue:"江戸時代の後、日本が大きく変わった明治時代の改革。"},
+        {num:7,row:2,col:4,len:4,answer:"こうもり",clue:"夜空を飛ぶ、羽を持つほ乳類。"},
+        {num:10,row:3,col:9,len:3,answer:"のうか",clue:"お米や野菜を作る仕事をしている家。"},
+        {num:11,row:4,col:0,len:3,answer:"くうき",clue:"目に見えない、いつもまわりにある気体。"},
+        {num:13,row:5,col:7,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:15,row:5,col:10,len:4,answer:"しろくま",clue:"北極にすむ、白い毛の大きなくま。"},
+        {num:17,row:6,col:8,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"},
+        {num:18,row:7,col:1,len:4,answer:"りかしつ",clue:"実験や観察をするための教室。"},
+        {num:19,row:7,col:3,len:2,answer:"みみ",clue:"音を聞くための体の部分。"},
+        {num:20,row:7,col:5,len:2,answer:"いし",clue:"地面や山にある、かたいもの。"},
+        {num:23,row:8,col:7,len:3,answer:"ぼうし",clue:"頭にかぶるもの。日よけにもなる。"},
+        {num:24,row:8,col:9,len:3,answer:"だんご",clue:"米の粉を丸めてむした和菓子。"}
+      ],
+      pickup:[{num:1,row:7,col:8},{num:2,row:5,col:4}], pickupAnswer:"かり"
+    },
+    {
+      id:72, title:"クロス72", theme:"しょくいんしつ・たいいくさい・りっぽうたい",
+      grid:["#こし########ご","まど##あお###くもり","#もみじ#ゆか##ら#ら","###ゅ#う#きかい##","#りゆう#ぎ#ゅ####","いか#り#か#う###び","##しょくいんしつ#もん","ひも#く###ょ#はち#","な###たいいくさい##","まる#すな#ち#い##ろ","つ###ば#ご#ふくろう","りっぽうたい###ち#か"],
+      across:[
+        {num:1,row:0,col:1,len:2,answer:"こし",clue:"体の真ん中あたり、体を曲げるところ。"},
+        {num:3,row:1,col:0,len:2,answer:"まど",clue:"外の景色が見えるように、壁に開けたガラスの部分。"},
+        {num:4,row:1,col:4,len:2,answer:"あお",clue:"空や海のような色。"},
+        {num:6,row:1,col:9,len:3,answer:"くもり",clue:"空が雲におおわれている天気。"},
+        {num:7,row:2,col:1,len:3,answer:"もみじ",clue:"秋に赤や黄色に色づくカエデの葉。"},
+        {num:9,row:2,col:5,len:2,answer:"ゆか",clue:"部屋の下、足で踏むところ。"},
+        {num:10,row:3,col:7,len:3,answer:"きかい",clue:"電気や力で動く、便利な装置。"},
+        {num:11,row:4,col:1,len:3,answer:"りゆう",clue:"そうなった、そうする、わけ。"},
+        {num:12,row:5,col:0,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:14,row:6,col:2,len:7,answer:"しょくいんしつ",clue:"先生たちが集まって仕事をする部屋。"},
+        {num:15,row:6,col:10,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"},
+        {num:16,row:7,col:0,len:2,answer:"ひも",clue:"物をしばったり結んだりする細長いもの。"},
+        {num:17,row:7,col:9,len:2,answer:"はち",clue:"花のみつを集める、飛ぶ虫。刺すこともある。"},
+        {num:18,row:8,col:4,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:21,row:9,col:0,len:2,answer:"まる",clue:"まんまるい形。◯のかたち。"},
+        {num:22,row:9,col:3,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
+        {num:24,row:10,col:8,len:4,answer:"ふくろう",clue:"夜に活動する、丸い目をした鳥。"},
+        {num:26,row:11,col:0,len:6,answer:"りっぽうたい",clue:"サイコロのような、6つの正方形でできた立体。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:3,answer:"こども",clue:"年れいが低い、子どものこと。"},
+        {num:2,row:0,col:11,len:3,answer:"ごりら",clue:"胸をたたくしぐさで知られる動物。"},
+        {num:5,row:1,col:5,len:6,answer:"おゆうぎかい",clue:"幼稚園や保育園で、歌や踊りを発表する行事。"},
+        {num:6,row:1,col:9,len:3,answer:"くらい",clue:"光が少なくて見えにくい様子。"},
+        {num:8,row:2,col:3,len:6,answer:"じゅうりょく",clue:"物を地面に向かって引っぱる力。"},
+        {num:10,row:3,col:7,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:11,row:4,col:1,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:13,row:5,col:11,len:2,answer:"びん",clue:"ガラスでできた、飲み物などを入れる入れ物。"},
+        {num:15,row:6,col:10,len:2,answer:"もち",clue:"米をついて作る、のびるやわらかい食べ物。"},
+        {num:16,row:7,col:0,len:5,answer:"ひなまつり",clue:"3月3日、女の子の成長をいわう行事。"},
+        {num:17,row:7,col:9,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:18,row:8,col:4,len:4,answer:"たなばた",clue:"7月7日、短冊に願い事を書く行事。"},
+        {num:19,row:8,col:6,len:3,answer:"いちご",clue:"赤くてつぶつぶのある甘い果物。"},
+        {num:20,row:8,col:8,len:3,answer:"さいふ",clue:"お金を入れて持ち歩く道具。"},
+        {num:23,row:9,col:11,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:25,row:10,col:9,len:2,answer:"くち",clue:"食べ物を食べたり話したりする部分。"}
+      ],
+      pickup:[{num:1,row:1,col:0},{num:2,row:7,col:10}], pickupAnswer:"まち"
+    },
+    {
+      id:73, title:"クロス73", theme:"こくさいこうりゅう・りゅうせいぐん・とうもろこし",
+      grid:["##き#み##おかあさん","#りゅうせいぐん##る#","##う##る#が####","ぼうし##か#くさ###","##ょ#は#よ##よ##","#こくさいこうりゅう##","ゆめ#く##ふ##ちず#","か#そら##くも#え##","たま###か##けんだま","###とうもろこし##つ","#はやし#め##き#かり"],
+      across:[
+        {num:3,row:0,col:7,len:5,answer:"おかあさん",clue:"お母さんのこと。"},
+        {num:5,row:1,col:1,len:7,answer:"りゅうせいぐん",clue:"たくさんの流れ星が一度に見られる現象。"},
+        {num:7,row:3,col:0,len:3,answer:"ぼうし",clue:"頭にかぶるもの。日よけにもなる。"},
+        {num:8,row:3,col:7,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:12,row:5,col:1,len:9,answer:"こくさいこうりゅう",clue:"国と国との間で、人や文化が行き来すること。"},
+        {num:14,row:6,col:0,len:2,answer:"ゆめ",clue:"眠っているときに見る、ふしぎな出来事。"},
+        {num:15,row:6,col:9,len:2,answer:"ちず",clue:"道や場所を表した図。"},
+        {num:16,row:7,col:2,len:2,answer:"そら",clue:"雲や太陽が見える、頭の上に広がる場所。"},
+        {num:17,row:7,col:6,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:18,row:8,col:0,len:2,answer:"たま",clue:"まるい形をしたもの。ボールのこと。"},
+        {num:20,row:8,col:8,len:4,answer:"けんだま",clue:"玉を皿や先にのせて遊ぶ、日本のおもちゃ。"},
+        {num:22,row:9,col:3,len:6,answer:"とうもろこし",clue:"夏にとれる、黄色いつぶがたくさんついた野菜。"},
+        {num:23,row:9,col:7,len:2,answer:"こし",clue:"体の真ん中あたり、体を曲げるところ。"},
+        {num:24,row:10,col:1,len:3,answer:"はやし",clue:"木がたくさん集まっているところ。"},
+        {num:25,row:10,col:10,len:2,answer:"かり",clue:"生き物や木の実をつかまえに行くこと。「いちごがり」のように使う。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:6,answer:"きゅうしょく",clue:"学校でみんなで食べる、決まった時間の食事。"},
+        {num:2,row:0,col:4,len:2,answer:"みせ",clue:"品物を売っているところ。"},
+        {num:3,row:0,col:7,len:4,answer:"おんがく",clue:"歌や楽器を使って耳で楽しむ芸術。"},
+        {num:4,row:0,col:10,len:2,answer:"さる",clue:"木登りが得意で、バナナが好きな動物。"},
+        {num:6,row:1,col:5,len:3,answer:"いるか",clue:"かしこくて泳ぎが得意な海の生き物。"},
+        {num:9,row:4,col:4,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:10,row:4,col:6,len:4,answer:"ようふく",clue:"洋服、着る服のこと。"},
+        {num:11,row:4,col:9,len:5,answer:"ようちえん",clue:"小学校に上がる前に通うところ。"},
+        {num:12,row:5,col:1,len:2,answer:"こめ",clue:"ご飯のもとになる、白くて小さなつぶ。"},
+        {num:13,row:5,col:3,len:3,answer:"さくら",clue:"春にうすいピンク色の花をさかせる木。"},
+        {num:14,row:6,col:0,len:3,answer:"ゆかた",clue:"夏祭りなどで着る、涼しい着物。"},
+        {num:19,row:8,col:5,len:3,answer:"かもめ",clue:"海辺でよく見る、白と灰色の鳥。"},
+        {num:20,row:8,col:8,len:3,answer:"けしき",clue:"山や海など、目に見える外の様子。"},
+        {num:21,row:8,col:11,len:3,answer:"まつり",clue:"おみこしや屋台が出る、にぎやかな行事。"},
+        {num:22,row:9,col:3,len:2,answer:"とし",clue:"1年、または生きてきた年数。"}
+      ],
+      pickup:[{num:1,row:5,col:3},{num:2,row:7,col:3}], pickupAnswer:"さら"
+    },
+    {
+      id:74, title:"クロス74", theme:"たんとうちょくにゅう・こうつうじゅうたい・じゆうけんきゅう",
+      grid:["かぞく#うし#おりがみ","み#りか#あ##ん#せ","#お#にじいろ#ぎ##","かかし###う#ょ##","#あ#じぞくかのう#ま","#さ#ゆ#####つち","たんとうちょくにゅう#","い##け##じ##しか","よ##ん#さら#めん#","う#つきみ####ぼ#","け##ゅ##さ###は","い#こうつうじゅうたい"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"かぞく",clue:"お父さんやお母さん、きょうだいなど。"},
+        {num:3,row:0,col:4,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:5,row:0,col:7,len:4,answer:"おりがみ",clue:"四角い紙を折っていろいろな形を作る遊び。"},
+        {num:8,row:1,col:2,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:11,row:2,col:3,len:4,answer:"にじいろ",clue:"虹のような、いろいろな色が並ぶ様子。"},
+        {num:13,row:3,col:0,len:3,answer:"かかし",clue:"畑で鳥をおどかすために立てる人形。"},
+        {num:14,row:4,col:3,len:6,answer:"じぞくかのう",clue:"環境や資源を守りながら、ずっと続けられること。"},
+        {num:16,row:5,col:9,len:2,answer:"つち",clue:"畑や地面にある、植物を育てる土。"},
+        {num:17,row:6,col:0,len:10,answer:"たんとうちょくにゅう",clue:"前置きなしに、いきなり本題に入ること。"},
+        {num:19,row:7,col:9,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
+        {num:20,row:8,col:5,len:2,answer:"さら",clue:"料理をのせる、平たい食器。"},
+        {num:21,row:8,col:8,len:2,answer:"めん",clue:"細長い形をした、うどんやそばなどの食べ物。"},
+        {num:22,row:9,col:2,len:3,answer:"つきみ",clue:"満月をながめて楽しむこと。"},
+        {num:25,row:11,col:2,len:9,answer:"こうつうじゅうたい",clue:"車が多すぎて道路がなかなか進まなくなること。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"かみ",clue:"頭に生えている毛。"},
+        {num:2,row:0,col:2,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"},
+        {num:4,row:0,col:5,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:6,row:0,col:8,len:5,answer:"りんぎょう",clue:"木を育てたり切り出したりする仕事。"},
+        {num:7,row:0,col:10,len:2,answer:"みせ",clue:"品物を売っているところ。"},
+        {num:9,row:1,col:3,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:10,row:2,col:1,len:5,answer:"おかあさん",clue:"お母さんのこと。"},
+        {num:12,row:2,col:6,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:14,row:4,col:3,len:8,answer:"じゆうけんきゅう",clue:"夏休みなどに、自分でテーマを決めて調べる宿題。"},
+        {num:15,row:4,col:10,len:2,answer:"まち",clue:"たくさんの家やお店が集まっているところ。"},
+        {num:16,row:5,col:9,len:5,answer:"つうしんぼ",clue:"学校での成績や様子が書かれた記録。"},
+        {num:17,row:6,col:0,len:6,answer:"たいようけい",clue:"太陽とそのまわりを回る星たちの集まり。"},
+        {num:18,row:6,col:6,len:3,answer:"くじら",clue:"海にすむ、とても大きな生き物。"},
+        {num:23,row:10,col:6,len:2,answer:"さじ",clue:"スプーンのこと。"},
+        {num:24,row:10,col:10,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"}
+      ],
+      pickup:[{num:1,row:7,col:10},{num:2,row:5,col:1}], pickupAnswer:"かさ"
+    },
+    {
+      id:75, title:"クロス75", theme:"すいでんちたい・りんきおうへん・すいぞくかん",
+      grid:["###あ#すいでんちたい","ず##かたな#####け","こ###い#はるやすみ#","うみ##いのち#ま#かん","し##にく####はた#","つの##さ##き#い#し","#う#すいぞくかん#ひも","#かかし###い##な#","う#が##べ###ふた#","たくみ#しんりんよく##","#す#た#と###ろうか","#りんきおうへん#う#ぜ"],
+      across:[
+        {num:2,row:0,col:5,len:7,answer:"すいでんちたい",clue:"稲を育てる田んぼが広がっている地域。"},
+        {num:5,row:1,col:3,len:3,answer:"かたな",clue:"武士が腰にさしていた刃物。"},
+        {num:7,row:2,col:6,len:5,answer:"はるやすみ",clue:"3月から4月にある、春の長い休み。"},
+        {num:10,row:3,col:0,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:11,row:3,col:4,len:3,answer:"いのち",clue:"生きていくための、いちばん大切なもの。"},
+        {num:12,row:3,col:10,len:2,answer:"かん",clue:"ジュースなどが入っている、金属の入れ物。"},
+        {num:13,row:4,col:3,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:14,row:4,col:9,len:2,answer:"はた",clue:"風になびく、しるしのついた布。"},
+        {num:15,row:5,col:0,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
+        {num:19,row:6,col:3,len:6,answer:"すいぞくかん",clue:"魚やイルカなど、水の生き物が見られる施設。"},
+        {num:20,row:6,col:10,len:2,answer:"ひも",clue:"物をしばったり結んだりする細長いもの。"},
+        {num:21,row:7,col:1,len:3,answer:"かかし",clue:"畑で鳥をおどかすために立てる人形。"},
+        {num:25,row:8,col:9,len:2,answer:"ふた",clue:"入れ物の口をふさぐ、かぶせるもの。"},
+        {num:26,row:9,col:0,len:3,answer:"たくみ",clue:"手先が器用で、物を作るのが上手なこと。"},
+        {num:28,row:9,col:4,len:6,answer:"しんりんよく",clue:"森の中を歩いて気分をリフレッシュすること。"},
+        {num:31,row:10,col:9,len:3,answer:"ろうか",clue:"教室と教室の間にある、細長い通路。"},
+        {num:33,row:11,col:1,len:7,answer:"りんきおうへん",clue:"その場の状況に合わせて、うまく対応すること。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:2,answer:"あか",clue:"トマトや消防車のような色。"},
+        {num:2,row:0,col:5,len:2,answer:"すな",clue:"海辺や砂場にある、細かいつぶのもの。"},
+        {num:3,row:0,col:11,len:2,answer:"いけ",clue:"魚や鯉がすむ、水がたまった場所。"},
+        {num:4,row:1,col:0,len:5,answer:"ずこうしつ",clue:"絵をかいたり工作をしたりする教室。"},
+        {num:6,row:1,col:4,len:6,answer:"たいいくさい",clue:"体育の行事、運動会のべつの呼び方。"},
+        {num:7,row:2,col:6,len:2,answer:"はち",clue:"花のみつを集める、飛ぶ虫。刺すこともある。"},
+        {num:8,row:2,col:8,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"},
+        {num:9,row:2,col:10,len:3,answer:"みかた",clue:"自分の側について助けてくれる人。"},
+        {num:14,row:4,col:9,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:16,row:5,col:1,len:3,answer:"のうか",clue:"お米や野菜を作る仕事をしている家。"},
+        {num:17,row:5,col:7,len:3,answer:"きかい",clue:"電気や力で動く、便利な装置。"},
+        {num:18,row:5,col:11,len:2,answer:"しも",clue:"冬の朝、地面や草につく白いもの。"},
+        {num:19,row:6,col:3,len:2,answer:"すし",clue:"酢めしの上に魚などをのせた料理。"},
+        {num:20,row:6,col:10,len:3,answer:"ひなた",clue:"日の光が当たる、あたたかい場所。"},
+        {num:22,row:7,col:2,len:3,answer:"かがみ",clue:"顔や姿をうつして見る道具。"},
+        {num:23,row:8,col:0,len:2,answer:"うた",clue:"声に出してメロディーにのせるもの。"},
+        {num:24,row:8,col:5,len:4,answer:"べんとう",clue:"おかずやご飯を入れて持っていく食事。"},
+        {num:25,row:8,col:9,len:4,answer:"ふくろう",clue:"夜に活動する、丸い目をした鳥。"},
+        {num:27,row:9,col:1,len:3,answer:"くすり",clue:"病気やけがを治すために飲む・つけるもの。"},
+        {num:29,row:9,col:9,len:2,answer:"くろ",clue:"夜のような、暗い色。"},
+        {num:30,row:10,col:3,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:32,row:10,col:11,len:2,answer:"かぜ",clue:"目に見えない、ひゅうと吹くもの。"}
+      ],
+      pickup:[{num:1,row:0,col:5},{num:2,row:1,col:0}], pickupAnswer:"すず"
+    },
+    {
+      id:76, title:"クロス76", theme:"しんきいってん・ひこうきぐも・どうぶつえん",
+      grid:["###ど##しまうま#","#ひこうきぐも##ちず","###ぶ######こ","#りくつ#くぎ###う","あか#え#ら##め#し","##しんきいってん#つ","みかん#り####か#","そ#り#####うし#","#さんすう#かもめ##","##よ#まくら####","##くも##すいか##"],
+      across:[
+        {num:2,row:0,col:6,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"},
+        {num:4,row:1,col:1,len:6,answer:"ひこうきぐも",clue:"飛行機が飛んだあとに空にできる、細長い雲。"},
+        {num:5,row:1,col:9,len:2,answer:"ちず",clue:"道や場所を表した図。"},
+        {num:7,row:3,col:1,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:8,row:3,col:5,len:2,answer:"くぎ",clue:"木材をつなぐときに打ちこむ、細長い金属。"},
+        {num:9,row:4,col:0,len:2,answer:"あか",clue:"トマトや消防車のような色。"},
+        {num:11,row:5,col:2,len:7,answer:"しんきいってん",clue:"気持ちを入れかえて、新たな気持ちで始めること。"},
+        {num:13,row:6,col:0,len:3,answer:"みかん",clue:"冬に食べる、オレンジ色で皮が手でむける果物。"},
+        {num:15,row:7,col:8,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:16,row:8,col:1,len:4,answer:"さんすう",clue:"足し算や引き算などを習う教科。"},
+        {num:18,row:8,col:6,len:3,answer:"かもめ",clue:"海辺でよく見る、白と灰色の鳥。"},
+        {num:19,row:9,col:4,len:3,answer:"まくら",clue:"寝るときに頭の下に置くもの。"},
+        {num:20,row:10,col:2,len:2,answer:"くも",clue:"空に浮かぶ、白やねずみ色のもの。"},
+        {num:21,row:10,col:6,len:3,answer:"すいか",clue:"夏に食べる、緑と黒のしまもようの大きな果物。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:6,answer:"どうぶつえん",clue:"いろいろな動物が見られる施設。"},
+        {num:2,row:0,col:6,len:2,answer:"しも",clue:"冬の朝、地面や草につく白いもの。"},
+        {num:3,row:0,col:9,len:2,answer:"まち",clue:"たくさんの家やお店が集まっているところ。"},
+        {num:6,row:1,col:10,len:5,answer:"ずこうしつ",clue:"絵をかいたり工作をしたりする教室。"},
+        {num:7,row:3,col:1,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:8,row:3,col:5,len:3,answer:"くらい",clue:"光が少なくて見えにくい様子。"},
+        {num:10,row:4,col:8,len:2,answer:"めん",clue:"細長い形をした、うどんやそばなどの食べ物。"},
+        {num:11,row:5,col:2,len:6,answer:"しんりんよく",clue:"森の中を歩いて気分をリフレッシュすること。"},
+        {num:12,row:5,col:4,len:2,answer:"きり",clue:"空気中の水分でまわりが白くかすむ天気。"},
+        {num:13,row:6,col:0,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"},
+        {num:14,row:6,col:9,len:2,answer:"かし",clue:"あまくておいしい、おやつのこと。"},
+        {num:15,row:7,col:8,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
+        {num:17,row:8,col:4,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:18,row:8,col:6,len:3,answer:"からす",clue:"黒い羽で「カーカー」と鳴く鳥。"}
+      ],
+      pickup:[{num:1,row:3,col:2},{num:2,row:8,col:1}], pickupAnswer:"くさ"
+    },
+    {
+      id:77, title:"クロス77", theme:"たいようこうはつでん・かんさつにっき・こうちょうしつ",
+      grid:["#か###いろ##ゆうひ","もみじ#かた###め#る","ん#ゃ#ん##ふえ#たま","##が#さかな#ど#い#","#たいくつ###じ#よ#","##も#に#こ#だ#うま","###りっぽうたい#こ#","か#は#き#ち##ぼうし","たいいく##ょ#か#は#","ぐ##さじ#うちわ#つき","る###からし###で#","まめ#ぱん#つきみだんご"],
+      across:[
+        {num:2,row:0,col:5,len:2,answer:"いろ",clue:"赤・青・黄色など、目で見分けられるもの。"},
+        {num:3,row:0,col:9,len:3,answer:"ゆうひ",clue:"夕方、西にしずむ太陽。"},
+        {num:5,row:1,col:0,len:3,answer:"もみじ",clue:"秋に赤や黄色に色づくカエデの葉。"},
+        {num:7,row:1,col:4,len:2,answer:"かた",clue:"うでのつけね、体の上の部分。"},
+        {num:8,row:2,col:7,len:2,answer:"ふえ",clue:"息をふきこんで音を出す楽器。"},
+        {num:10,row:2,col:10,len:2,answer:"たま",clue:"まるい形をしたもの。ボールのこと。"},
+        {num:11,row:3,col:4,len:3,answer:"さかな",clue:"水の中を泳ぐ生き物。"},
+        {num:12,row:4,col:1,len:4,answer:"たいくつ",clue:"することがなくて、つまらないこと。"},
+        {num:14,row:5,col:10,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:15,row:6,col:3,len:6,answer:"りっぽうたい",clue:"サイコロのような、6つの正方形でできた立体。"},
+        {num:18,row:7,col:9,len:3,answer:"ぼうし",clue:"頭にかぶるもの。日よけにもなる。"},
+        {num:19,row:7,col:10,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:20,row:8,col:0,len:4,answer:"たいいく",clue:"体を動かして運動する授業。"},
+        {num:23,row:9,col:3,len:2,answer:"さじ",clue:"スプーンのこと。"},
+        {num:25,row:9,col:6,len:3,answer:"うちわ",clue:"あおいで風を起こす、平たい道具。"},
+        {num:26,row:9,col:10,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"},
+        {num:27,row:10,col:4,len:3,answer:"からし",clue:"ツンとからい、黄色い調味料。"},
+        {num:28,row:11,col:0,len:2,answer:"まめ",clue:"畑でとれる、小さくて丸い食べ物。"},
+        {num:29,row:11,col:3,len:2,answer:"ぱん",clue:"小麦粉をこねて焼いた食べ物。"},
+        {num:30,row:11,col:6,len:6,answer:"つきみだんご",clue:"お月見のときにお供えする、丸い団子。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:2,answer:"かみ",clue:"頭に生えている毛。"},
+        {num:2,row:0,col:5,len:2,answer:"いた",clue:"木や金属を、うすく平らにしたもの。"},
+        {num:3,row:0,col:9,len:2,answer:"ゆめ",clue:"眠っているときに見る、ふしぎな出来事。"},
+        {num:4,row:0,col:11,len:3,answer:"ひるま",clue:"太陽が出ている、朝から夕方までの時間。"},
+        {num:5,row:1,col:0,len:2,answer:"もん",clue:"家や学校の出入り口にある大きな門。"},
+        {num:6,row:1,col:2,len:5,answer:"じゃがいも",clue:"土の中で育つ、カレーやポテトの材料になるいも。"},
+        {num:7,row:1,col:4,len:7,answer:"かんさつにっき",clue:"植物や生き物のようすを観察して書く記録。"},
+        {num:9,row:2,col:8,len:5,answer:"えどじだい",clue:"徳川家が政治を行っていた、江戸に幕府があった時代。"},
+        {num:10,row:2,col:10,len:10,answer:"たいようこうはつでん",clue:"太陽の光を利用して電気を作ること。"},
+        {num:13,row:5,col:6,len:7,answer:"こうちょうしつ",clue:"校長先生がいる部屋。"},
+        {num:16,row:7,col:0,len:5,answer:"かたぐるま",clue:"人を肩の上に乗せて運ぶこと。"},
+        {num:17,row:7,col:2,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:21,row:8,col:3,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:22,row:8,col:8,len:2,answer:"かわ",clue:"水が流れている、海に注ぐ細長い地形。"},
+        {num:24,row:9,col:4,len:3,answer:"じかん",clue:"時計で計る、時の長さ。"}
+      ],
+      pickup:[{num:1,row:3,col:10},{num:2,row:7,col:0}], pickupAnswer:"いか"
+    },
+    {
+      id:78, title:"クロス78", theme:"せきついどうぶつ・そつぎょうしき・つきみだんご",
+      grid:["せきついどうぶつ####","#ば#す#め#のうか##","そ#な#か####かわ#","つきみだんご#みなと#か","ぎ######か##やま","ょ##りっぽうたい##き","う#たか##ま#かみなり","しあい#り####ず##","き#そ#く#みそ####","#どうぶつえん#えき##","######なみだ###"],
+      across:[
+        {num:1,row:0,col:0,len:8,answer:"せきついどうぶつ",clue:"背骨を持つ動物のなかま。"},
+        {num:6,row:1,col:7,len:3,answer:"のうか",clue:"お米や野菜を作る仕事をしている家。"},
+        {num:11,row:2,col:9,len:2,answer:"かわ",clue:"水が流れている、海に注ぐ細長い地形。"},
+        {num:12,row:3,col:0,len:6,answer:"つきみだんご",clue:"お月見のときにお供えする、丸い団子。"},
+        {num:13,row:3,col:7,len:3,answer:"みなと",clue:"船が出入りする、海沿いの施設があるところ。"},
+        {num:16,row:4,col:10,len:2,answer:"やま",clue:"高く盛り上がった地形。登山で登るところ。"},
+        {num:17,row:5,col:3,len:6,answer:"りっぽうたい",clue:"サイコロのような、6つの正方形でできた立体。"},
+        {num:21,row:6,col:2,len:2,answer:"たか",clue:"するどいつめとくちばしを持つ、空高く飛ぶ鳥。"},
+        {num:22,row:6,col:8,len:4,answer:"かみなり",clue:"ピカッと光ってゴロゴロと音がするもの。"},
+        {num:24,row:7,col:0,len:3,answer:"しあい",clue:"スポーツなどで勝ち負けを競うこと。"},
+        {num:26,row:8,col:6,len:2,answer:"みそ",clue:"大豆から作る、みそ汁などに使う調味料。"},
+        {num:27,row:9,col:1,len:6,answer:"どうぶつえん",clue:"いろいろな動物が見られる施設。"},
+        {num:28,row:9,col:8,len:2,answer:"えき",clue:"電車が止まる場所。"},
+        {num:29,row:10,col:6,len:3,answer:"なみだ",clue:"悲しいときやうれしいときに目から出る水。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"きば",clue:"動物の口から出ている、するどい歯。"},
+        {num:3,row:0,col:3,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
+        {num:4,row:0,col:5,len:2,answer:"うめ",clue:"早春に花をさかせる、すっぱい実がなる木。"},
+        {num:5,row:0,col:7,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
+        {num:7,row:1,col:9,len:3,answer:"かかと",clue:"足の裏の、うしろ側の部分。"},
+        {num:8,row:2,col:0,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:9,row:2,col:2,len:2,answer:"なみ",clue:"海や川の水面が上下にゆれ動くもの。"},
+        {num:10,row:2,col:4,len:2,answer:"かん",clue:"ジュースなどが入っている、金属の入れ物。"},
+        {num:13,row:3,col:7,len:3,answer:"みかた",clue:"自分の側について助けてくれる人。"},
+        {num:14,row:3,col:11,len:4,answer:"かまきり",clue:"前足がかまのような形をしている、緑色の虫。"},
+        {num:15,row:4,col:7,len:2,answer:"かた",clue:"うでのつけね、体の上の部分。"},
+        {num:17,row:5,col:3,len:2,answer:"りか",clue:"実験をしたり生き物を観察したりする教科。"},
+        {num:18,row:5,col:6,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:19,row:5,col:8,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:20,row:6,col:0,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:21,row:6,col:2,len:4,answer:"たいそう",clue:"体をきたえたり、ほぐしたりする運動。"},
+        {num:23,row:6,col:9,len:2,answer:"みず",clue:"海や川、コップにも入っている透明な液体。"},
+        {num:25,row:7,col:4,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:26,row:8,col:6,len:3,answer:"みんな",clue:"そこにいる人たち全員のこと。"},
+        {num:28,row:9,col:8,len:2,answer:"えだ",clue:"木の幹から分かれて伸びている部分。"}
+      ],
+      pickup:[{num:1,row:6,col:0},{num:2,row:5,col:7}], pickupAnswer:"うた"
+    },
+    {
+      id:79, title:"クロス79", theme:"のうりんすいさんぎょう・かんじれんしゅう・そつぎょうしき",
+      grid:["みのむし#ほ##うちわ","ら#ぎ##しまうま##","いす#かに#く###そ","#しぜん#からす#くつ","###じ###いか#ぎ","###れ#た#で##ょ","のうりんすいさんぎょう","#わ#し#そ#ち##し","#ば#ゅ#う#た#たき","つき#う#ふ#いと##","の###わく##しか#","#########みみ"],
+      across:[
+        {num:1,row:0,col:0,len:4,answer:"みのむし",clue:"木の枝に葉っぱをまとった巣をぶら下げる虫。"},
+        {num:4,row:0,col:8,len:3,answer:"うちわ",clue:"あおいで風を起こす、平たい道具。"},
+        {num:5,row:1,col:5,len:4,answer:"しまうま",clue:"白と黒のしま模様がある、馬に似た動物。"},
+        {num:7,row:2,col:0,len:2,answer:"いす",clue:"せもたれがある、すわるための家具。"},
+        {num:9,row:2,col:3,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:11,row:3,col:1,len:3,answer:"しぜん",clue:"山や海など、人が作っていないもの。"},
+        {num:12,row:3,col:5,len:3,answer:"からす",clue:"黒い羽で「カーカー」と鳴く鳥。"},
+        {num:14,row:3,col:9,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:15,row:4,col:7,len:2,answer:"いか",clue:"10本の足と墨を持ついきもの。"},
+        {num:17,row:6,col:0,len:11,answer:"のうりんすいさんぎょう",clue:"農業・林業・水産業をまとめた呼び方。"},
+        {num:20,row:8,col:9,len:2,answer:"たき",clue:"高いところから水が流れ落ちるところ。"},
+        {num:21,row:9,col:0,len:2,answer:"つき",clue:"夜空に浮かぶ、丸く光る天体。"},
+        {num:22,row:9,col:7,len:2,answer:"いと",clue:"ぬい物や糸電話に使う、細長いもの。"},
+        {num:24,row:10,col:4,len:2,answer:"わく",clue:"物のまわりを囲む、四角いふち。"},
+        {num:25,row:10,col:8,len:2,answer:"しか",clue:"オスは立派なつのを持つ、山にすむ動物。"},
+        {num:27,row:11,col:9,len:2,answer:"みみ",clue:"音を聞くための体の部分。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"みらい",clue:"これから先の、まだ来ていない時間。"},
+        {num:2,row:0,col:2,len:2,answer:"むぎ",clue:"パンやうどんの原料になる穀物。"},
+        {num:3,row:0,col:5,len:2,answer:"ほし",clue:"夜空にきらきら光る天体。"},
+        {num:4,row:0,col:8,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:6,row:1,col:6,len:3,answer:"まくら",clue:"寝るときに頭の下に置くもの。"},
+        {num:8,row:2,col:1,len:2,answer:"すし",clue:"酢めしの上に魚などをのせた料理。"},
+        {num:9,row:2,col:3,len:8,answer:"かんじれんしゅう",clue:"漢字を書いて覚えるための練習。"},
+        {num:10,row:2,col:10,len:7,answer:"そつぎょうしき",clue:"学校を卒業するときに行われる式。"},
+        {num:13,row:3,col:7,len:7,answer:"すいでんちたい",clue:"稲を育てる田んぼが広がっている地域。"},
+        {num:16,row:5,col:5,len:6,answer:"たいそうふく",clue:"体育のときに着る運動用の服。"},
+        {num:18,row:6,col:1,len:4,answer:"うわばき",clue:"学校の中ではきかえる、うわ用のくつ。"},
+        {num:19,row:6,col:10,len:2,answer:"うし",clue:"「モー」と鳴く、牛乳やお肉をとる動物。"},
+        {num:21,row:9,col:0,len:2,answer:"つの",clue:"牛や鹿の頭に生えている、かたいもの。"},
+        {num:23,row:9,col:8,len:2,answer:"とし",clue:"1年、または生きてきた年数。"},
+        {num:26,row:10,col:9,len:2,answer:"かみ",clue:"頭に生えている毛。"}
+      ],
+      pickup:[{num:1,row:9,col:7},{num:2,row:5,col:5}], pickupAnswer:"いた"
+    },
+    {
+      id:80, title:"クロス80", theme:"たんすいかぶつ・せんごくじだい・どうぶつえん",
+      grid:["かに#########か","#ほ#め##ま#に#くさ","たんすいかぶつ#くもり#","く##じ##り##み##","みち#いろ##もみじがり","#ず#し##び#ら##く","う#せんごくじだい#くつ","ち#####ゅ##か##","ゅ##とんかつ#うわばき","うま####かたち##か","#どうぶつえん#わ#はい","##み##だ###ふた#"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"かに",clue:"はさみを持ち、横歩きをする海のいきもの。"},
+        {num:8,row:1,col:10,len:2,answer:"くさ",clue:"地面から生える、緑色の植物。"},
+        {num:9,row:2,col:0,len:7,answer:"たんすいかぶつ",clue:"ご飯やパンなどに多くふくまれる、エネルギーのもとになる栄養素。"},
+        {num:10,row:2,col:8,len:3,answer:"くもり",clue:"空が雲におおわれている天気。"},
+        {num:12,row:4,col:0,len:2,answer:"みち",clue:"人や車が通るところ。"},
+        {num:14,row:4,col:3,len:2,answer:"いろ",clue:"赤・青・黄色など、目で見分けられるもの。"},
+        {num:15,row:4,col:7,len:5,answer:"もみじがり",clue:"秋に紅葉した葉っぱを見に出かけること。"},
+        {num:20,row:6,col:2,len:7,answer:"せんごくじだい",clue:"各地の武将が争っていた、日本の歴史の一時代。"},
+        {num:21,row:6,col:10,len:2,answer:"くつ",clue:"外を歩くときに足にはく履き物。"},
+        {num:23,row:8,col:3,len:4,answer:"とんかつ",clue:"豚肉にころもをつけて油であげた料理。"},
+        {num:24,row:8,col:8,len:4,answer:"うわばき",clue:"学校の中ではきかえる、うわ用のくつ。"},
+        {num:26,row:9,col:0,len:2,answer:"うま",clue:"たてがみを持ち、速く走る動物。"},
+        {num:28,row:9,col:6,len:3,answer:"かたち",clue:"物の外側の様子、フォルム。"},
+        {num:29,row:10,col:1,len:6,answer:"どうぶつえん",clue:"いろいろな動物が見られる施設。"},
+        {num:32,row:10,col:10,len:2,answer:"はい",clue:"物が燃えたあとに残る、灰色の粉。"},
+        {num:33,row:11,col:9,len:2,answer:"ふた",clue:"入れ物の口をふさぐ、かぶせるもの。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"にほん",clue:"わたしたちが住んでいる国の名前。"},
+        {num:3,row:0,col:11,len:2,answer:"かさ",clue:"雨の日にさして体をぬらさないようにする道具。"},
+        {num:4,row:1,col:1,len:2,answer:"ほん",clue:"文字や絵がかかれた、読むためのもの。"},
+        {num:5,row:1,col:3,len:6,answer:"めいじいしん",clue:"江戸時代の後、日本が大きく変わった明治時代の改革。"},
+        {num:6,row:1,col:6,len:3,answer:"まつり",clue:"おみこしや屋台が出る、にぎやかな行事。"},
+        {num:7,row:1,col:8,len:2,answer:"にく",clue:"牛や豚、鶏などからとれる食材。"},
+        {num:8,row:1,col:10,len:2,answer:"くり",clue:"秋にとれる、いがに包まれた木の実。"},
+        {num:9,row:2,col:0,len:3,answer:"たくみ",clue:"手先が器用で、物を作るのが上手なこと。"},
+        {num:11,row:2,col:9,len:3,answer:"もみじ",clue:"秋に赤や黄色に色づくカエデの葉。"},
+        {num:13,row:4,col:1,len:2,answer:"ちず",clue:"道や場所を表した図。"},
+        {num:16,row:4,col:8,len:3,answer:"みらい",clue:"これから先の、まだ来ていない時間。"},
+        {num:17,row:4,col:11,len:3,answer:"りくつ",clue:"物事のすじ道。"},
+        {num:18,row:5,col:6,len:6,answer:"びじゅつかん",clue:"絵や彫刻などの作品が展示されている施設。"},
+        {num:19,row:6,col:0,len:4,answer:"うちゅう",clue:"星や太陽が浮かぶ、広い広い空間。"},
+        {num:22,row:7,col:9,len:2,answer:"かわ",clue:"水が流れている、海に注ぐ細長い地形。"},
+        {num:24,row:8,col:8,len:3,answer:"うちわ",clue:"あおいで風を起こす、平たい道具。"},
+        {num:25,row:8,col:11,len:3,answer:"きかい",clue:"電気や力で動く、便利な装置。"},
+        {num:27,row:9,col:1,len:2,answer:"まど",clue:"外の景色が見えるように、壁に開けたガラスの部分。"},
+        {num:30,row:10,col:2,len:2,answer:"うみ",clue:"広くて塩水をたたえた、魚や貝がすむ場所。"},
+        {num:31,row:10,col:5,len:2,answer:"えだ",clue:"木の幹から分かれて伸びている部分。"},
+        {num:32,row:10,col:10,len:2,answer:"はた",clue:"風になびく、しるしのついた布。"}
+      ],
+      pickup:[{num:1,row:2,col:0},{num:2,row:2,col:4}], pickupAnswer:"たか"
+    },
+    {
+      id:81, title:"クロス81", theme:"りんきおうへん・せいこううどく・きょうちょう",
+      grid:["かさ##たいりく","#ど#せ##ん#","こうずい#つきみ","い##こ##お#","#きょうちょう#","###う##へ#","#いくどうおん#","ひと#く####"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:3,row:0,col:4,len:4,answer:"たいりく",clue:"海に囲まれた、広大な陸地。"},
+        {num:7,row:2,col:0,len:4,answer:"こうずい",clue:"雨が多く降って、川の水があふれ出ること。"},
+        {num:8,row:2,col:5,len:3,answer:"つきみ",clue:"秋の夜、美しい満月を眺めて楽しむこと。"},
+        {num:9,row:4,col:1,len:6,answer:"きょうちょう",clue:"力を合わせて、共に助け合うこと。"},
+        {num:10,row:6,col:1,len:6,answer:"いくどうおん",clue:"多くの人が口をそろえて同じことを言うこと。"},
+        {num:11,row:7,col:0,len:2,answer:"ひと",clue:"言葉を話し、考える力を持つ生き物。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:4,row:0,col:6,len:7,answer:"りんきおうへん",clue:"その場の状況に合わせて、うまく対応すること。"},
+        {num:5,row:1,col:1,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:6,row:1,col:3,len:7,answer:"せいこううどく",clue:"晴れた日は畑を耕し、雨の日は家で読書をする、悠々自適な暮らし。"},
+        {num:7,row:2,col:0,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:10,row:6,col:1,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"}
+      ],
+      pickup:[{num:1,row:4,col:6},{num:2,row:2,col:7}], pickupAnswer:"うみ"
+    },
+    {
+      id:82, title:"クロス82", theme:"ふげんじっこう・りしせいぜん・しこうさくご",
+      grid:["つ#あ##ぶんせき","りしせいぜん##ぬ","###く#かいぎ#","#だ#ど#####","#しこうさくご#つ","###お###こえ","#ふげんじっこう#","どく##だ##げ#","う#わかい#しんぽ"],
+      across:[
+        {num:3,row:0,col:5,len:4,answer:"ぶんせき",clue:"物事を細かく分けて、性質や原因を調べること。"},
+        {num:5,row:1,col:0,len:6,answer:"りしせいぜん",clue:"物事の筋道が整い、はっきりしているようす。"},
+        {num:7,row:2,col:5,len:3,answer:"かいぎ",clue:"何人かが集まって話し合うこと。"},
+        {num:9,row:4,col:1,len:6,answer:"しこうさくご",clue:"うまくいく方法を、失敗を重ねながら探すこと。"},
+        {num:11,row:5,col:7,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:12,row:6,col:1,len:7,answer:"ふげんじっこう",clue:"文句を言わず、だまって実行すること。"},
+        {num:14,row:7,col:0,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:15,row:8,col:2,len:3,answer:"わかい",clue:"争っていた者どうしが、仲直りすること。"},
+        {num:16,row:8,col:6,len:3,answer:"しんぽ",clue:"物事が良い方向に進み、発展すること。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"},
+        {num:2,row:0,col:2,len:2,answer:"あせ",clue:"暑いときや運動したときに皮膚から出る水分。"},
+        {num:3,row:0,col:5,len:3,answer:"ぶんか",clue:"人々が作り上げてきた、生活や芸術のありかた。"},
+        {num:4,row:0,col:8,len:2,answer:"きぬ",clue:"蚕の繭からとれる、光沢のある高級な布。"},
+        {num:6,row:1,col:3,len:6,answer:"いくどうおん",clue:"多くの人が口をそろえて同じことを言うこと。"},
+        {num:8,row:3,col:1,len:2,answer:"だし",clue:"かつお節や昆布からとる、和食のうまみのもと。"},
+        {num:10,row:4,col:8,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:11,row:5,col:7,len:4,answer:"こうげん",clue:"標高が高く、広く平らな土地。"},
+        {num:12,row:6,col:1,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:13,row:6,col:4,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"},
+        {num:14,row:7,col:0,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"}
+      ],
+      pickup:[{num:1,row:0,col:2},{num:2,row:0,col:8}], pickupAnswer:"あき"
+    },
+    {
+      id:83, title:"クロス83", theme:"じゅうにんといろ・じきゅうじそく・むがむちゅう",
+      grid:["####こ##こうじ","###かいぎ###ゅ","###わ#ろ#じ#う","##ご#えんげき#に","#きり####ゅ#ん","##むがむちゅう#と","#つち#ね##じだい","##ゅ###みそ#ろ","#どうじょう#くつ#","ふく###そら#きぬ"],
+      across:[
+        {num:2,row:0,col:7,len:3,answer:"こうじ",clue:"味噌や日本酒づくりに欠かせない、発酵のもとになるかび。"},
+        {num:4,row:1,col:3,len:3,answer:"かいぎ",clue:"何人かが集まって話し合うこと。"},
+        {num:8,row:3,col:4,len:4,answer:"えんげき",clue:"俳優が舞台の上で演じる、物語の表現芸術。"},
+        {num:9,row:4,col:1,len:2,answer:"きり",clue:"視界を白くさえぎる、細かい水滴の集まり。"},
+        {num:10,row:5,col:2,len:6,answer:"むがむちゅう",clue:"我を忘れるほど、1つのことに熱中すること。"},
+        {num:12,row:6,col:1,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"},
+        {num:13,row:6,col:7,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"},
+        {num:14,row:7,col:6,len:2,answer:"みそ",clue:"大豆を発酵させて作る、和食の基本調味料。"},
+        {num:15,row:8,col:1,len:5,answer:"どうじょう",clue:"他人の苦しみやつらさを、自分のことのように思いやること。"},
+        {num:17,row:8,col:7,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:19,row:9,col:0,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:20,row:9,col:5,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:21,row:9,col:8,len:2,answer:"きぬ",clue:"蚕の繭からとれる、光沢のある高級な布。"}
+      ],
+      down:[
+        {num:1,row:0,col:4,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:3,row:0,col:9,len:8,answer:"じゅうにんといろ",clue:"人によって考えや好みがそれぞれ違うこと。"},
+        {num:4,row:1,col:3,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:5,row:1,col:5,len:3,answer:"ぎろん",clue:"それぞれの意見を出し合い、議論すること。"},
+        {num:6,row:2,col:7,len:7,answer:"じきゅうじそく",clue:"必要なものを、自分で作って自分でまかなうこと。"},
+        {num:7,row:3,col:2,len:6,answer:"ごりむちゅう",clue:"どうしたらよいか、まったく見当がつかないこと。"},
+        {num:11,row:5,col:4,len:2,answer:"むね",clue:"心臓や肺がある、体の上部の部分。"},
+        {num:15,row:8,col:1,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:16,row:8,col:5,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:18,row:8,col:8,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"}
+      ],
+      pickup:[{num:1,row:3,col:9},{num:2,row:2,col:7}], pickupAnswer:"にじ"
+    },
+    {
+      id:84, title:"クロス84", theme:"じきゅうじそく・ゆうゆうじてき・いくどうおん",
+      grid:["ゆ###かさ#ぎ","うそ#ど#ど#ろ","ゆ#いくどうおん","う###う###","じきゅうじそく#","て###ょ#つえ","きせつ#うみ#き","##ま##ち##"],
+      across:[
+        {num:2,row:0,col:4,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:5,row:1,col:0,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:7,row:2,col:2,len:6,answer:"いくどうおん",clue:"多くの人が口をそろえて同じことを言うこと。"},
+        {num:9,row:4,col:0,len:7,answer:"じきゅうじそく",clue:"必要なものを、自分で作って自分でまかなうこと。"},
+        {num:11,row:5,col:6,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:13,row:6,col:0,len:3,answer:"きせつ",clue:"1年を、気候によっていくつかに分けたもの。"},
+        {num:15,row:6,col:4,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:7,answer:"ゆうゆうじてき",clue:"世間のことを気にせず、自分のペースでのんびり過ごすこと。"},
+        {num:3,row:0,col:5,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:4,row:0,col:7,len:3,answer:"ぎろん",clue:"それぞれの意見を出し合い、議論すること。"},
+        {num:6,row:1,col:3,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:8,row:2,col:4,len:5,answer:"どうじょう",clue:"他人の苦しみやつらさを、自分のことのように思いやること。"},
+        {num:10,row:4,col:6,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:12,row:5,col:7,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:14,row:6,col:2,len:2,answer:"つま",clue:"結婚している男性から見た、配偶者の女性。"},
+        {num:16,row:6,col:5,len:2,answer:"みち",clue:"人や車が通るための地面の道すじ。"}
+      ],
+      pickup:[{num:1,row:1,col:3},{num:2,row:3,col:4}], pickupAnswer:"どう"
+    },
+    {
+      id:85, title:"クロス85", theme:"いっしんどうたい・にっしんげっぽ・ふわらいどう",
+      grid:["######すいみん","#####かみ###","#ふ##にわ#つち#","#わざ#っ#きり##","そら##し#ょ#た#","#いっしんどうたい#","のど##げ#ち#り#","#う##っ#ょ#くつ","##しんぽ#うみ#き","#かお####ち#み"],
+      across:[
+        {num:1,row:0,col:6,len:4,answer:"すいみん",clue:"体を休めるために眠ること。"},
+        {num:2,row:1,col:5,len:2,answer:"かみ",clue:"文字を書くのに使う、薄く平らなもの。"},
+        {num:4,row:2,col:4,len:2,answer:"にわ",clue:"家の敷地内にある、木や花を植えた場所。"},
+        {num:5,row:2,col:7,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"},
+        {num:6,row:3,col:1,len:2,answer:"わざ",clue:"訓練によって身についた、特別な技術。"},
+        {num:7,row:3,col:6,len:2,answer:"きり",clue:"視界を白くさえぎる、細かい水滴の集まり。"},
+        {num:8,row:4,col:0,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:10,row:5,col:1,len:8,answer:"いっしんどうたい",clue:"2人以上の人が、心も体も1つのように結びつくこと。"},
+        {num:11,row:6,col:0,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:12,row:7,col:8,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:14,row:8,col:2,len:3,answer:"しんぽ",clue:"物事が良い方向に進み、発展すること。"},
+        {num:15,row:8,col:6,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"},
+        {num:17,row:9,col:1,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"}
+      ],
+      down:[
+        {num:1,row:0,col:6,len:2,answer:"すみ",clue:"墨汁のもとになる、書道で使う黒い固形物。"},
+        {num:2,row:1,col:5,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:3,row:2,col:1,len:6,answer:"ふわらいどう",clue:"自分の考えを持たず、他人の意見にすぐ同調すること。"},
+        {num:4,row:2,col:4,len:7,answer:"にっしんげっぽ",clue:"日に日に、たえまなく進歩していくこと。"},
+        {num:5,row:2,col:7,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"},
+        {num:7,row:3,col:6,len:6,answer:"きょうちょう",clue:"力を合わせて、共に助け合うこと。"},
+        {num:9,row:4,col:8,len:4,answer:"たいりく",clue:"海に囲まれた、広大な陸地。"},
+        {num:13,row:7,col:9,len:3,answer:"つきみ",clue:"秋の夜、美しい満月を眺めて楽しむこと。"},
+        {num:14,row:8,col:2,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:16,row:8,col:7,len:2,answer:"みち",clue:"人や車が通るための地面の道すじ。"}
+      ],
+      pickup:[{num:1,row:6,col:1},{num:2,row:7,col:8}], pickupAnswer:"どく"
+    },
+    {
+      id:86, title:"クロス86", theme:"じゅうらいどおり・あくせんくとう・きしかいせい",
+      grid:["##かわ#####ちから","##ど####あ#り##","#ぼうえき#えんりょ##","#ん##し##し#うそ#","つち##かいぜん###ふ","ゆ###い###どりょく","##あくせんくとう###","ぎろん#い#つ#よ#どく","##のど#ほ#ほうこく#","#にじ#じしん###り#","##ょ#だ##つき#つめ","じゅうらいどおり####"],
+      across:[
+        {num:1,row:0,col:2,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:2,row:0,col:9,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:4,row:2,col:1,len:4,answer:"ぼうえき",clue:"国と国との間で品物を売り買いすること。"},
+        {num:5,row:2,col:3,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:7,row:2,col:6,len:4,answer:"えんりょ",clue:"相手に気をつかい、控えめにすること。"},
+        {num:8,row:3,col:9,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:9,row:4,col:0,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"},
+        {num:10,row:4,col:4,len:4,answer:"かいぜん",clue:"良くない点を直して、より良くすること。"},
+        {num:12,row:5,col:8,len:4,answer:"どりょく",clue:"目標に向けて、力を尽くして努めること。"},
+        {num:13,row:6,col:2,len:7,answer:"あくせんくとう",clue:"苦しい状況の中で、必死に努力して戦うこと。"},
+        {num:15,row:7,col:0,len:3,answer:"ぎろん",clue:"それぞれの意見を出し合い、議論すること。"},
+        {num:16,row:7,col:10,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:17,row:8,col:2,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:19,row:8,col:7,len:4,answer:"ほうこく",clue:"仕事の結果や状況を、上の人に知らせること。"},
+        {num:20,row:9,col:1,len:2,answer:"にじ",clue:"雨上がりに空にかかる、七色の弧。"},
+        {num:21,row:9,col:4,len:3,answer:"じしん",clue:"地面が大きくゆれる自然現象。"},
+        {num:22,row:10,col:7,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"},
+        {num:23,row:10,col:10,len:2,answer:"つめ",clue:"指の先を守る、かたい部分。"},
+        {num:24,row:11,col:0,len:8,answer:"じゅうらいどおり",clue:"それまでとまったく変わらない、いつもの通り。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:3,answer:"かどう",clue:"花を美しく生ける、日本の伝統芸術。"},
+        {num:2,row:0,col:9,len:4,answer:"ちりょう",clue:"病気やけがを治すために行う医療行為。"},
+        {num:3,row:1,col:7,len:4,answer:"あんしん",clue:"心配や不安がなく、心が落ち着いていること。"},
+        {num:4,row:2,col:1,len:3,answer:"ぼんち",clue:"周りを山に囲まれた、平らな土地。"},
+        {num:6,row:2,col:4,len:6,answer:"きしかいせい",clue:"絶望的な状況を、一気に良い方向へ立て直すこと。"},
+        {num:9,row:4,col:0,len:2,answer:"つゆ",clue:"初夏に雨が続く季節。または朝の草につく水滴。"},
+        {num:11,row:4,col:11,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:12,row:5,col:8,len:4,answer:"どうよう",clue:"予想外のことに、心が落ち着かなくなること。"},
+        {num:13,row:6,col:2,len:6,answer:"あんのじょう",clue:"予想していた通りに、悪い結果になること。"},
+        {num:14,row:6,col:6,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:16,row:7,col:10,len:4,answer:"どくりつ",clue:"人に頼らず、自分の力で物事を行うこと。"},
+        {num:18,row:8,col:5,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:21,row:9,col:4,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"},
+        {num:22,row:10,col:7,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"}
+      ],
+      pickup:[{num:1,row:1,col:7},{num:2,row:10,col:8}], pickupAnswer:"あき"
+    },
+    {
+      id:87, title:"クロス87", theme:"しゅっちょう・むがむちゅう・ごりむちゅう",
+      grid:["ち#むね####","かいが#ご##な","ら#む#り#くつ","##ち#む#ろ#","#しゅっちょう#","##う#ゅ#にわ","###こうえん#","##つえ#き##"],
+      across:[
+        {num:2,row:0,col:2,len:2,answer:"むね",clue:"心臓や肺がある、体の上部の部分。"},
+        {num:3,row:1,col:0,len:3,answer:"かいが",clue:"色や線を使って平面に表現する、視覚芸術。"},
+        {num:6,row:2,col:6,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:7,row:4,col:1,len:6,answer:"しゅっちょう",clue:"仕事のために一時的にほかの土地へ出向くこと。"},
+        {num:8,row:5,col:6,len:2,answer:"にわ",clue:"家の敷地内にある、木や花を植えた場所。"},
+        {num:9,row:6,col:3,len:4,answer:"こうえん",clue:"多くの人の前で、演奏や演説などを行うこと。"},
+        {num:11,row:7,col:2,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:2,row:0,col:2,len:6,answer:"むがむちゅう",clue:"我を忘れるほど、1つのことに熱中すること。"},
+        {num:4,row:1,col:4,len:6,answer:"ごりむちゅう",clue:"どうしたらよいか、まったく見当がつかないこと。"},
+        {num:5,row:1,col:7,len:2,answer:"なつ",clue:"暑さが厳しい、1年で最も日照時間が長い季節。"},
+        {num:6,row:2,col:6,len:5,answer:"くろうにん",clue:"経験を積んで、物事によく慣れている人。"},
+        {num:9,row:6,col:3,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:10,row:6,col:5,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"}
+      ],
+      pickup:[{num:1,row:2,col:7},{num:2,row:0,col:0}], pickupAnswer:"つち"
+    },
+    {
+      id:88, title:"クロス88", theme:"りんきおうへん・いしんでんしん・あんのじょう",
+      grid:["###だんしゃり##","##すし#お#ん##","そ#み###ゆき#い","うそ#ぶ#に#お#し","べ#あんのじょう#ん","つ##が###へ#で","かいふく##あんしん","い#ぜ#こえ###し","#けいえい#げんいん"],
+      across:[
+        {num:1,row:0,col:3,len:5,answer:"だんしゃり",clue:"不要な物を断ち、捨て、物への執着を離れる生き方。"},
+        {num:4,row:1,col:2,len:2,answer:"すし",clue:"酢めしに魚介などをのせた日本の代表的な料理。"},
+        {num:6,row:2,col:6,len:2,answer:"ゆき",clue:"冬に空から降る、白く冷たい結晶。"},
+        {num:8,row:3,col:0,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:11,row:4,col:2,len:6,answer:"あんのじょう",clue:"予想していた通りに、悪い結果になること。"},
+        {num:12,row:6,col:0,len:4,answer:"かいふく",clue:"病気やけがなどが治って、元の状態に戻ること。"},
+        {num:13,row:6,col:2,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:14,row:6,col:6,len:4,answer:"あんしん",clue:"心配や不安がなく、心が落ち着いていること。"},
+        {num:15,row:7,col:4,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:16,row:8,col:1,len:4,answer:"けいえい",clue:"会社などの事業を管理し、運営すること。"},
+        {num:17,row:8,col:6,len:4,answer:"げんいん",clue:"ある結果を引き起こした、もとになる事柄。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:2,answer:"だし",clue:"かつお節や昆布からとる、和食のうまみのもと。"},
+        {num:2,row:0,col:5,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:3,row:0,col:7,len:7,answer:"りんきおうへん",clue:"その場の状況に合わせて、うまく対応すること。"},
+        {num:4,row:1,col:2,len:2,answer:"すみ",clue:"墨汁のもとになる、書道で使う黒い固形物。"},
+        {num:5,row:2,col:0,len:6,answer:"そうべつかい",clue:"職場や学校を去る人を送り出す会。"},
+        {num:7,row:2,col:9,len:7,answer:"いしんでんしん",clue:"言葉にしなくても、気持ちが相手に伝わること。"},
+        {num:9,row:3,col:3,len:4,answer:"ぶんがく",clue:"言葉を用いて表現される、小説や詩などの芸術。"},
+        {num:10,row:3,col:5,len:2,answer:"にじ",clue:"雨上がりに空にかかる、七色の弧。"},
+        {num:13,row:6,col:2,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"},
+        {num:15,row:7,col:4,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"}
+      ],
+      pickup:[{num:1,row:4,col:7},{num:2,row:2,col:2}], pickupAnswer:"うみ"
+    },
+    {
+      id:89, title:"クロス89", theme:"じゅうらいどおり・しんきいってん・はんしんはんぎ",
+      grid:["##にじ###す","#た#ゅ##はし","なつ#うた#ん#","#じ#ら##しお","しんきいってん#","ょ##ど##は#","うそ#お#へんか","ゆ#みりん#ぎ#"],
+      across:[
+        {num:1,row:0,col:2,len:2,answer:"にじ",clue:"雨上がりに空にかかる、七色の弧。"},
+        {num:5,row:1,col:6,len:2,answer:"はし",clue:"川や谷をわたるためにかけられた構造物。"},
+        {num:6,row:2,col:0,len:2,answer:"なつ",clue:"暑さが厳しい、1年で最も日照時間が長い季節。"},
+        {num:7,row:2,col:3,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:8,row:3,col:6,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:9,row:4,col:0,len:7,answer:"しんきいってん",clue:"気持ちを入れかえて、新たな気持ちで始めること。"},
+        {num:10,row:6,col:0,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:11,row:6,col:5,len:3,answer:"へんか",clue:"物事の状態が、それまでと違ったものになること。"},
+        {num:12,row:7,col:2,len:3,answer:"みりん",clue:"料理にまろやかな甘みを加える、日本の調味料。"}
+      ],
+      down:[
+        {num:2,row:0,col:3,len:8,answer:"じゅうらいどおり",clue:"それまでとまったく変わらない、いつもの通り。"},
+        {num:3,row:0,col:7,len:2,answer:"すし",clue:"酢めしに魚介などをのせた日本の代表的な料理。"},
+        {num:4,row:1,col:1,len:4,answer:"たつじん",clue:"ある分野で、非常にすぐれた技を持つ人。"},
+        {num:5,row:1,col:6,len:7,answer:"はんしんはんぎ",clue:"半分は信じ、半分は疑っている状態。"},
+        {num:9,row:4,col:0,len:4,answer:"しょうゆ",clue:"大豆や小麦から作る、和食に欠かせない調味料。"}
+      ],
+      pickup:[{num:1,row:4,col:2},{num:2,row:7,col:3}], pickupAnswer:"きり"
+    },
+    {
+      id:90, title:"クロス90", theme:"いしんでんしん・だいたんふてき・どうそうかい",
+      grid:["もの##ど#こうじ","#どうそうかい##","ぶ#た##く#じ#","かぜ#お#に#ゅ#","#いしんでんしん#","ゆき#こ###び#","#ん#ちから###","###し##あせ#","だいたんふてき##"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"もの",clue:"形のある、あらゆる品物を指す言葉。"},
+        {num:4,row:0,col:6,len:3,answer:"こうじ",clue:"味噌や日本酒づくりに欠かせない、発酵のもとになるかび。"},
+        {num:5,row:1,col:1,len:6,answer:"どうそうかい",clue:"卒業した学校の仲間が集まる会。"},
+        {num:10,row:3,col:0,len:2,answer:"かぜ",clue:"目に見えない、空気の流れ。"},
+        {num:13,row:4,col:1,len:7,answer:"いしんでんしん",clue:"言葉にしなくても、気持ちが相手に伝わること。"},
+        {num:14,row:5,col:0,len:2,answer:"ゆき",clue:"冬に空から降る、白く冷たい結晶。"},
+        {num:15,row:6,col:3,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:16,row:7,col:6,len:2,answer:"あせ",clue:"暑いときや運動したときに皮膚から出る水分。"},
+        {num:17,row:8,col:0,len:7,answer:"だいたんふてき",clue:"度胸があり、大胆で恐れを知らないようす。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:3,row:0,col:4,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:4,row:0,col:6,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:6,row:1,col:2,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:7,row:1,col:5,len:4,answer:"かくにん",clue:"まちがいがないか、たしかめること。"},
+        {num:8,row:2,col:0,len:2,answer:"ぶか",clue:"職場で、自分より下の役職の人。"},
+        {num:9,row:2,col:7,len:4,answer:"じゅんび",clue:"物事を行う前に、必要なものをそろえておくこと。"},
+        {num:11,row:3,col:1,len:4,answer:"ぜいきん",clue:"国や自治体に納める、義務づけられたお金。"},
+        {num:12,row:3,col:3,len:6,answer:"おんこちしん",clue:"昔のことを研究して、新しい知識や考えを見つけること。"},
+        {num:16,row:7,col:6,len:2,answer:"あき",clue:"紅葉や実りの季節。"}
+      ],
+      pickup:[{num:1,row:3,col:5},{num:2,row:2,col:7}], pickupAnswer:"にじ"
+    },
+    {
+      id:91, title:"クロス91", theme:"とうほんせいそう・じきゅうじそく・どくりつじそん",
+      grid:["##こ#うた######","#だいごみ#ゆ#と##ど","すし#か#じきゅうじそく","な#たいか###ほ##り","#つき#く#か#ん#ねつ","##び#に#て#せ##じ","###かんげいかい#うそ","#ゆ#ど####そ##ん","だきょう##くろうと##","#み###てつ##う#ど","####そら#こうしょう","######つえ####"],
+      across:[
+        {num:2,row:0,col:4,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:3,row:1,col:1,len:4,answer:"だいごみ",clue:"物事の奥深いところにある、本当のおもしろさ。"},
+        {num:8,row:2,col:0,len:2,answer:"すし",clue:"酢めしに魚介などをのせた日本の代表的な料理。"},
+        {num:9,row:2,col:5,len:7,answer:"じきゅうじそく",clue:"必要なものを、自分で作って自分でまかなうこと。"},
+        {num:10,row:3,col:2,len:3,answer:"たいか",clue:"ものごとが、悪い方向に変わってしまうこと。"},
+        {num:12,row:4,col:1,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"},
+        {num:14,row:4,col:10,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:15,row:6,col:3,len:6,answer:"かんげいかい",clue:"新しく仲間になった人を迎える会。"},
+        {num:16,row:6,col:10,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:18,row:8,col:0,len:4,answer:"だきょう",clue:"意見が対立したとき、たがいに譲り合うこと。"},
+        {num:19,row:8,col:6,len:4,answer:"くろうと",clue:"その道の専門家、玄人。"},
+        {num:21,row:9,col:5,len:2,answer:"てつ",clue:"さびやすいが強い、道具や建材に使われる金属。"},
+        {num:23,row:10,col:4,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:24,row:10,col:7,len:5,answer:"こうしょう",clue:"利害が対立する相手と、話し合って結論を出すこと。"},
+        {num:25,row:11,col:6,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:2,row:0,col:4,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"},
+        {num:3,row:1,col:1,len:2,answer:"だし",clue:"かつお節や昆布からとる、和食のうまみのもと。"},
+        {num:4,row:1,col:3,len:3,answer:"ごかい",clue:"相手の言葉や気持ちを、まちがって受け取ること。"},
+        {num:5,row:1,col:6,len:2,answer:"ゆき",clue:"冬に空から降る、白く冷たい結晶。"},
+        {num:6,row:1,col:8,len:8,answer:"とうほんせいそう",clue:"用事のために、あちこち忙しく走り回ること。"},
+        {num:7,row:1,col:11,len:7,answer:"どくりつじそん",clue:"人に頼らず、自分の力で生活していくこと。"},
+        {num:8,row:2,col:0,len:2,answer:"すな",clue:"海辺や砂漠にある、細かいつぶの地面。"},
+        {num:10,row:3,col:2,len:3,answer:"たきび",clue:"野外で木の枝などを燃やして作る火。"},
+        {num:11,row:3,col:4,len:4,answer:"かくにん",clue:"まちがいがないか、たしかめること。"},
+        {num:13,row:4,col:6,len:3,answer:"かてい",clue:"物事が進んでいく道すじ。"},
+        {num:15,row:6,col:3,len:3,answer:"かどう",clue:"花を美しく生ける、日本の伝統芸術。"},
+        {num:17,row:7,col:1,len:3,answer:"ゆきみ",clue:"雪景色を眺めて楽しむこと。"},
+        {num:19,row:8,col:6,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:20,row:8,col:9,len:3,answer:"とうし",clue:"利益を期待して、お金を出すこと。"},
+        {num:21,row:9,col:5,len:2,answer:"てら",clue:"僧侶が仏を祭る、日本の宗教施設。"},
+        {num:22,row:9,col:11,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:24,row:10,col:7,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"}
+      ],
+      pickup:[{num:1,row:1,col:2},{num:2,row:8,col:9}], pickupAnswer:"いと"
+    },
+    {
+      id:92, title:"クロス92", theme:"かていさいえん・しゅびいっかん・いくどうおん",
+      grid:["か####すし##つ","さどう###ょ#えき","#う#しょどう#ん#","みそ#ゅ##よ#げ#","#う#び#こ#あき#","#かていさいえん##","#い#っ###のど#","ご##かいぎ#じ#じ","かくにん###ょ#し","い#わ#いくどうおん"],
+      across:[
+        {num:2,row:0,col:5,len:2,answer:"すし",clue:"酢めしに魚介などをのせた日本の代表的な料理。"},
+        {num:5,row:1,col:0,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:7,row:1,col:8,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:8,row:2,col:3,len:4,answer:"しょどう",clue:"筆と墨を使って、文字を美しく書く芸術。"},
+        {num:9,row:3,col:0,len:2,answer:"みそ",clue:"大豆を発酵させて作る、和食の基本調味料。"},
+        {num:11,row:4,col:7,len:2,answer:"あき",clue:"紅葉や実りの季節。"},
+        {num:12,row:5,col:1,len:7,answer:"かていさいえん",clue:"自宅の庭などで、野菜を育てて楽しむこと。"},
+        {num:13,row:6,col:7,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:15,row:7,col:3,len:3,answer:"かいぎ",clue:"何人かが集まって話し合うこと。"},
+        {num:17,row:8,col:0,len:4,answer:"かくにん",clue:"まちがいがないか、たしかめること。"},
+        {num:19,row:9,col:4,len:6,answer:"いくどうおん",clue:"多くの人が口をそろえて同じことを言うこと。"},
+        {num:20,row:9,col:6,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:3,row:0,col:6,len:4,answer:"しょうよ",clue:"毎月の給料とは別に支払われる、ボーナスのこと。"},
+        {num:4,row:0,col:9,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"},
+        {num:6,row:1,col:1,len:6,answer:"どうそうかい",clue:"卒業した学校の仲間が集まる会。"},
+        {num:7,row:1,col:8,len:4,answer:"えんげき",clue:"俳優が舞台の上で演じる、物語の表現芸術。"},
+        {num:8,row:2,col:3,len:7,answer:"しゅびいっかん",clue:"最初から最後まで、方針や態度を変えないこと。"},
+        {num:10,row:4,col:5,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:11,row:4,col:7,len:6,answer:"あんのじょう",clue:"予想していた通りに、悪い結果になること。"},
+        {num:14,row:7,col:0,len:3,answer:"ごかい",clue:"相手の言葉や気持ちを、まちがって受け取ること。"},
+        {num:16,row:7,col:9,len:3,answer:"じしん",clue:"地面が大きくゆれる自然現象。"},
+        {num:18,row:8,col:2,len:2,answer:"にわ",clue:"家の敷地内にある、木や花を植えた場所。"}
+      ],
+      pickup:[{num:1,row:7,col:3},{num:2,row:9,col:2}], pickupAnswer:"かわ"
+    },
+    {
+      id:93, title:"クロス93(慣用句)", theme:"いっしんどうたい・しゅびいっかん・だいたんふてき",
+      grid:["しお####だいごみ","#っ##し####り","ひと#しゅびいっかん","ろ###み#く###","うた#ほ##ど#こえ","#いっしんどうたい#","ぶか####お###","ん##だいたんふてき","かお##と##ぜ#り","#####じだい##"],
+      across:[
+        {num:1,row:0,col:0,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:3,row:0,col:6,len:4,answer:"だいごみ",clue:"物事の奥深いところにある、本当のおもしろさ。"},
+        {num:6,row:2,col:0,len:2,answer:"ひと",clue:"言葉を話し、考える力を持つ生き物。"},
+        {num:7,row:2,col:3,len:7,answer:"しゅびいっかん",clue:"最初から最後まで、方針や態度を変えないこと。"},
+        {num:9,row:4,col:0,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:12,row:4,col:8,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:13,row:5,col:1,len:8,answer:"いっしんどうたい",clue:"2人以上の人が、心も体も1つのように結びつくこと。"},
+        {num:14,row:6,col:0,len:2,answer:"ぶか",clue:"職場で、自分より下の役職の人。"},
+        {num:15,row:7,col:3,len:7,answer:"だいたんふてき",clue:"度胸があり、大胆で恐れを知らないようす。"},
+        {num:19,row:8,col:0,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"},
+        {num:20,row:9,col:5,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"おっと",clue:"結婚している女性から見た、配偶者の男性。"},
+        {num:4,row:0,col:9,len:3,answer:"みりん",clue:"料理にまろやかな甘みを加える、日本の調味料。"},
+        {num:5,row:1,col:4,len:3,answer:"しゅみ",clue:"仕事とは別に、楽しみのために続けている活動。"},
+        {num:6,row:2,col:0,len:3,answer:"ひろう",clue:"体や心が疲れて、力が出なくなること。"},
+        {num:8,row:2,col:6,len:6,answer:"いくどうおん",clue:"多くの人が口をそろえて同じことを言うこと。"},
+        {num:10,row:4,col:1,len:3,answer:"たいか",clue:"ものごとが、悪い方向に変わってしまうこと。"},
+        {num:11,row:4,col:3,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:12,row:4,col:8,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:14,row:6,col:0,len:3,answer:"ぶんか",clue:"人々が作り上げてきた、生活や芸術のありかた。"},
+        {num:16,row:7,col:4,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"},
+        {num:17,row:7,col:7,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"},
+        {num:18,row:7,col:9,len:2,answer:"きり",clue:"視界を白くさえぎる、細かい水滴の集まり。"}
+      ],
+      pickup:[{num:1,row:7,col:3},{num:2,row:1,col:4}], pickupAnswer:"だし"
+    },
+    {
+      id:94, title:"クロス94(慣用句)", theme:"こうきしんおうせい・はんしんはんぎ・ふわらいどう",
+      grid:["####か#こい#","#ふわらいどう#ね","##ざ#ぎ#きせつ","######し##","#はんしんはんぎ#","だし#お##お##","い###さどう#と","ご#てつ##せ#ざ","みち#りしせいぜん"],
+      across:[
+        {num:2,row:0,col:6,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:3,row:1,col:1,len:6,answer:"ふわらいどう",clue:"自分の考えを持たず、他人の意見にすぐ同調すること。"},
+        {num:6,row:2,col:6,len:3,answer:"きせつ",clue:"1年を、気候によっていくつかに分けたもの。"},
+        {num:7,row:4,col:1,len:7,answer:"はんしんはんぎ",clue:"半分は信じ、半分は疑っている状態。"},
+        {num:9,row:5,col:0,len:2,answer:"だし",clue:"かつお節や昆布からとる、和食のうまみのもと。"},
+        {num:10,row:6,col:4,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:11,row:6,col:5,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:13,row:7,col:2,len:2,answer:"てつ",clue:"さびやすいが強い、道具や建材に使われる金属。"},
+        {num:15,row:8,col:0,len:2,answer:"みち",clue:"人や車が通るための地面の道すじ。"},
+        {num:16,row:8,col:3,len:6,answer:"りしせいぜん",clue:"物事の筋道が整い、はっきりしているようす。"}
+      ],
+      down:[
+        {num:1,row:0,col:4,len:3,answer:"かいぎ",clue:"何人かが集まって話し合うこと。"},
+        {num:2,row:0,col:6,len:9,answer:"こうきしんおうせい",clue:"知らないことに対する興味が、非常に強いようす。"},
+        {num:4,row:1,col:2,len:2,answer:"わざ",clue:"訓練によって身についた、特別な技術。"},
+        {num:5,row:1,col:8,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:7,row:4,col:1,len:2,answer:"はし",clue:"川や谷をわたるためにかけられた構造物。"},
+        {num:8,row:4,col:3,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:9,row:5,col:0,len:4,answer:"だいごみ",clue:"物事の奥深いところにある、本当のおもしろさ。"},
+        {num:12,row:6,col:8,len:3,answer:"とざん",clue:"山に登って、頂上を目指すこと。"},
+        {num:14,row:7,col:3,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"}
+      ],
+      pickup:[{num:1,row:0,col:4},{num:2,row:1,col:2}], pickupAnswer:"かわ"
+    },
+    {
+      id:95, title:"クロス95(慣用句)", theme:"ゆうゆうじてき・りしせいぜん・ふわらいどう",
+      grid:["##ふ#ご##こ#さ","ろ#わ#りしせいぜん","う#ら#む####ぽ","かてい#ちから###","##ど#ゅ##れ##","#ゆうゆうじてき#ど","えき#め#ゅ#しかく","#みそ#ふく##ど#","###ひ#ねつ#うた","###とざん####"],
+      across:[
+        {num:6,row:1,col:4,len:6,answer:"りしせいぜん",clue:"物事の筋道が整い、はっきりしているようす。"},
+        {num:7,row:3,col:0,len:3,answer:"かてい",clue:"物事が進んでいく道すじ。"},
+        {num:8,row:3,col:4,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:10,row:5,col:1,len:7,answer:"ゆうゆうじてき",clue:"世間のことを気にせず、自分のペースでのんびり過ごすこと。"},
+        {num:14,row:6,col:0,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:15,row:6,col:7,len:3,answer:"しかく",clue:"技能や知識を認められた証明。または図形の一種。"},
+        {num:17,row:7,col:1,len:2,answer:"みそ",clue:"大豆を発酵させて作る、和食の基本調味料。"},
+        {num:18,row:7,col:4,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:20,row:8,col:5,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:21,row:8,col:8,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:22,row:9,col:3,len:3,answer:"とざん",clue:"山に登って、頂上を目指すこと。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:6,answer:"ふわらいどう",clue:"自分の考えを持たず、他人の意見にすぐ同調すること。"},
+        {num:2,row:0,col:4,len:6,answer:"ごりむちゅう",clue:"どうしたらよいか、まったく見当がつかないこと。"},
+        {num:3,row:0,col:7,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:4,row:0,col:9,len:3,answer:"さんぽ",clue:"のんびりと歩いて外を回ること。"},
+        {num:5,row:1,col:0,len:3,answer:"ろうか",clue:"年を取って、体の機能がおとろえていくこと。"},
+        {num:9,row:4,col:7,len:3,answer:"れきし",clue:"過去に起こった出来事の積み重ね。"},
+        {num:10,row:5,col:1,len:3,answer:"ゆきみ",clue:"雪景色を眺めて楽しむこと。"},
+        {num:11,row:5,col:3,len:2,answer:"ゆめ",clue:"眠っている間に見る映像。または将来の願い。"},
+        {num:12,row:5,col:5,len:5,answer:"じゅくねん",clue:"人生の経験を積んだ、円熟した年ごろ。"},
+        {num:13,row:5,col:9,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:16,row:6,col:8,len:3,answer:"かどう",clue:"花を美しく生ける、日本の伝統芸術。"},
+        {num:19,row:8,col:3,len:2,answer:"ひと",clue:"言葉を話し、考える力を持つ生き物。"}
+      ],
+      pickup:[{num:1,row:5,col:1},{num:2,row:5,col:7}], pickupAnswer:"ゆき"
+    },
+    {
+      id:96, title:"クロス96(食・酒)", theme:"そうべつかい・ぼうねんかい・かんげいかい",
+      grid:["##はら#かみ","れきし##ん#","#こ#く#げ#","そうべつかい#","#####かぜ","ぼうねんかい#","#み##お##"],
+      across:[
+        {num:1,row:0,col:2,len:2,answer:"はら",clue:"胃や腸がある、体の中央部分。"},
+        {num:2,row:0,col:5,len:2,answer:"かみ",clue:"文字を書くのに使う、薄く平らなもの。"},
+        {num:3,row:1,col:0,len:3,answer:"れきし",clue:"過去に起こった出来事の積み重ね。"},
+        {num:6,row:3,col:0,len:6,answer:"そうべつかい",clue:"職場や学校を去る人を送り出す会。"},
+        {num:7,row:4,col:5,len:2,answer:"かぜ",clue:"目に見えない、空気の流れ。"},
+        {num:8,row:5,col:0,len:6,answer:"ぼうねんかい",clue:"1年の苦労をねぎらうために年末に開く宴会。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:2,answer:"はし",clue:"川や谷をわたるためにかけられた構造物。"},
+        {num:2,row:0,col:5,len:6,answer:"かんげいかい",clue:"新しく仲間になった人を迎える会。"},
+        {num:4,row:1,col:1,len:3,answer:"きこう",clue:"ある地域で長い期間続く、平均的な気象の状態。"},
+        {num:5,row:2,col:3,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:9,row:5,col:1,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"},
+        {num:10,row:5,col:4,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"}
+      ],
+      pickup:[{num:1,row:4,col:5},{num:2,row:5,col:2}], pickupAnswer:"かね"
+    },
+    {
+      id:97, title:"クロス97(食・酒)", theme:"どうそうかい・なべりょうり・そうべつかい",
+      grid:["の##ど#こうじ","どうそうかい##","##う###きぬ","#なべりょうり#","##つ##た##","##かさ####","ふぜい#####"],
+      across:[
+        {num:3,row:0,col:5,len:3,answer:"こうじ",clue:"味噌や日本酒づくりに欠かせない、発酵のもとになるかび。"},
+        {num:4,row:1,col:0,len:6,answer:"どうそうかい",clue:"卒業した学校の仲間が集まる会。"},
+        {num:5,row:1,col:1,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"},
+        {num:7,row:2,col:6,len:2,answer:"きぬ",clue:"蚕の繭からとれる、光沢のある高級な布。"},
+        {num:8,row:3,col:1,len:6,answer:"なべりょうり",clue:"肉や野菜を鍋で煮ながら食べる、冬に人気の料理。"},
+        {num:10,row:5,col:2,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:11,row:6,col:0,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:2,row:0,col:3,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:3,row:0,col:5,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:6,row:1,col:2,len:6,answer:"そうべつかい",clue:"職場や学校を去る人を送り出す会。"},
+        {num:7,row:2,col:6,len:2,answer:"きり",clue:"視界を白くさえぎる、細かい水滴の集まり。"},
+        {num:9,row:3,col:5,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"}
+      ],
+      pickup:[{num:1,row:1,col:4},{num:2,row:6,col:1}], pickupAnswer:"かぜ"
+    },
+    {
+      id:98, title:"クロス98(仕事・経済)", theme:"きゅうりょう・ゆしゅつ・ぼうえき",
+      grid:["##どく#ふく#","よぼう#かね##","#う#しお###","つえ#ょ#じ##","#きゅうりょう#","###よ#う##","####ゆしゅつ","###つき##り"],
+      across:[
+        {num:1,row:0,col:2,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:2,row:0,col:5,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:3,row:1,col:0,len:3,answer:"よぼう",clue:"病気や事故が起こらないよう、前もって防ぐこと。"},
+        {num:5,row:1,col:4,len:2,answer:"かね",clue:"物を買うときに使う、貨幣のこと。"},
+        {num:6,row:2,col:3,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:7,row:3,col:0,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:10,row:4,col:1,len:6,answer:"きゅうりょう",clue:"働いた対価として会社から支払われるお金。"},
+        {num:11,row:6,col:4,len:4,answer:"ゆしゅつ",clue:"品物を外国へ売り出すこと。"},
+        {num:13,row:7,col:3,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"}
+      ],
+      down:[
+        {num:1,row:0,col:2,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:2,row:0,col:5,len:2,answer:"ふね",clue:"水上を進む、人や荷物を運ぶ乗り物。"},
+        {num:4,row:1,col:1,len:4,answer:"ぼうえき",clue:"国と国との間で品物を売り買いすること。"},
+        {num:5,row:1,col:4,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"},
+        {num:6,row:2,col:3,len:4,answer:"しょうよ",clue:"毎月の給料とは別に支払われる、ボーナスのこと。"},
+        {num:8,row:3,col:1,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:9,row:3,col:5,len:4,answer:"じょうし",clue:"職場で、自分より上の役職の人。"},
+        {num:11,row:6,col:4,len:2,answer:"ゆき",clue:"冬に空から降る、白く冷たい結晶。"},
+        {num:12,row:6,col:7,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"}
+      ],
+      pickup:[{num:1,row:4,col:1},{num:2,row:4,col:4}], pickupAnswer:"きり"
+    },
+    {
+      id:99, title:"クロス99(仕事・経済)", theme:"しゅっちょう・りれきしょ・ぼうえき",
+      grid:["#へんか#り###","###こ#れ#ぶか","##ぼうえき#ん#","#####し#かわ","#しゅっちょう#さ","#か##か#たきび","ふく#てら##せ#","ぜ#ねつ##くつ#","いと#######"],
+      across:[
+        {num:1,row:0,col:1,len:3,answer:"へんか",clue:"物事の状態が、それまでと違ったものになること。"},
+        {num:4,row:1,col:7,len:2,answer:"ぶか",clue:"職場で、自分より下の役職の人。"},
+        {num:5,row:2,col:2,len:4,answer:"ぼうえき",clue:"国と国との間で品物を売り買いすること。"},
+        {num:6,row:3,col:7,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:8,row:4,col:1,len:6,answer:"しゅっちょう",clue:"仕事のために一時的にほかの土地へ出向くこと。"},
+        {num:11,row:5,col:6,len:3,answer:"たきび",clue:"野外で木の枝などを燃やして作る火。"},
+        {num:13,row:6,col:0,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:14,row:6,col:3,len:2,answer:"てら",clue:"僧侶が仏を祭る、日本の宗教施設。"},
+        {num:15,row:7,col:2,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:16,row:7,col:6,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:17,row:8,col:0,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"}
+      ],
+      down:[
+        {num:2,row:0,col:3,len:3,answer:"かこう",clue:"火山の頂上にある、噴火口のくぼみ。"},
+        {num:3,row:0,col:5,len:5,answer:"りれきしょ",clue:"就職や転職のときに提出する、経歴を記した書類。"},
+        {num:4,row:1,col:7,len:3,answer:"ぶんか",clue:"人々が作り上げてきた、生活や芸術のありかた。"},
+        {num:7,row:3,col:8,len:3,answer:"わさび",clue:"すしに添えられる、鼻にツンとくる香辛料。"},
+        {num:8,row:4,col:1,len:3,answer:"しかく",clue:"技能や知識を認められた証明。または図形の一種。"},
+        {num:9,row:4,col:4,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:10,row:4,col:6,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:12,row:5,col:7,len:3,answer:"きせつ",clue:"1年を、気候によっていくつかに分けたもの。"},
+        {num:13,row:6,col:0,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"},
+        {num:14,row:6,col:3,len:2,answer:"てつ",clue:"さびやすいが強い、道具や建材に使われる金属。"}
+      ],
+      pickup:[{num:1,row:0,col:3},{num:2,row:7,col:0}], pickupAnswer:"かぜ"
+    },
+    {
+      id:100, title:"クロス100(自然)", theme:"はるいちばん・こうげん・せいたい",
+      grid:["か#ほ####つ","い#けっか#こえ","ぎろん#さどう#","###せ##げ#","#はるいちばん#","ほし#た####","##へいや###","####ま###"],
+      across:[
+        {num:4,row:1,col:2,len:3,answer:"けっか",clue:"あることが原因となって生じた事柄。"},
+        {num:6,row:1,col:6,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:7,row:2,col:0,len:3,answer:"ぎろん",clue:"それぞれの意見を出し合い、議論すること。"},
+        {num:8,row:2,col:4,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:10,row:4,col:1,len:6,answer:"はるいちばん",clue:"立春から春分の間に、その年初めて吹く強い南風。"},
+        {num:11,row:5,col:0,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:12,row:6,col:2,len:3,answer:"へいや",clue:"広く平らに広がっている土地。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"かいぎ",clue:"何人かが集まって話し合うこと。"},
+        {num:2,row:0,col:2,len:3,answer:"ほけん",clue:"万一のときに備えて、あらかじめお金を積み立てるしくみ。"},
+        {num:3,row:0,col:7,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:5,row:1,col:4,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:6,row:1,col:6,len:4,answer:"こうげん",clue:"標高が高く、広く平らな土地。"},
+        {num:9,row:3,col:3,len:4,answer:"せいたい",clue:"生き物が自然の中で生きていく、そのようす。"},
+        {num:10,row:4,col:1,len:2,answer:"はし",clue:"川や谷をわたるためにかけられた構造物。"},
+        {num:13,row:6,col:4,len:2,answer:"やま",clue:"周囲より高く盛り上がった地形。"}
+      ],
+      pickup:[{num:1,row:2,col:4},{num:2,row:1,col:2}], pickupAnswer:"さけ"
+    },
+    {
+      id:101, title:"クロス101(自然)", theme:"はるいちばん・かんきょう・かいきょう",
+      grid:["へいや####かさ","ん###かぜ#て#","かくご#い#こい#","##かんきょう#か","ふぜい#ょ#じだい","ね###うみ##が","###つ#り###","はるいちばん###"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"へいや",clue:"広く平らに広がっている土地。"},
+        {num:2,row:0,col:7,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:3,row:1,col:4,len:2,answer:"かぜ",clue:"目に見えない、空気の流れ。"},
+        {num:4,row:2,col:0,len:3,answer:"かくご",clue:"よくない事態を予想して、心構えをすること。"},
+        {num:6,row:2,col:6,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:7,row:3,col:2,len:5,answer:"かんきょう",clue:"人や生き物を取り巻く、周囲のようす。"},
+        {num:9,row:4,col:0,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"},
+        {num:10,row:4,col:6,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"},
+        {num:11,row:5,col:4,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"},
+        {num:14,row:7,col:0,len:6,answer:"はるいちばん",clue:"立春から春分の間に、その年初めて吹く強い南風。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:3,answer:"へんか",clue:"物事の状態が、それまでと違ったものになること。"},
+        {num:2,row:0,col:7,len:3,answer:"かてい",clue:"物事が進んでいく道すじ。"},
+        {num:3,row:1,col:4,len:5,answer:"かいきょう",clue:"陸地と陸地の間にある、狭い海の部分。"},
+        {num:5,row:2,col:2,len:3,answer:"ごかい",clue:"相手の言葉や気持ちを、まちがって受け取ること。"},
+        {num:6,row:2,col:6,len:3,answer:"こうじ",clue:"味噌や日本酒づくりに欠かせない、発酵のもとになるかび。"},
+        {num:8,row:3,col:8,len:3,answer:"かいが",clue:"色や線を使って平面に表現する、視覚芸術。"},
+        {num:9,row:4,col:0,len:2,answer:"ふね",clue:"水上を進む、人や荷物を運ぶ乗り物。"},
+        {num:12,row:5,col:5,len:3,answer:"みりん",clue:"料理にまろやかな甘みを加える、日本の調味料。"},
+        {num:13,row:6,col:3,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"}
+      ],
+      pickup:[{num:1,row:0,col:7},{num:2,row:5,col:0}], pickupAnswer:"かね"
+    },
+    {
+      id:102, title:"クロス102(こころ)", theme:"きょうちょう・ゆううつ・こうかい",
+      grid:["ね#######","つゆ#ゆ##こ#","#きょうちょう#","すみ#う##かみ","し#てつ#こい#","#そら#つえ##"],
+      across:[
+        {num:2,row:1,col:0,len:2,answer:"つゆ",clue:"初夏に雨が続く季節。または朝の草につく水滴。"},
+        {num:6,row:2,col:1,len:6,answer:"きょうちょう",clue:"力を合わせて、共に助け合うこと。"},
+        {num:7,row:3,col:0,len:2,answer:"すみ",clue:"墨汁のもとになる、書道で使う黒い固形物。"},
+        {num:8,row:3,col:6,len:2,answer:"かみ",clue:"文字を書くのに使う、薄く平らなもの。"},
+        {num:9,row:4,col:2,len:2,answer:"てつ",clue:"さびやすいが強い、道具や建材に使われる金属。"},
+        {num:10,row:4,col:5,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:11,row:5,col:1,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:12,row:5,col:4,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:3,row:1,col:1,len:3,answer:"ゆきみ",clue:"雪景色を眺めて楽しむこと。"},
+        {num:4,row:1,col:3,len:4,answer:"ゆううつ",clue:"気分が晴れず、沈んだ気持ちになること。"},
+        {num:5,row:1,col:6,len:4,answer:"こうかい",clue:"あとになって、したことを悔やむこと。"},
+        {num:7,row:3,col:0,len:2,answer:"すし",clue:"酢めしに魚介などをのせた日本の代表的な料理。"},
+        {num:9,row:4,col:2,len:2,answer:"てら",clue:"僧侶が仏を祭る、日本の宗教施設。"},
+        {num:10,row:4,col:5,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"}
+      ],
+      pickup:[{num:1,row:3,col:6},{num:2,row:0,col:0}], pickupAnswer:"かね"
+    },
+    {
+      id:103, title:"クロス103(こころ)", theme:"どうじょう・きょうかん・しんぽ",
+      grid:["####す###","####なつ##","#####えき#","#もの#に#ょ#","##どうじょう#","###た##か#","ぶか###しんぽ","#ねつ#かお##","##ゆきみ###"],
+      across:[
+        {num:2,row:1,col:4,len:2,answer:"なつ",clue:"暑さが厳しい、1年で最も日照時間が長い季節。"},
+        {num:4,row:2,col:5,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:6,row:3,col:1,len:2,answer:"もの",clue:"形のある、あらゆる品物を指す言葉。"},
+        {num:9,row:4,col:2,len:5,answer:"どうじょう",clue:"他人の苦しみやつらさを、自分のことのように思いやること。"},
+        {num:11,row:6,col:0,len:2,answer:"ぶか",clue:"職場で、自分より下の役職の人。"},
+        {num:13,row:6,col:5,len:3,answer:"しんぽ",clue:"物事が良い方向に進み、発展すること。"},
+        {num:14,row:7,col:1,len:2,answer:"ねつ",clue:"体調が悪いときに上がる、体温の高さ。"},
+        {num:16,row:7,col:4,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"},
+        {num:17,row:8,col:2,len:3,answer:"ゆきみ",clue:"雪景色を眺めて楽しむこと。"}
+      ],
+      down:[
+        {num:1,row:0,col:4,len:2,answer:"すな",clue:"海辺や砂漠にある、細かいつぶの地面。"},
+        {num:3,row:1,col:5,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:5,row:2,col:6,len:5,answer:"きょうかん",clue:"相手の気持ちや考えに、自分も同じように感じること。"},
+        {num:7,row:3,col:2,len:2,answer:"のど",clue:"食べ物を飲み込んだり声を出したりする器官。"},
+        {num:8,row:3,col:4,len:2,answer:"にじ",clue:"雨上がりに空にかかる、七色の弧。"},
+        {num:10,row:4,col:3,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:12,row:6,col:1,len:2,answer:"かね",clue:"物を買うときに使う、貨幣のこと。"},
+        {num:13,row:6,col:5,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:15,row:7,col:2,len:2,answer:"つゆ",clue:"初夏に雨が続く季節。または朝の草につく水滴。"},
+        {num:16,row:7,col:4,len:2,answer:"かみ",clue:"文字を書くのに使う、薄く平らなもの。"}
+      ],
+      pickup:[{num:1,row:0,col:4},{num:2,row:6,col:5}], pickupAnswer:"すし"
+    },
+    {
+      id:104, title:"クロス104(文化・趣味)", theme:"かていさいえん・おんがく・えんそく",
+      grid:["##さけ#おっと","###っ###う","###かわ#ほし","####か#け#","かていさいえん#","さ#と##ん##","#####そら#","##おんがく##"],
+      across:[
+        {num:1,row:0,col:2,len:2,answer:"さけ",clue:"米を発酵させて作る、日本の伝統的な酒。"},
+        {num:3,row:0,col:5,len:3,answer:"おっと",clue:"結婚している女性から見た、配偶者の男性。"},
+        {num:5,row:2,col:3,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:7,row:2,col:6,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:8,row:4,col:0,len:7,answer:"かていさいえん",clue:"自宅の庭などで、野菜を育てて楽しむこと。"},
+        {num:11,row:6,col:5,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:12,row:7,col:2,len:4,answer:"おんがく",clue:"音の組み合わせによって表現される芸術。"}
+      ],
+      down:[
+        {num:2,row:0,col:3,len:3,answer:"けっか",clue:"あることが原因となって生じた事柄。"},
+        {num:4,row:0,col:7,len:3,answer:"とうし",clue:"利益を期待して、お金を出すこと。"},
+        {num:6,row:2,col:4,len:3,answer:"わかい",clue:"争っていた者どうしが、仲直りすること。"},
+        {num:7,row:2,col:6,len:3,answer:"ほけん",clue:"万一のときに備えて、あらかじめお金を積み立てるしくみ。"},
+        {num:8,row:4,col:0,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:9,row:4,col:2,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"},
+        {num:10,row:4,col:5,len:4,answer:"えんそく",clue:"日帰りで、自然や名所へ出かけること。"}
+      ],
+      pickup:[{num:1,row:3,col:4},{num:2,row:7,col:2}], pickupAnswer:"かお"
+    },
+    {
+      id:105, title:"クロス105(文化・趣味)", theme:"しょうせつ・ぶんがく・さんぽ",
+      grid:["####みそ##","####れ###","###さんぽ##","にじ#ど####","#しょうせつ#そ","#ん###ちから","######い#","#かさ#ぶんがく","##けっか##つ"],
+      across:[
+        {num:1,row:0,col:4,len:2,answer:"みそ",clue:"大豆を発酵させて作る、和食の基本調味料。"},
+        {num:2,row:2,col:3,len:3,answer:"さんぽ",clue:"のんびりと歩いて外を回ること。"},
+        {num:3,row:3,col:0,len:2,answer:"にじ",clue:"雨上がりに空にかかる、七色の弧。"},
+        {num:5,row:4,col:1,len:5,answer:"しょうせつ",clue:"作者が想像や事実をもとに書いた、物語の文学作品。"},
+        {num:8,row:5,col:5,len:3,answer:"ちから",clue:"物を動かしたり支えたりする、身体や機械の作用。"},
+        {num:10,row:7,col:1,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:12,row:7,col:4,len:4,answer:"ぶんがく",clue:"言葉を用いて表現される、小説や詩などの芸術。"},
+        {num:14,row:8,col:2,len:3,answer:"けっか",clue:"あることが原因となって生じた事柄。"}
+      ],
+      down:[
+        {num:1,row:0,col:4,len:3,answer:"みれん",clue:"あきらめきれずに、心残りがすること。"},
+        {num:2,row:2,col:3,len:3,answer:"さどう",clue:"作法にのっとってお茶をたてる、日本の伝統文化。"},
+        {num:4,row:3,col:1,len:3,answer:"じしん",clue:"地面が大きくゆれる自然現象。"},
+        {num:6,row:4,col:5,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"},
+        {num:7,row:4,col:7,len:2,answer:"そら",clue:"雲や太陽が見える、頭上に広がる空間。"},
+        {num:9,row:5,col:6,len:3,answer:"かいが",clue:"色や線を使って平面に表現する、視覚芸術。"},
+        {num:11,row:7,col:2,len:2,answer:"さけ",clue:"米を発酵させて作る、日本の伝統的な酒。"},
+        {num:12,row:7,col:4,len:2,answer:"ぶか",clue:"職場で、自分より下の役職の人。"},
+        {num:13,row:7,col:7,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"}
+      ],
+      pickup:[{num:1,row:0,col:4},{num:2,row:5,col:5}], pickupAnswer:"みち"
+    },
+    {
+      id:106, title:"クロス106(健康)", theme:"わかがえり・しかく・へんか",
+      grid:["#ほし##ふね##","#け#しかく#こい","へんか#い#つえ#","い#わかがえり##","やま#く#き###","###ご#####"],
+      across:[
+        {num:1,row:0,col:1,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:2,row:0,col:5,len:2,answer:"ふね",clue:"水上を進む、人や荷物を運ぶ乗り物。"},
+        {num:3,row:1,col:3,len:3,answer:"しかく",clue:"技能や知識を認められた証明。または図形の一種。"},
+        {num:5,row:1,col:7,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:6,row:2,col:0,len:3,answer:"へんか",clue:"物事の状態が、それまでと違ったものになること。"},
+        {num:8,row:2,col:6,len:2,answer:"つえ",clue:"体を支えるために手に持って歩く棒。"},
+        {num:9,row:3,col:2,len:5,answer:"わかがえり",clue:"見た目や気持ちが、若いころのようになること。"},
+        {num:12,row:4,col:0,len:2,answer:"やま",clue:"周囲より高く盛り上がった地形。"}
+      ],
+      down:[
+        {num:1,row:0,col:1,len:3,answer:"ほけん",clue:"万一のときに備えて、あらかじめお金を積み立てるしくみ。"},
+        {num:2,row:0,col:5,len:2,answer:"ふく",clue:"体を覆うために着るもの、衣類の総称。"},
+        {num:4,row:1,col:4,len:3,answer:"かいが",clue:"色や線を使って平面に表現する、視覚芸術。"},
+        {num:5,row:1,col:7,len:2,answer:"こえ",clue:"のどから出す、話したり歌ったりする音。"},
+        {num:6,row:2,col:0,len:3,answer:"へいや",clue:"広く平らに広がっている土地。"},
+        {num:7,row:2,col:2,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:8,row:2,col:6,len:2,answer:"つり",clue:"糸とはりを使って、魚をつかまえること。"},
+        {num:10,row:3,col:3,len:3,answer:"かくご",clue:"よくない事態を予想して、心構えをすること。"},
+        {num:11,row:3,col:5,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"}
+      ],
+      pickup:[{num:1,row:3,col:3},{num:2,row:0,col:6}], pickupAnswer:"かね"
+    },
+    {
+      id:107, title:"クロス107(健康)", theme:"にゅういん・しんだん・うんどう",
+      grid:["はなみ####つ#","ら#れ#う#たきび","#しんだん#い##","かお##ど#いと#","ぜ#にゅういん##","#かわ######","こい#た#かみ##","#ふぜい#こ###","どく#かどう###"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"はなみ",clue:"春に咲く桜の花を眺めて楽しむこと。"},
+        {num:5,row:1,col:6,len:3,answer:"たきび",clue:"野外で木の枝などを燃やして作る火。"},
+        {num:6,row:2,col:1,len:4,answer:"しんだん",clue:"医者が症状を調べて、病気の種類を判断すること。"},
+        {num:7,row:3,col:0,len:2,answer:"かお",clue:"目や鼻、口がある、頭の前面の部分。"},
+        {num:9,row:3,col:6,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"},
+        {num:10,row:4,col:2,len:5,answer:"にゅういん",clue:"治療のため、病院に泊まって過ごすこと。"},
+        {num:11,row:5,col:1,len:2,answer:"かわ",clue:"水が流れ、海や湖に注ぐ地形。"},
+        {num:12,row:6,col:0,len:2,answer:"こい",clue:"人を強く恋しく思う気持ち。"},
+        {num:14,row:6,col:5,len:2,answer:"かみ",clue:"文字を書くのに使う、薄く平らなもの。"},
+        {num:15,row:7,col:1,len:3,answer:"ふぜい",clue:"見た目や雰囲気から感じられる、しみじみとした味わい。"},
+        {num:16,row:8,col:0,len:2,answer:"どく",clue:"体に入ると害をおよぼす、有害な物質。"},
+        {num:17,row:8,col:3,len:3,answer:"かどう",clue:"花を美しく生ける、日本の伝統芸術。"}
+      ],
+      down:[
+        {num:1,row:0,col:0,len:2,answer:"はら",clue:"胃や腸がある、体の中央部分。"},
+        {num:2,row:0,col:2,len:3,answer:"みれん",clue:"あきらめきれずに、心残りがすること。"},
+        {num:3,row:0,col:7,len:2,answer:"つき",clue:"夜空に浮かぶ、地球の衛星。"},
+        {num:4,row:1,col:4,len:4,answer:"うんどう",clue:"体を鍛えるために体を動かすこと。"},
+        {num:5,row:1,col:6,len:4,answer:"たいいん",clue:"入院していた人が、病院を出ること。"},
+        {num:6,row:2,col:1,len:2,answer:"しお",clue:"海水を煮つめて作る、味付けの基本となる調味料。"},
+        {num:7,row:3,col:0,len:2,answer:"かぜ",clue:"目に見えない、空気の流れ。"},
+        {num:8,row:3,col:4,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:10,row:4,col:2,len:2,answer:"にわ",clue:"家の敷地内にある、木や花を植えた場所。"},
+        {num:11,row:5,col:1,len:4,answer:"かいふく",clue:"病気やけがなどが治って、元の状態に戻ること。"},
+        {num:13,row:6,col:3,len:3,answer:"たいか",clue:"ものごとが、悪い方向に変わってしまうこと。"},
+        {num:14,row:6,col:5,len:3,answer:"かこう",clue:"火山の頂上にある、噴火口のくぼみ。"}
+      ],
+      pickup:[{num:1,row:0,col:0},{num:2,row:2,col:1}], pickupAnswer:"はし"
+    },
+    {
+      id:108, title:"クロス108(思考)", theme:"ほうこく・れんらく・しかく",
+      grid:["しかく###ゆ#","#い###れきし","#がっき#ん#ゅ","お##こ#ら#み","っ#ほうこく##","とうし#う###","#た##じだい#","######と#"],
+      across:[
+        {num:1,row:0,col:0,len:3,answer:"しかく",clue:"技能や知識を認められた証明。または図形の一種。"},
+        {num:4,row:1,col:5,len:3,answer:"れきし",clue:"過去に起こった出来事の積み重ね。"},
+        {num:6,row:2,col:1,len:3,answer:"がっき",clue:"音を出して音楽を演奏するための道具。"},
+        {num:9,row:4,col:2,len:4,answer:"ほうこく",clue:"仕事の結果や状況を、上の人に知らせること。"},
+        {num:11,row:5,col:0,len:3,answer:"とうし",clue:"利益を期待して、お金を出すこと。"},
+        {num:13,row:6,col:4,len:3,answer:"じだい",clue:"歴史のなかで区切られた、ある一定の期間。"}
+      ],
+      down:[
+        {num:2,row:0,col:1,len:3,answer:"かいが",clue:"色や線を使って平面に表現する、視覚芸術。"},
+        {num:3,row:0,col:6,len:2,answer:"ゆき",clue:"冬に空から降る、白く冷たい結晶。"},
+        {num:4,row:1,col:5,len:4,answer:"れんらく",clue:"用事を伝えるために、相手と連絡を取り合うこと。"},
+        {num:5,row:1,col:7,len:3,answer:"しゅみ",clue:"仕事とは別に、楽しみのために続けている活動。"},
+        {num:7,row:2,col:3,len:3,answer:"きこう",clue:"ある地域で長い期間続く、平均的な気象の状態。"},
+        {num:8,row:3,col:0,len:3,answer:"おっと",clue:"結婚している女性から見た、配偶者の男性。"},
+        {num:9,row:4,col:2,len:2,answer:"ほし",clue:"夜空にまたたく天体。"},
+        {num:10,row:4,col:4,len:3,answer:"こうじ",clue:"味噌や日本酒づくりに欠かせない、発酵のもとになるかび。"},
+        {num:12,row:5,col:1,len:2,answer:"うた",clue:"メロディーにのせて声で表現するもの。"},
+        {num:14,row:6,col:6,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"}
+      ],
+      pickup:[{num:1,row:5,col:2},{num:2,row:3,col:0}], pickupAnswer:"しお"
+    },
+    {
+      id:109, title:"クロス109(思考)", theme:"ぶんせき・けいかく・つきみ",
+      grid:["###つきみ##","#ろ#ち#り#え","どう##ぶんせき","#かさ#ん###","##けいかく##","###と#つゆ#","######きず","#####うみ#","####みそ##"],
+      across:[
+        {num:1,row:0,col:3,len:3,answer:"つきみ",clue:"秋の夜、美しい満月を眺めて楽しむこと。"},
+        {num:5,row:2,col:0,len:2,answer:"どう",clue:"10円玉などに使われる、赤みを帯びた金属。"},
+        {num:6,row:2,col:4,len:4,answer:"ぶんせき",clue:"物事を細かく分けて、性質や原因を調べること。"},
+        {num:7,row:3,col:1,len:2,answer:"かさ",clue:"雨や日差しをよけるために差す道具。"},
+        {num:9,row:4,col:2,len:4,answer:"けいかく",clue:"あらかじめ物事の進め方を考え、まとめること。"},
+        {num:12,row:5,col:5,len:2,answer:"つゆ",clue:"初夏に雨が続く季節。または朝の草につく水滴。"},
+        {num:14,row:6,col:6,len:2,answer:"きず",clue:"けがをしたときにできる、皮膚の損傷。"},
+        {num:15,row:7,col:5,len:2,answer:"うみ",clue:"塩水をたたえた、広く大きな水域。"},
+        {num:16,row:8,col:4,len:2,answer:"みそ",clue:"大豆を発酵させて作る、和食の基本調味料。"}
+      ],
+      down:[
+        {num:1,row:0,col:3,len:2,answer:"つち",clue:"植物を育てる、地面をおおう物質。"},
+        {num:2,row:0,col:5,len:3,answer:"みりん",clue:"料理にまろやかな甘みを加える、日本の調味料。"},
+        {num:3,row:1,col:1,len:3,answer:"ろうか",clue:"年を取って、体の機能がおとろえていくこと。"},
+        {num:4,row:1,col:7,len:2,answer:"えき",clue:"電車が発着する、乗り降りのための施設。"},
+        {num:6,row:2,col:4,len:3,answer:"ぶんか",clue:"人々が作り上げてきた、生活や芸術のありかた。"},
+        {num:8,row:3,col:2,len:2,answer:"さけ",clue:"米を発酵させて作る、日本の伝統的な酒。"},
+        {num:10,row:4,col:3,len:2,answer:"いと",clue:"布を織ったり縫ったりするのに使う、細長いもの。"},
+        {num:11,row:4,col:5,len:2,answer:"くつ",clue:"外出時に足にはく履き物。"},
+        {num:13,row:5,col:6,len:3,answer:"ゆきみ",clue:"雪景色を眺めて楽しむこと。"},
+        {num:15,row:7,col:5,len:2,answer:"うそ",clue:"事実ではないことを、事実のように言うこと。"}
+      ],
+      pickup:[{num:1,row:0,col:3},{num:2,row:0,col:4}], pickupAnswer:"つき"
     },
   ];
 
@@ -1547,12 +3290,8 @@
     addSolved(G.puzzle.id);
     renderPuzzleList();
     if(window.BGStats){
-      const lvl=G.puzzle.level;
       BGStats.record("crossword", cur=>{
         cur.clears=(cur.clears||0)+1;
-        cur.byLevel=cur.byLevel||{};
-        const lv=cur.byLevel[lvl]=cur.byLevel[lvl]||{plays:0,clears:0};
-        lv.clears++;
       });
     }
     toast("クリア！");
@@ -1658,9 +3397,6 @@
       if(window.BGStats){
         BGStats.record("crossword", cur=>{
           cur.plays=(cur.plays||0)+1;
-          cur.byLevel=cur.byLevel||{};
-          cur.byLevel[p.level]=cur.byLevel[p.level]||{plays:0,clears:0};
-          cur.byLevel[p.level].plays++;
         });
       }
     }
@@ -1673,32 +3409,22 @@
     startPuzzle(found.p, found.s);
   }
 
-  const LV_LABEL={easy:"やさしい",normal:"ふつう",hard:"むずかしい",oni:"鬼"};
-  let pzLevelFilter="all";
-
   function renderPuzzleList(){
     const solved=getSolved();
     const wrap=$("puzzleList");
     wrap.innerHTML="";
-    PUZZLES.filter(p=>pzLevelFilter==="all"||p.level===pzLevelFilter).forEach(p=>{
+    PUZZLES.forEach(p=>{
       const done=solved.indexOf(p.id)>=0;
       const b=document.createElement("button");
       b.className="pcard"+(done?" done":"");
       b.innerHTML=
         '<span class="nm">'+esc(p.title)+'</span>'+
-        '<span class="sub">'+esc(LV_LABEL[p.level]||"")+'　／　'+esc(p.theme)+'　／　'+p.grid.length+'×'+p.grid[0].length+'　／　ヒント'+(p.across.length+p.down.length)+'問</span>'+
+        '<span class="sub">'+p.grid.length+'×'+p.grid[0].length+'　／　ヒント'+(p.across.length+p.down.length)+'問</span>'+
         (done?'<span class="check">クリア済み</span>':"");
       b.addEventListener("click",()=>startPuzzle(p));
       wrap.appendChild(b);
     });
   }
-
-  $("segPzLevel").addEventListener("click",e=>{
-    const b=e.target.closest("button"); if(!b) return;
-    $("segPzLevel").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
-    pzLevelFilter=b.dataset.val;
-    renderPuzzleList();
-  });
 
   function refreshSetupExtras(){
     const found=loadSave();
@@ -1710,7 +3436,7 @@
         total++;
         if(found.s.cur[r] && found.s.cur[r].split(",")[c]) done++;
       }
-      $("resumeInfo").textContent = (LV_LABEL[found.p.level]||"")+" ／ "+found.p.title+" ／ あと"+Math.max(0,total-done)+"マス";
+      $("resumeInfo").textContent = found.p.title+" ／ あと"+Math.max(0,total-done)+"マス";
       btn.classList.add("show");
     }else{
       btn.classList.remove("show");
@@ -1793,13 +3519,7 @@
   window.addEventListener("pagehide",saveState);
 
   lsSet("crossword-meta", {
-    total:PUZZLES.length,
-    byLevel:{
-      easy:PUZZLES.filter(p=>p.level==="easy").length,
-      normal:PUZZLES.filter(p=>p.level==="normal").length,
-      hard:PUZZLES.filter(p=>p.level==="hard").length,
-      oni:PUZZLES.filter(p=>p.level==="oni").length
-    }
+    total:PUZZLES.length
   });
 
   renderPuzzleList();
