@@ -116,12 +116,15 @@ function generateOne(R, C, pool, targetWords, rng, minLongWords, avoidSeeds) {
   if (!first) return null;
   commit(seed.answer, seed.clue, startRow, startCol, 'across', first.cells);
 
+  // 目標語数(targetWords)に達しても打ち切らず、置ける単語がなくなるまで
+  // 詰め込み続けることで黒マス(空きマス)を減らす。stalledRoundsは「1周丸ごと
+  // 何も置けなかった」回数で、シャッフル順次第で後の周に置ける場合があるため
+  // 数回粘ってから終了する。
   let stalledRounds = 0;
-  while (placed.length < targetWords && stalledRounds < 3) {
+  while (stalledRounds < 4) {
     const candidates = shuffle(pool.filter(w => !used.has(w.answer)), rng);
     let placedAny = false;
     for (const w of candidates) {
-      if (placed.length >= targetWords) break;
       const options = [];
       for (let r = 0; r < R; r++) {
         for (let c = 0; c < C; c++) {
@@ -181,21 +184,43 @@ function numberAndSplit(result) {
   return { across, down };
 }
 
+// ボーナス文字は「グリッド上の文字を寄せ集めて並び替えると出来上がる単語」。
+// 短すぎると物足りないため、まず5〜10文字の単語から探し、見つからなければ
+// 段階的に条件を緩めて必ず何かしら設定されるようにする。
 function addPickup(p, rng) {
   const grid = p.grid;
   const cells = [];
   for (let r = 0; r < grid.length; r++) for (let c = 0; c < grid[0].length; c++) if (grid[r][c] !== '#') cells.push({ r, c, ch: grid[r][c] });
   const fullWords = new Set([...p.across, ...p.down].map(w => w.answer));
-  const candidates = [];
-  for (let i = 0; i < cells.length; i++) for (let j = 0; j < cells.length; j++) {
-    if (i === j) continue;
-    const word = cells[i].ch + cells[j].ch;
-    if (bankMap.has(word) && !fullWords.has(word)) candidates.push({ answer: word, pos: [cells[i], cells[j]] });
+
+  function tryLen(minLen, maxLen) {
+    const candWords = shuffle(FULL_BANK.filter(w => w.answer.length >= minLen && w.answer.length <= maxLen && !fullWords.has(w.answer)), rng);
+    for (const w of candWords) {
+      const byChar = new Map();
+      for (const cell of cells) {
+        if (!byChar.has(cell.ch)) byChar.set(cell.ch, []);
+        byChar.get(cell.ch).push(cell);
+      }
+      for (const [ch, arr] of byChar) byChar.set(ch, shuffle(arr, rng));
+      const idxMap = new Map();
+      const chosen = [];
+      let ok = true;
+      for (const ch of w.answer) {
+        const arr = byChar.get(ch);
+        const idx = idxMap.get(ch) || 0;
+        if (!arr || idx >= arr.length) { ok = false; break; }
+        chosen.push(arr[idx]);
+        idxMap.set(ch, idx + 1);
+      }
+      if (ok) return { answer: w.answer, pos: chosen };
+    }
+    return null;
   }
-  if (!candidates.length) return;
-  const pick = candidates[Math.floor(rng() * candidates.length)];
-  p.pickup = pick.pos.map((c, i) => ({ num: i + 1, row: c.r, col: c.c }));
-  p.pickupAnswer = pick.answer;
+
+  const found = tryLen(5, 10) || tryLen(4, 10) || tryLen(2, 3);
+  if (!found) return;
+  p.pickup = found.pos.map((c, i) => ({ num: i + 1, row: c.r, col: c.c }));
+  p.pickupAnswer = found.answer;
 }
 
 function tryGenerateWithRetries(R, C, pool, targetWords, minLongWords, avoidSeeds, seedBase) {
