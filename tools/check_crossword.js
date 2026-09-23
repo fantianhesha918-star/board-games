@@ -5,6 +5,7 @@
 // - 採番(num)が方向ごとに重複していないか
 // - どの単語にも属さないマス、番号が振られていない2マス以上の並びがないか
 // - pickup(ボーナス文字)の位置がpickupAnswerと一致しているか
+// - (警告のみ)クルーに答え(ひらがな)がそのまま含まれていないか
 // クロスワードの追加・編集をしたら、必ずこれを実行してから完了とすること。
 const fs = require('fs');
 const path = require('path');
@@ -22,6 +23,7 @@ const PUZZLES = eval(html.slice(startIdx + startMarker.length, endIdx + '\n  ]'.
 
 let anyIssue = false;
 function report(msg) { anyIssue = true; console.log(msg); }
+const warnings = [];
 
 for (const p of PUZZLES) {
   const grid = p.grid;
@@ -107,7 +109,21 @@ for (const p of PUZZLES) {
     for (const pk of p.pickup) s += grid[pk.row][pk.col];
     if (s !== p.pickupAnswer) report(`id:${p.id} pickup不一致: got="${s}" expected="${p.pickupAnswer}"`);
   }
+
+  // クルーに答え(ひらがな)がそのまま含まれていないか(警告扱い、エラーにはしない)
+  // 2026-09-23、id1「ようふく」のクルーが「洋服、着る服のこと。」と答えを漢字で
+  // そのまま書いてしまっていた不具合を機に追加。ひらがな一致のみ検出でき、
+  // 「お母さん」等の漢字表記による自己言及は検出できないため、追加時は目視確認も必要。
+  for (const w of [...(p.across || []), ...(p.down || [])]) {
+    if (w.answer.length >= 3 && w.clue.includes(w.answer)) {
+      warnings.push(`id:${p.id} ${w.answer} クルーに答えがそのまま含まれている疑い: "${w.clue}"`);
+    }
+  }
 }
 
 if (!anyIssue) console.log(`全チェック問題なし(${PUZZLES.length}問)`);
 else process.exitCode = 1;
+if (warnings.length) {
+  console.log(`\n--- 警告(${warnings.length}件、要目視確認) ---`);
+  warnings.forEach(w => console.log(w));
+}
