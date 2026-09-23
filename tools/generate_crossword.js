@@ -424,13 +424,14 @@ if (themeArg) { themeFilter = themeArg.slice('--theme='.length); args = args.fil
 
 // --solver: 本格ソルバー方式(黒マスパターン先決め+全マス充填)を使う。
 // --black=0.25: 黒マス目標密度(省略時はサイズに応じて0.25〜0.30を自動選択)。
-// --budget=20000: 1問あたりの合計計算時間(ms)。--attempt=500: パターン1個あたりの充填試行時間(ms)。
+// --budget=20000: 1問あたりの合計計算時間(ms、省略時は101マス超なら60000、それ以外は20000を自動選択)。
+// --attempt=500: パターン1個あたりの充填試行時間(ms)。
 const solverMode = args.includes('--solver');
 args = args.filter(a => a !== '--solver');
 let blackRatioArg = null;
 const blackArg = args.find(a => a.startsWith('--black='));
 if (blackArg) { blackRatioArg = parseFloat(blackArg.slice('--black='.length)); args = args.filter(a => a !== blackArg); }
-let solverBudgetMs = 20000;
+let solverBudgetMs = null; // nullなら生成時にサイズに応じて自動決定
 const budgetArg = args.find(a => a.startsWith('--budget='));
 if (budgetArg) { solverBudgetMs = parseInt(budgetArg.slice('--budget='.length), 10); args = args.filter(a => a !== budgetArg); }
 let solverAttemptMs = 500;
@@ -483,14 +484,24 @@ specs.forEach((spec, idx) => {
   if (solverMode) {
     const cells = spec.R * spec.C;
     const blackRatio = blackRatioArg != null ? blackRatioArg : (cells <= 49 ? 0.25 : 0.30);
-    const res = generateSolverBased(spec.R, spec.C, blackRatio, solverByLen, idx + 1, solverBudgetMs, solverAttemptMs);
-    if (!res) { console.log(`spec${idx} (${spec.R}x${spec.C}, 黒マス${Math.round(blackRatio * 100)}%, ソルバー方式) 生成失敗、スキップ`); return; }
+    // 2026-09-23の実験で、11x11(121マス)は黒マス30%でも語彙不足ではなく単に
+    // 探索量不足で失敗しやすいと判明(15秒予算で成功率25%→60秒予算で50%に上昇、
+    // forward-checking等のアルゴリズム改善は同条件で有意差なしだった)。
+    // オフライン生成なので大きい盤面ほど計算予算を増やす。
+    const budget = solverBudgetMs != null ? solverBudgetMs : (cells > 100 ? 60000 : 20000);
+    // 大きい盤面ほど1回の予算内でも成功率が5割程度にとどまるため、seedBaseを変えて
+    // 最大3回まで再挑戦する(1回あたりの探索空間が変わり、別の乱数系列を試せる)。
+    let res = null;
+    for (let retry = 0; retry < 3 && !res; retry++) {
+      res = generateSolverBased(spec.R, spec.C, blackRatio, solverByLen, (idx + 1) + retry * 97, budget, solverAttemptMs);
+    }
+    if (!res) { console.log(`spec${idx} (${spec.R}x${spec.C}, 黒マス${Math.round(blackRatio * 100)}%, ソルバー方式, 予算${budget}ms) 生成失敗、スキップ`); return; }
     const { across, down } = numberAndSplit(res);
     const p = { grid: res.grid, across, down };
     const rng = mulberry32(idx + 777);
     addPickup(p, rng);
     generated.push(p);
-    console.log(`生成(ソルバー方式): ${res.R}x${res.C} 黒マス${Math.round(blackRatio * 100)}% 語数${across.length + down.length} (試行回数${res.attempts})`);
+    console.log(`生成(ソルバー方式): ${res.R}x${res.C} 黒マス${Math.round(blackRatio * 100)}% 語数${across.length + down.length} (試行回数${res.attempts}, 予算${budget}ms)`);
     return;
   }
   const res = tryGenerateWithRetries(spec.R, spec.C, POOL, spec.target, spec.minLong, avoidSeeds, idx + 1);
