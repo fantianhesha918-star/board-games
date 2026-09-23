@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f6f43">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=2">
+<script src="pwa.js" defer></script>
+<script src="stats.js"></script>
+<title>熟語パズル</title>
+<style>
+  :root{
+    --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
+    --text:#232323;--text-dim:#6b6b6b;--line:#e2e0d8;
+    --accent:#1f6f43;--accent-press:#185c37;
+    --shadow:0 2px 10px rgba(0,0,0,.08),0 8px 30px rgba(0,0,0,.06);
+    --bad:#d64545;--pick:#c98a1e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161715;--surface:#22231f;--surface-2:#1c1d1a;
+      --text:#ececec;--text-dim:#a0a09a;--line:#33352f;
+      --accent:#37b06a;--accent-press:#2c9057;
+      --shadow:0 2px 10px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.3);
+      --bad:#ef6b6b;--pick:#e0a23c;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%;max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em;}
+  .topbar .spacer{flex:1;}
+  .back-btn,.icon-btn{border:none;background:var(--surface);color:var(--text);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;flex:none;font-weight:700;text-decoration:none;}
+  .back-btn{width:38px;height:38px;font-size:20px;display:flex;align-items:center;justify-content:center;}
+  .icon-btn{height:38px;padding:0 14px;font-size:13.5px;display:flex;align-items:center;gap:5px;}
+  .back-btn:active,.icon-btn:active{transform:scale(.95);}
+
+  /* setup */
+  .setup{padding:8px 20px 24px;display:flex;flex-direction:column;gap:18px;}
+  .howto{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;margin:0;padding:12px 14px;font-size:12.5px;line-height:1.75;color:var(--text-dim);}
+  .howto h3{margin:0 0 5px;font-size:13px;font-weight:800;color:var(--text);}
+  .howto p{margin:4px 0;}
+  .howto b{color:var(--accent);font-weight:700;}
+  .howto .ex{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 0;font-size:15px;font-weight:800;color:var(--text);flex-wrap:wrap;}
+  .howto .ex .bl{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--surface);box-shadow:inset 0 0 0 2px dashed var(--pick);color:var(--pick);font-size:13px;}
+  .plist{display:flex;flex-direction:column;gap:10px;}
+  .pcard{
+    position:relative;display:flex;align-items:center;gap:12px;text-align:left;
+    border:2px solid var(--line);background:var(--surface);color:var(--text);
+    padding:12px 16px;border-radius:16px;cursor:pointer;font:inherit;box-shadow:var(--shadow);
+  }
+  .pcard:active{transform:scale(.98);}
+  .pcard.done{border-color:var(--accent);}
+  .pcard .pnum{flex:none;width:34px;height:34px;border-radius:10px;background:var(--surface-2);color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+  .pcard.done .pnum{background:var(--accent);color:#fff;}
+  .pcard .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .pcard .nm{font-weight:800;font-size:15px;}
+  .pcard .sub{font-size:11.5px;color:var(--text-dim);font-weight:700;}
+  .pcard .check{color:var(--accent);font-weight:800;font-size:15px;flex:none;}
+
+  /* play */
+  .play{flex:1;display:flex;flex-direction:column;gap:16px;padding:6px 20px 20px;align-items:center;}
+  .board3{
+    position:relative;width:100%;max-width:280px;margin:4px auto 0;
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    gap:8px;aspect-ratio:1/1;
+  }
+  .board3 .kc{
+    display:flex;align-items:center;justify-content:center;border-radius:16px;
+    font-size:min(11vw,42px);font-weight:800;transition:background .15s ease,color .15s ease,border-color .15s ease;
+  }
+  .board3 .kc.hidden{visibility:hidden;}
+  .board3 .kc.given{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+  .board3 .kc.blank{background:var(--surface-2);color:var(--text-dim);box-shadow:inset 0 0 0 2.5px dashed var(--line);font-size:min(7vw,26px);cursor:default;}
+  .board3 .kc.blank.solved{background:var(--surface);color:var(--accent);box-shadow:var(--shadow),inset 0 0 0 2.5px var(--accent);font-size:min(11vw,42px);}
+  .board3 .kc.blank.hinted{color:var(--pick);box-shadow:var(--shadow),inset 0 0 0 2.5px var(--pick);}
+  .board3 .kc.blank.wrong{animation:shake .32s ease;box-shadow:inset 0 0 0 2.5px var(--bad);}
+  @keyframes shake{
+    10%,90%{transform:translateX(-3px);} 20%,80%{transform:translateX(3px);}
+    30%,50%,70%{transform:translateX(-6px);} 40%,60%{transform:translateX(6px);}
+  }
+
+  .hintline{min-height:18px;font-size:12.5px;font-weight:700;color:var(--pick);text-align:center;}
+
+  .choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:340px;}
+  .choices button{
+    width:56px;height:56px;border:none;border-radius:14px;background:var(--surface);color:var(--text);
+    font-size:24px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .choices button:active{transform:scale(.94);}
+  .choices button:disabled{opacity:.35;pointer-events:none;}
+  .choices.done{display:none;}
+
+  .words{display:none;flex-direction:column;gap:6px;width:100%;max-width:340px;}
+  .words.show{display:flex;}
+  .words .wd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;}
+  .words .wd .w{font-weight:800;font-size:16px;}
+  .words .wd .r{font-size:12px;color:var(--text-dim);font-weight:700;}
+
+  .actions{display:flex;gap:8px;width:100%;max-width:340px;}
+  .actions button{flex:1;border:none;background:var(--surface);color:var(--text);border-radius:12px;padding:12px 0;
+    font-size:13.5px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;}
+  .actions button:active{transform:scale(.96);}
+  .actions button:disabled{opacity:.4;pointer-events:none;}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:22px;padding:24px 22px;width:100%;max-width:330px;text-align:center;box-shadow:var(--shadow);}
+  .modal .result{font-size:24px;font-weight:800;margin:0 0 8px;}
+  .modal .detail{color:var(--text-dim);font-size:14px;margin:0 0 20px;line-height:1.7;}
+  .modal .row{display:flex;gap:10px;}
+  .modal .row button,.modal .row a{flex:1;border:none;padding:13px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+  .modal .row .primary{background:var(--accent);color:#fff;}
+  .modal .row .ghost{background:var(--line);color:var(--text);}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.84);color:#fff;font-size:13px;font-weight:700;padding:10px 17px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="setup" class="screen active">
+    <div class="topbar">
+      <a class="back-btn" href="index.html">‹</a>
+      <h1>熟語パズル</h1>
+      <span class="spacer"></span>
+      <a class="icon-btn" href="rules.html#jukugo">ルール</a>
+    </div>
+    <div class="setup">
+      <div class="howto">
+        <h3>遊び方</h3>
+        <p>真ん中が空欄のマスに、上下左右それぞれの漢字と組み合わせて<b>4つの熟語</b>が完成する、同じ漢字を1つ選びます。</p>
+        <div class="ex">
+          <span>社</span><span>→</span><span class="bl">会</span><span>→</span><span>見</span>
+        </div>
+        <p style="text-align:center;margin-top:-4px">↑「社会」「会議」「都会」「会見」がすべて完成する<b>「会」</b>が正解</p>
+        <p>候補の漢字ボタンから正解だと思うものをタップしてください。まちがえても何度でも挑戦できます。<b>ヒント</b>を押すと読み方のヒントが見られます。</p>
+      </div>
+      <div class="plist" id="puzzleList"></div>
+    </div>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="topbar">
+      <button class="back-btn" id="toSetup">‹</button>
+      <h1 id="playTitle">熟語パズル</h1>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="hintBtn">ヒント</button>
+    </div>
+    <div class="play">
+      <div class="board3" id="board3"></div>
+      <p class="hintline" id="hintLine"></p>
+      <div class="choices" id="choices"></div>
+      <div class="words" id="words"></div>
+      <div class="actions">
+        <button type="button" id="againBtn">この問題をもう一度</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="result" id="ovTitle">クリア！</p>
+    <p class="detail" id="ovDetail"></p>
+    <div class="row">
+      <a class="ghost" href="index.html">ホーム</a>
+      <button class="primary" id="ovNext">つぎの問題</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  const $=id=>document.getElementById(id);
+  let toastTimer=0;
+  function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1500); }
+  function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
+  function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+  /* ---------- パズルデータ(中央の空欄+上下左右の漢字で4つの熟語が完成する) ---------- */
+  const PUZZLES=[
+    {id:1, center:"会", reading:"かい",
+      top:{k:"社",w:"社会",r:"しゃかい"}, bottom:{k:"議",w:"会議",r:"かいぎ"},
+      left:{k:"都",w:"都会",r:"とかい"}, right:{k:"見",w:"会見",r:"かいけん"}},
+    {id:2, center:"金", reading:"きん",
+      top:{k:"料",w:"料金",r:"りょうきん"}, bottom:{k:"庫",w:"金庫",r:"きんこ"},
+      left:{k:"現",w:"現金",r:"げんきん"}, right:{k:"色",w:"金色",r:"きんいろ"}},
+    {id:3, center:"水", reading:"すい",
+      top:{k:"香",w:"香水",r:"こうすい"}, bottom:{k:"道",w:"水道",r:"すいどう"},
+      left:{k:"海",w:"海水",r:"かいすい"}, right:{k:"面",w:"水面",r:"すいめん"}},
+    {id:4, center:"学", reading:"がく",
+      top:{k:"入",w:"入学",r:"にゅうがく"}, bottom:{k:"校",w:"学校",r:"がっこう"},
+      left:{k:"科",w:"科学",r:"かがく"}, right:{k:"生",w:"学生",r:"がくせい"}},
+    {id:5, center:"食", reading:"しょく",
+      top:{k:"定",w:"定食",r:"ていしょく"}, bottom:{k:"事",w:"食事",r:"しょくじ"},
+      left:{k:"和",w:"和食",r:"わしょく"}, right:{k:"品",w:"食品",r:"しょくひん"}},
+    {id:6, center:"生", reading:"せい",
+      top:{k:"先",w:"先生",r:"せんせい"}, bottom:{k:"活",w:"生活",r:"せいかつ"},
+      left:{k:"人",w:"人生",r:"じんせい"}, right:{k:"徒",w:"生徒",r:"せいと"}},
+    {id:7, center:"気", reading:"き",
+      top:{k:"天",w:"天気",r:"てんき"}, bottom:{k:"分",w:"気分",r:"きぶん"},
+      left:{k:"元",w:"元気",r:"げんき"}, right:{k:"体",w:"気体",r:"きたい"}},
+    {id:8, center:"間", reading:"かん",
+      top:{k:"空",w:"空間",r:"くうかん"}, bottom:{k:"食",w:"間食",r:"かんしょく"},
+      left:{k:"時",w:"時間",r:"じかん"}, right:{k:"隔",w:"間隔",r:"かんかく"}},
+    {id:9, center:"心", reading:"しん",
+      top:{k:"安",w:"安心",r:"あんしん"}, bottom:{k:"配",w:"心配",r:"しんぱい"},
+      left:{k:"中",w:"中心",r:"ちゅうしん"}, right:{k:"理",w:"心理",r:"しんり"}},
+    {id:10, center:"力", reading:"りょく",
+      top:{k:"体",w:"体力",r:"たいりょく"}, bottom:{k:"士",w:"力士",r:"りきし"},
+      left:{k:"実",w:"実力",r:"じつりょく"}, right:{k:"作",w:"力作",r:"りきさく"}},
+    {id:11, center:"語", reading:"ご",
+      top:{k:"英",w:"英語",r:"えいご"}, bottom:{k:"学",w:"語学",r:"ごがく"},
+      left:{k:"物",w:"物語",r:"ものがたり"}, right:{k:"録",w:"語録",r:"ごろく"}},
+    {id:12, center:"手", reading:"て",
+      top:{k:"選",w:"選手",r:"せんしゅ"}, bottom:{k:"紙",w:"手紙",r:"てがみ"},
+      left:{k:"苦",w:"苦手",r:"にがて"}, right:{k:"帳",w:"手帳",r:"てちょう"}},
+    {id:13, center:"目", reading:"もく",
+      top:{k:"科",w:"科目",r:"かもく"}, bottom:{k:"的",w:"目的",r:"もくてき"},
+      left:{k:"題",w:"題目",r:"だいもく"}, right:{k:"標",w:"目標",r:"もくひょう"}},
+    {id:14, center:"事", reading:"じ",
+      top:{k:"仕",w:"仕事",r:"しごと"}, bottom:{k:"件",w:"事件",r:"じけん"},
+      left:{k:"記",w:"記事",r:"きじ"}, right:{k:"故",w:"事故",r:"じこ"}},
+    {id:15, center:"面", reading:"めん",
+      top:{k:"場",w:"場面",r:"ばめん"}, bottom:{k:"接",w:"面接",r:"めんせつ"},
+      left:{k:"方",w:"方面",r:"ほうめん"}, right:{k:"積",w:"面積",r:"めんせき"}},
+    {id:16, center:"線", reading:"せん",
+      top:{k:"直",w:"直線",r:"ちょくせん"}, bottom:{k:"路",w:"線路",r:"せんろ"},
+      left:{k:"光",w:"光線",r:"こうせん"}, right:{k:"分",w:"線分",r:"せんぶん"}},
+    {id:17, center:"通", reading:"つう",
+      top:{k:"交",w:"交通",r:"こうつう"}, bottom:{k:"学",w:"通学",r:"つうがく"},
+      left:{k:"普",w:"普通",r:"ふつう"}, right:{k:"路",w:"通路",r:"つうろ"}},
+    {id:18, center:"話", reading:"わ",
+      top:{k:"会",w:"会話",r:"かいわ"}, bottom:{k:"題",w:"話題",r:"わだい"},
+      left:{k:"電",w:"電話",r:"でんわ"}, right:{k:"術",w:"話術",r:"わじゅつ"}},
+    {id:19, center:"山", reading:"さん",
+      top:{k:"登",w:"登山",r:"とざん"}, bottom:{k:"脈",w:"山脈",r:"さんみゃく"},
+      left:{k:"火",w:"火山",r:"かざん"}, right:{k:"林",w:"山林",r:"さんりん"}},
+    {id:20, center:"海", reading:"かい",
+      top:{k:"航",w:"航海",r:"こうかい"}, bottom:{k:"岸",w:"海岸",r:"かいがん"},
+      left:{k:"近",w:"近海",r:"きんかい"}, right:{k:"外",w:"海外",r:"かいがい"}}
+  ];
+  const CENTERS=PUZZLES.map(p=>p.center);
+
+  /* ---------- 保存(クリア済み一覧) ---------- */
+  const SOLVED_KEY="jukugo-solved", META_KEY="jukugo-meta";
+  function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+  function getSolved(){ const a=lsGet(SOLVED_KEY); return Array.isArray(a)?a:[]; }
+  function addSolved(id){ const a=getSolved(); if(a.indexOf(id)<0){ a.push(id); lsSet(SOLVED_KEY,a); } }
+  lsSet(META_KEY,{total:PUZZLES.length});
+
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; const t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+
+  /* ---------- ゲーム状態 ---------- */
+  const G={ puzzle:null, choices:null, solved:false, mistakes:0, hintLevel:0, hintUsed:false, wonAt:0 };
+
+  function renderPuzzleList(){
+    const wrap=$("puzzleList"); wrap.innerHTML="";
+    const solved=getSolved();
+    PUZZLES.forEach((p,idx)=>{
+      const done=solved.indexOf(p.id)>=0;
+      const b=document.createElement("button");
+      b.type="button"; b.className="pcard"+(done?" done":"");
+      b.innerHTML=
+        '<span class="pnum">'+(idx+1)+'</span>'+
+        '<span class="body"><span class="nm">熟語パズル '+(idx+1)+'</span>'+
+        '<span class="sub">'+esc('上'+p.top.k+' 下'+p.bottom.k+' 左'+p.left.k+' 右'+p.right.k)+'</span></span>'+
+        (done?'<span class="check">✓</span>':'');
+      b.addEventListener("click",()=>startPuzzle(p.id));
+      wrap.appendChild(b);
+    });
+  }
+
+  function findPuzzle(id){ return PUZZLES.find(p=>p.id===id); }
+
+  function startPuzzle(id){
+    const p=findPuzzle(id);
+    if(!p) return;
+    G.puzzle=p; G.solved=false; G.mistakes=0; G.hintLevel=0; G.hintUsed=false; G.wonAt=0;
+    const distractors=shuffle(CENTERS.filter(c=>c!==p.center)).slice(0,5);
+    G.choices=shuffle([p.center,...distractors]);
+    $("playTitle").textContent="熟語パズル "+(PUZZLES.indexOf(p)+1);
+    $("hintLine").textContent="";
+    $("overlay").classList.remove("show");
+    buildBoard();
+    buildChoices();
+    $("words").classList.remove("show");
+    $("words").innerHTML="";
+    show("play");
+    if(window.BGStats){
+      BGStats.record("jukugo", cur=>{ cur.plays=(cur.plays||0)+1; });
+    }
+  }
+
+  function buildBoard(){
+    const p=G.puzzle;
+    const board=$("board3"); board.innerHTML="";
+    const cells=[
+      {pos:"00",hidden:true}, {pos:"01",given:p.top}, {pos:"02",hidden:true},
+      {pos:"10",given:p.left}, {pos:"11",blank:true}, {pos:"12",given:p.right},
+      {pos:"20",hidden:true}, {pos:"21",given:p.bottom}, {pos:"22",hidden:true}
+    ];
+    cells.forEach(c=>{
+      const d=document.createElement("div");
+      if(c.hidden){ d.className="kc hidden"; }
+      else if(c.given){ d.className="kc given"; d.textContent=c.given.k; }
+      else{ d.id="blankCell"; d.className="kc blank"; d.textContent="？"; }
+      board.appendChild(d);
+    });
+  }
+
+  function buildChoices(){
+    const wrap=$("choices"); wrap.innerHTML=""; wrap.classList.remove("done");
+    G.choices.forEach(k=>{
+      const b=document.createElement("button");
+      b.type="button"; b.textContent=k;
+      b.addEventListener("click",()=>pick(k,b));
+      wrap.appendChild(b);
+    });
+  }
+
+  function pick(k,btn){
+    if(G.solved) return;
+    if(k===G.puzzle.center){ solve(false); return; }
+    G.mistakes++;
+    const blank=$("blankCell");
+    blank.classList.remove("wrong"); void blank.offsetWidth; blank.classList.add("wrong");
+    toast("ちがうみたい…");
+    btn.disabled=true;
+  }
+
+  function solve(viaHint){
+    G.solved=true;
+    const p=G.puzzle;
+    const blank=$("blankCell");
+    blank.textContent=p.center;
+    blank.classList.remove("wrong");
+    blank.classList.add("solved");
+    if(viaHint || G.hintUsed) blank.classList.add("hinted");
+    $("choices").classList.add("done");
+    const wordsEl=$("words");
+    wordsEl.innerHTML =
+      [p.top,p.left,p.right,p.bottom].map(w=>
+        '<div class="wd"><span class="w">'+esc(w.w)+'</span><span class="r">'+esc(w.r)+'</span></div>'
+      ).join("");
+    wordsEl.classList.add("show");
+    addSolved(p.id);
+    G.wonAt=Date.now();
+    if(window.BGStats){
+      BGStats.record("jukugo", cur=>{
+        cur.clears=(cur.clears||0)+1;
+        if(G.mistakes===0 && !G.hintUsed) cur.perfect=(cur.perfect||0)+1;
+      });
+    }
+    toast(viaHint||G.hintUsed ? "正解！(ヒントあり)" : "正解！");
+    setTimeout(showResultModal,650);
+  }
+
+  function showResultModal(){
+    const p=G.puzzle;
+    $("ovTitle").textContent="クリア！";
+    $("ovDetail").innerHTML =
+      "答えは「<b>"+esc(p.center)+"（"+esc(p.reading)+"）</b>」<br>"+
+      "まちがえた回数 "+G.mistakes+(G.hintUsed?"／ヒント使用":"");
+    $("overlay").classList.add("show");
+  }
+
+  function hint(){
+    if(G.solved) return;
+    const p=G.puzzle;
+    if(G.hintLevel===0){
+      G.hintLevel=1;
+      $("hintLine").textContent="読み方のヒント: 「"+p.reading[0]+"」から始まる";
+    }else{
+      G.hintUsed=true;
+      solve(true);
+    }
+  }
+
+  /* ---------- イベント ---------- */
+  $("hintBtn").addEventListener("click",hint);
+  $("toSetup").addEventListener("click",()=>{ renderPuzzleList(); show("setup"); });
+  $("againBtn").addEventListener("click",()=>startPuzzle(G.puzzle.id));
+  $("ovNext").addEventListener("click",()=>{
+    const idx=PUZZLES.indexOf(G.puzzle);
+    const solved=getSolved();
+    let next=null;
+    for(let i=1;i<=PUZZLES.length;i++){
+      const cand=PUZZLES[(idx+i)%PUZZLES.length];
+      if(solved.indexOf(cand.id)<0){ next=cand; break; }
+    }
+    if(!next) next=PUZZLES[(idx+1)%PUZZLES.length];
+    startPuzzle(next.id);
+  });
+  $("play").addEventListener("click",e=>{
+    if(G.solved && !$("overlay").classList.contains("show") && Date.now()-(G.wonAt||0)>400
+      && !e.target.closest("#choices") && !e.target.closest("#hintBtn") && !e.target.closest(".actions")){
+      showResultModal();
+    }
+  });
+
+  renderPuzzleList();
+})();
+</script>
+</body>
+</html>
