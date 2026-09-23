@@ -17,6 +17,10 @@
 - `docs/babanuki.html` … ババ抜き
 - `docs/sevens.html` … 七並べ
 - `docs/daifugo.html` … 大富豪
+- `docs/solitaire.html` … ソリティア（クロンダイク、トランプメニューから遷移）
+- `docs/sudoku.html` … ナンプレ（数独、ハブのゲームカードから遷移）
+- `docs/crossword.html` … クロスワード（大人向け語彙、ハブのゲームカードから遷移）
+- `docs/stats.html` / `docs/stats.js` … 全ゲーム共通の記録・成績表示
 - `docs/rules.html` … 全ゲームの遊び方・ルール説明（index/trump のメニューから「遊び方・ルール説明」ボタンで開く）
 - 各ページは自己完結（共有JSファイルなし、file:// でも動く）
 
@@ -47,7 +51,9 @@
   - ババ抜き: 実装済み（2〜4人・人間/CPU混在可）。設定でシャッフル（ババ嵐：ジョーカー保持者が1ゲーム1回、サイコロ ➡/⬅=全員の手札を一斉に横移動、☠=不発）の あり/なし を選択可。**オンライン対戦（別々の端末から2〜4人・空き席はCPU補充可）対応**：複数人用スキーマ（`createRoomN`）。state＝`{cfg:{shuffle},hands[](CSV。"JK"=ジョーカー),done[],place[],finishSeq,pileP,usedShuffle[],turn(席番号),last,over,loser,seq}`。手札は各自の端末にだけ表示（データは全員に届くので「devtoolsで覗かない」前提）。1手ぶんの遷移は`applyBabaAction`（純粋関数。type=draw／shuffle）、シャッフルは手番を進めず・引く前の各席1回、CPU席は席0が`netCpuTurn`で動かす。引く相手＝次の未あがり席、引いた後は相手の残り手札をシャッフルして位置バレを軽減
   - 七並べ: 実装済み（2〜4人・人間/CPU混在可、パス回数 3/4/5、ジョーカー=ワイルドの あり/なし）。盤の空マスは「♥5」等の簡易表示、出たマスは実カードの絵柄を表示。A または K まで並ぶと反対端から折り返して置く（Aまで→K,Q,…／Kまで→A,2,…、到達側の通常方向は凍結）。ジョーカーは好きな空きマスに置ける“ワイルド”（1ゲーム1回きり・戻せない）で、置いた位置の本物カードを持つ人は次の手番で必ずそれを出す（パス不可、実カードに置き換わる）。バーストで手札を場に開く、順位表示。**オンライン対戦（別々の端末から2〜4人・空き席はCPU補充可）対応**：複数人用スキーマ（`createRoomN`）。state＝`{cfg,board(52文字 . o j),hands[](CSV),pass[],alive[](a/d/b),place[],bustAt[],finishSeq,bustSeq,turn(席番号),forced,last,over,seq}`。手札は各自の端末にだけ表示（データ自体は全員に届くので「devtoolsで覗かない」前提）。1手ぶんの遷移は`applyAction`（純粋関数）、CPU席は席0が`netCpuTurn`で動かす
   - 大富豪: 実装済み（2〜4人・人間/CPU混在可、CPU強さ3段、連戦（階級＋カード交換）/1戦）。全ローカルルールを実装し設定画面で個別ON/OFF：B（8切り・革命・階段・縛り・スペ3返し・11バック・都落ち、既定ON）／C（7渡し・10捨て・5飛ばし・9リバース・反則あがり、既定OFF）。**オンライン対戦（別々の端末から2〜4人・空き席CPU補充可）対応**：複数人用スキーマ（`createRoomN`）。カードは 0..52 の整数idで表現、state.hands は id を "," 連結した文字列の配列（Firestore が配列内配列を許さないため）。1手＝純粋関数 `applyDaifugo(state,seat,act)`。act＝play/pass/transfer/discard/exchange/next。7渡し・10捨て・カード交換は `phase`＋`pending` で中断し、その席（人間は `pickCards`、CPUはホスト代行）が選んで再開（`runPipeline` のステップ配列を pending に退避）。連戦の次ゲームは席0（ホスト）が `{type:"next"}`。CPU手番・CPUの選択はホスト（席0）が `netCpuDrive` で代行。既存 `render()` は `applyNetSnapshot` で G を再構築して流用
-  - 一人ゲーム（ソリティア等）: 準備中
+  - ソリティア（クロンダイク）: 実装済み（`docs/solitaire.html`、トランプメニューから遷移）
+- ナンプレ（数独）: 実装済み（`docs/sudoku.html`、ハブのゲームカードから遷移）
+- クロスワード: 実装済み（`docs/crossword.html`、大人向け語彙。詳細ルールは同ディレクトリの `CLAUDE.md` 参照）
 - 将棋 / どうぶつしょうぎ: 準備中
 
 ## 素材
