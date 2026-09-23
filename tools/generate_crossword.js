@@ -54,6 +54,185 @@ function mulberry32(seed) {
   };
 }
 
+// ===== 本格ソルバー方式(黒マスパターン先決め + 全マス同時充填) =====
+// 2026-09-23、feasibility_solver.jsでの実験により、以下が判明したため実装:
+//   1. パターン生成は「完全ランダム→検証、ダメならやり直し」ではなく、1マスずつ
+//      候補を試してその場で妥当性チェックする「逐次構築方式」にすると、
+//      9x9以上でもほぼ100%パターン生成に成功する(旧方式は10x10以上でほぼ0%)。
+//   2. 充填(単語当てはめ)は「1つのパターンに長時間かける」より「複数の異なる
+//      パターンを短時間(0.5秒程度)ずつ試し、ダメなら次のパターンへ」の方が、
+//      同じ計算時間でも成功率が大幅に高い(オフライン生成なので数秒〜数十秒
+//      かけてよい)。
+//   3. 黒マス密度は20%では現状の語彙(3000語)でも成功率0%。25〜30%を狙うと
+//      7x7〜10x10で実用的な成功率に達する(9x9/30%で100%、10x10/30%で90%等)。
+// この方式は「1語ずつ既存マスに交差させる」現行方式(generateOne)とは別物で、
+// 黒マス率を20〜30%程度まで下げられる可能性がある代わりに、生成失敗もありうる
+// (--solverフラグで有効化。失敗時は当該問題をスキップする)。
+function symmetricPairs(R, C) {
+  const cells = [];
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+    const r2 = R - 1 - r, c2 = C - 1 - c;
+    if (r > r2 || (r === r2 && c > c2)) continue;
+    cells.push([r, c]);
+  }
+  return cells;
+}
+
+function validPattern(grid, R, C) {
+  for (let r = 0; r < R; r++) {
+    let run = 0;
+    for (let c = 0; c <= C; c++) {
+      const white = c < C && grid[r][c] === '.';
+      if (white) run++; else { if (run === 1) return false; run = 0; }
+    }
+  }
+  for (let c = 0; c < C; c++) {
+    let run = 0;
+    for (let r = 0; r <= R; r++) {
+      const white = r < R && grid[r][c] === '.';
+      if (white) run++; else { if (run === 1) return false; run = 0; }
+    }
+  }
+  return true;
+}
+
+// 逐次構築方式: 1ペア(180度対称)ずつランダム順で黒マス化を試し、その場で
+// validPatternを満たすかチェックする。だめならそのペアは白マスのまま次へ。
+function patternGreedy(R, C, blackRatioTarget, rng, maxRestarts) {
+  const cells = symmetricPairs(R, C);
+  const targetBlack = Math.round(R * C * blackRatioTarget / 2);
+  for (let restart = 0; restart < maxRestarts; restart++) {
+    const grid = Array.from({ length: R }, () => Array(C).fill('.'));
+    const order = shuffle(cells, rng);
+    let placed = 0;
+    for (const [r, c] of order) {
+      if (placed >= targetBlack) break;
+      if (grid[r][c] === '#') continue;
+      grid[r][c] = '#'; grid[R - 1 - r][C - 1 - c] = '#';
+      if (validPattern(grid, R, C)) placed++;
+      else { grid[r][c] = '.'; grid[R - 1 - r][C - 1 - c] = '.'; }
+    }
+    if (placed >= targetBlack * 0.85) return grid;
+  }
+  return null;
+}
+
+function extractSlots(grid, R, C) {
+  const slots = [];
+  for (let r = 0; r < R; r++) {
+    let c = 0;
+    while (c < C) {
+      if (grid[r][c] === '#') { c++; continue; }
+      const start = c;
+      while (c < C && grid[r][c] !== '#') c++;
+      if (c - start >= 2) slots.push({ dir: 'across', row: r, col: start, len: c - start });
+    }
+  }
+  for (let c = 0; c < C; c++) {
+    let r = 0;
+    while (r < R) {
+      if (grid[r][c] === '#') { r++; continue; }
+      const start = r;
+      while (r < R && grid[r][c] !== '#') r++;
+      if (r - start >= 2) slots.push({ dir: 'down', row: start, col: c, len: r - start });
+    }
+  }
+  return slots;
+}
+function cellsOfSlot(slot) {
+  const arr = [];
+  for (let k = 0; k < slot.len; k++) arr.push(slot.dir === 'across' ? [slot.row, slot.col + k] : [slot.row + k, slot.col]);
+  return arr;
+}
+
+// MRV(候補数最小のスロットを優先)によるバックトラック充填。timeLimitMsを
+// 超えたら'timeout'を返して即座に打ち切る(呼び出し側で次のパターンへ移る)。
+function solveFill(grid, R, C, byLen, rng, timeLimitMs) {
+  const slots = extractSlots(grid, R, C);
+  if (!slots.length) return null;
+  const fill = Array.from({ length: R }, () => Array(C).fill(null));
+  const usedWords = new Set();
+  const slotCells = slots.map(cellsOfSlot);
+  const t0 = Date.now();
+  function candidatesFor(idx) {
+    const slot = slots[idx], cells = slotCells[idx];
+    const pool = byLen.get(slot.len) || [];
+    const cand = [];
+    for (const w of pool) {
+      if (usedWords.has(w)) continue;
+      let ok = true;
+      for (let k = 0; k < w.length; k++) {
+        const [r, c] = cells[k];
+        if (fill[r][c] != null && fill[r][c] !== w[k]) { ok = false; break; }
+      }
+      if (ok) cand.push(w);
+    }
+    return cand;
+  }
+  function pickNextSlot(remaining) {
+    let best = -1, bestCount = Infinity, bestCand = null;
+    for (const idx of remaining) {
+      const cand = candidatesFor(idx);
+      if (cand.length < bestCount) { bestCount = cand.length; best = idx; bestCand = cand; if (bestCount === 0) break; }
+    }
+    return { best, bestCand };
+  }
+  function backtrack(remaining) {
+    if (Date.now() - t0 > timeLimitMs) return 'timeout';
+    if (!remaining.size) return true;
+    const { best, bestCand } = pickNextSlot(remaining);
+    if (bestCand.length === 0) return false;
+    const order = shuffle(bestCand, rng);
+    const cells = slotCells[best];
+    const nextRemaining = new Set(remaining); nextRemaining.delete(best);
+    for (const w of order) {
+      const changed = [];
+      for (let k = 0; k < w.length; k++) {
+        const [r, c] = cells[k];
+        if (fill[r][c] == null) { fill[r][c] = w[k]; changed.push([r, c]); }
+      }
+      usedWords.add(w);
+      const res = backtrack(nextRemaining);
+      if (res === true) return true;
+      if (res === 'timeout') { for (const [r, c] of changed) fill[r][c] = null; usedWords.delete(w); return 'timeout'; }
+      for (const [r, c] of changed) fill[r][c] = null;
+      usedWords.delete(w);
+    }
+    return false;
+  }
+  const remaining = new Set(slots.map((_, i) => i));
+  const res = backtrack(remaining);
+  return res === true ? { fill, slots, slotCells } : null;
+}
+
+// 複数の異なるパターンを、それぞれ短時間(perAttemptMs)ずつ試す。
+// totalBudgetMsに達するまで、失敗したら即座に別パターンへ切り替える。
+function generateSolverBased(R, C, blackRatio, byLen, seedBase, totalBudgetMs, perAttemptMs) {
+  const t0 = Date.now();
+  let attempt = 0;
+  while (Date.now() - t0 < totalBudgetMs) {
+    const rng = mulberry32(seedBase * 1000003 + attempt);
+    const grid = patternGreedy(R, C, blackRatio, rng, 10);
+    if (grid) {
+      const remainingBudget = Math.min(perAttemptMs, totalBudgetMs - (Date.now() - t0));
+      if (remainingBudget > 0) {
+        const solved = solveFill(grid, R, C, byLen, mulberry32(seedBase * 31 + attempt + 1), remainingBudget);
+        if (solved) {
+          const finalGrid = grid.map((row, r) => row.map((ch, c) => ch === '#' ? '#' : solved.fill[r][c]).join(''));
+          const words = solved.slots.map((slot, i) => {
+            const cells = solved.slotCells[i];
+            const answer = cells.map(([r, c]) => solved.fill[r][c]).join('');
+            return { row: slot.row, col: slot.col, dir: slot.dir, len: slot.len, answer, clue: bankMap.get(answer) || '' };
+          });
+          return { grid: finalGrid, words, R, C, attempts: attempt + 1 };
+        }
+      }
+    }
+    attempt++;
+  }
+  return null;
+}
+
 function generateOne(R, C, pool, targetWords, rng, minLongWords, avoidSeeds) {
   const grid = Array.from({ length: R }, () => Array(C).fill(null));
   const placed = [];
@@ -243,6 +422,21 @@ let themeFilter = null;
 const themeArg = args.find(a => a.startsWith('--theme='));
 if (themeArg) { themeFilter = themeArg.slice('--theme='.length); args = args.filter(a => a !== themeArg); }
 
+// --solver: 本格ソルバー方式(黒マスパターン先決め+全マス充填)を使う。
+// --black=0.25: 黒マス目標密度(省略時はサイズに応じて0.25〜0.30を自動選択)。
+// --budget=20000: 1問あたりの合計計算時間(ms)。--attempt=500: パターン1個あたりの充填試行時間(ms)。
+const solverMode = args.includes('--solver');
+args = args.filter(a => a !== '--solver');
+let blackRatioArg = null;
+const blackArg = args.find(a => a.startsWith('--black='));
+if (blackArg) { blackRatioArg = parseFloat(blackArg.slice('--black='.length)); args = args.filter(a => a !== blackArg); }
+let solverBudgetMs = 20000;
+const budgetArg = args.find(a => a.startsWith('--budget='));
+if (budgetArg) { solverBudgetMs = parseInt(budgetArg.slice('--budget='.length), 10); args = args.filter(a => a !== budgetArg); }
+let solverAttemptMs = 500;
+const attemptArg = args.find(a => a.startsWith('--attempt='));
+if (attemptArg) { solverAttemptMs = parseInt(attemptArg.slice('--attempt='.length), 10); args = args.filter(a => a !== attemptArg); }
+
 let count = 4;
 let sizeArgs = [];
 if (args.length && /^\d+$/.test(args[0])) { count = +args[0]; sizeArgs = args.slice(1); }
@@ -276,10 +470,29 @@ for (let i = 0; i < count; i++) {
   specs.push({ ...size, target: Math.round(cells * 0.32), minLong });
 }
 
+// ソルバー方式用: POOLの単語を長さ別に索引化(重複語は既にbankMapでユニーク済み)。
+const solverByLen = new Map();
+if (solverMode) {
+  for (const w of POOL) { if (!solverByLen.has(w.answer.length)) solverByLen.set(w.answer.length, []); solverByLen.get(w.answer.length).push(w.answer); }
+}
+
 const nextId = Math.max(...PUZZLES.map(p => p.id)) + 1;
 const avoidSeeds = new Set();
 const generated = [];
 specs.forEach((spec, idx) => {
+  if (solverMode) {
+    const cells = spec.R * spec.C;
+    const blackRatio = blackRatioArg != null ? blackRatioArg : (cells <= 49 ? 0.25 : 0.30);
+    const res = generateSolverBased(spec.R, spec.C, blackRatio, solverByLen, idx + 1, solverBudgetMs, solverAttemptMs);
+    if (!res) { console.log(`spec${idx} (${spec.R}x${spec.C}, 黒マス${Math.round(blackRatio * 100)}%, ソルバー方式) 生成失敗、スキップ`); return; }
+    const { across, down } = numberAndSplit(res);
+    const p = { grid: res.grid, across, down };
+    const rng = mulberry32(idx + 777);
+    addPickup(p, rng);
+    generated.push(p);
+    console.log(`生成(ソルバー方式): ${res.R}x${res.C} 黒マス${Math.round(blackRatio * 100)}% 語数${across.length + down.length} (試行回数${res.attempts})`);
+    return;
+  }
   const res = tryGenerateWithRetries(spec.R, spec.C, POOL, spec.target, spec.minLong, avoidSeeds, idx + 1);
   if (!res) { console.log(`spec${idx} (${spec.R}x${spec.C}) 生成失敗、スキップ`); return; }
   const { across, down } = numberAndSplit(res);
