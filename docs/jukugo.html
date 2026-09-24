@@ -71,6 +71,8 @@
   .pcard.done .pnum{background:var(--accent);color:#fff;}
   .pcard .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
   .pcard .nm{font-weight:800;font-size:15px;}
+  .pcard .hard{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;color:var(--pick);
+    background:color-mix(in srgb,var(--pick) 14%,transparent);border-radius:999px;padding:2px 7px;vertical-align:middle;}
   .pcard .sub{font-size:11.5px;color:var(--text-dim);font-weight:700;}
   .pcard .check{color:var(--accent);font-weight:800;font-size:15px;flex:none;}
 
@@ -272,7 +274,55 @@
       left:{k:"火",w:"火山",r:"かざん"}, right:{k:"林",w:"山林",r:"さんりん"}},
     {id:20, center:"海", reading:"かい",
       top:{k:"航",w:"航海",r:"こうかい"}, bottom:{k:"岸",w:"海岸",r:"かいがん"},
-      left:{k:"近",w:"近海",r:"きんかい"}, right:{k:"外",w:"海外",r:"かいがい"}}
+      left:{k:"近",w:"近海",r:"きんかい"}, right:{k:"外",w:"海外",r:"かいがい"}},
+    {id:21, center:"状", reading:"じょう",
+      top:{k:"現",w:"現状",r:"げんじょう"}, bottom:{k:"態",w:"状態",r:"じょうたい"},
+      left:{k:"症",w:"症状",r:"しょうじょう"}, right:{k:"況",w:"状況",r:"じょうきょう"}},
+    {id:22, center:"性", reading:"せい",
+      top:{k:"個",w:"個性",r:"こせい"}, bottom:{k:"質",w:"性質",r:"せいしつ"},
+      left:{k:"女",w:"女性",r:"じょせい"}, right:{k:"格",w:"性格",r:"せいかく"}},
+    {id:23, center:"系", reading:"けい",
+      top:{k:"体",w:"体系",r:"たいけい"}, bottom:{k:"統",w:"系統",r:"けいとう"},
+      left:{k:"直",w:"直系",r:"ちょっけい"}, right:{k:"図",w:"系図",r:"けいず"}},
+    {id:24, center:"情", reading:"じょう",
+      top:{k:"感",w:"感情",r:"かんじょう"}, bottom:{k:"報",w:"情報",r:"じょうほう"},
+      left:{k:"友",w:"友情",r:"ゆうじょう"}, right:{k:"熱",w:"情熱",r:"じょうねつ"}},
+    {id:25, center:"制", reading:"せい",
+      top:{k:"体",w:"体制",r:"たいせい"}, bottom:{k:"度",w:"制度",r:"せいど"},
+      left:{k:"統",w:"統制",r:"とうせい"}, right:{k:"限",w:"制限",r:"せいげん"}},
+    {id:26, center:"域", reading:"いき",
+      top:{k:"地",w:"地域",r:"ちいき"}, bottom:{k:"内",w:"域内",r:"いきない"},
+      left:{k:"広",w:"広域",r:"こういき"}, right:{k:"外",w:"域外",r:"いきがい"}},
+    {id:27, center:"層", reading:"そう",
+      top:{k:"階",w:"階層",r:"かいそう"}, bottom:{k:"別",w:"層別",r:"そうべつ"},
+      left:{k:"地",w:"地層",r:"ちそう"}, right:{k:"雲",w:"層雲",r:"そううん"}},
+    {id:28, center:"型", reading:"かた",
+      top:{k:"体",w:"体型",r:"たいけい"}, bottom:{k:"紙",w:"型紙",r:"かたがみ"},
+      left:{k:"新",w:"新型",r:"しんがた"}, right:{k:"番",w:"型番",r:"かたばん"}},
+    {id:29, center:"質", reading:"しつ",
+      top:{k:"物",w:"物質",r:"ぶっしつ"}, bottom:{k:"問",w:"質問",r:"しつもん"},
+      left:{k:"体",w:"体質",r:"たいしつ"}, right:{k:"感",w:"質感",r:"しつかん"}},
+    {id:30, center:"拠", reading:"きょ",
+      top:{k:"根",w:"根拠",r:"こんきょ"}, bottom:{k:"点",w:"拠点",r:"きょてん"},
+      left:{k:"準",w:"準拠",r:"じゅんきょ"}, right:{k:"出",w:"拠出",r:"きょしゅつ"}},
+    {id:31, center:"軸", reading:"じく",
+      top:{k:"車",w:"車軸",r:"しゃじく"}, bottom:{k:"足",w:"軸足",r:"じくあし"},
+      left:{k:"基",w:"基軸",r:"きじく"}, right:{k:"受",w:"軸受",r:"じくうけ"}},
+    {id:32, center:"盤", reading:"ばん",
+      top:{k:"円",w:"円盤",r:"えんばん"}, bottom:{k:"石",w:"盤石",r:"ばんじゃく"},
+      left:{k:"序",w:"序盤",r:"じょばん"}, right:{k:"面",w:"盤面",r:"ばんめん"}},
+    {id:33, center:"識", reading:"しき",
+      top:{k:"意",w:"意識",r:"いしき"}, bottom:{k:"別",w:"識別",r:"しきべつ"},
+      left:{k:"認",w:"認識",r:"にんしき"}, right:{k:"字",w:"識字",r:"しきじ"}},
+    {id:34, center:"境", reading:"きょう",
+      top:{k:"国",w:"国境",r:"こっきょう"}, bottom:{k:"界",w:"境界",r:"きょうかい"},
+      left:{k:"環",w:"環境",r:"かんきょう"}, right:{k:"地",w:"境地",r:"きょうち"}},
+    {id:35, center:"解", reading:"かい",
+      top:{k:"理",w:"理解",r:"りかい"}, bottom:{k:"答",w:"解答",r:"かいとう"},
+      left:{k:"正",w:"正解",r:"せいかい"}, right:{k:"明",w:"解明",r:"かいめい"}},
+    {id:36, center:"断", reading:"だん",
+      top:{k:"横",w:"横断",r:"おうだん"}, bottom:{k:"定",w:"断定",r:"だんてい"},
+      left:{k:"決",w:"決断",r:"けつだん"}, right:{k:"念",w:"断念",r:"だんねん"}}
   ];
 
   /* ---------- 保存(クリア済み一覧) ---------- */
@@ -295,7 +345,7 @@
       b.type="button"; b.className="pcard"+(done?" done":"");
       b.innerHTML=
         '<span class="pnum">'+(idx+1)+'</span>'+
-        '<span class="body"><span class="nm">熟語パズル '+(idx+1)+'</span>'+
+        '<span class="body"><span class="nm">熟語パズル '+(idx+1)+(idx>=20?'<span class="hard">むずかしめ</span>':'')+'</span>'+
         '<span class="sub">'+esc('上'+p.top.k+' 下'+p.bottom.k+' 左'+p.left.k+' 右'+p.right.k)+'</span></span>'+
         (done?'<span class="check">✓</span>':'');
       b.addEventListener("click",()=>startPuzzle(p.id));
