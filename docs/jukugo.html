@@ -98,14 +98,19 @@
 
   .hintline{min-height:18px;font-size:12.5px;font-weight:700;color:var(--pick);text-align:center;}
 
-  .choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:340px;}
-  .choices button{
-    width:56px;height:56px;border:none;border-radius:14px;background:var(--surface);color:var(--text);
-    font-size:24px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;
+  .answerbox{display:flex;gap:8px;width:100%;max-width:340px;}
+  .answerbox input{
+    flex:1;min-width:0;border:none;border-radius:12px;background:var(--surface);color:var(--text);
+    box-shadow:inset 0 0 0 2px var(--line);padding:12px 14px;font-size:22px;font-weight:800;
+    text-align:center;font-family:inherit;
   }
-  .choices button:active{transform:scale(.94);}
-  .choices button:disabled{opacity:.35;pointer-events:none;}
-  .choices.done{display:none;}
+  .answerbox input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--accent);}
+  .answerbox button{
+    flex:none;border:none;background:var(--accent);color:#fff;border-radius:12px;padding:0 18px;
+    font-size:14px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);
+  }
+  .answerbox button:active{background:var(--accent-press);transform:scale(.96);}
+  .answerbox.done{display:none;}
 
   .words{display:none;flex-direction:column;gap:6px;width:100%;max-width:340px;}
   .words.show{display:flex;}
@@ -156,7 +161,7 @@
           <span>社</span><span>→</span><span class="bl">会</span><span>→</span><span>見</span>
         </div>
         <p style="text-align:center;margin-top:-4px">↑「社会」「会議」「都会」「会見」がすべて完成する<b>「会」</b>が正解</p>
-        <p>候補の漢字ボタンから正解だと思うものをタップしてください。まちがえても何度でも挑戦できます。<b>ヒント</b>を押すと読み方のヒントが見られます。</p>
+        <p>入力欄に正解だと思う<b>漢字を1字</b>入力して「けってい」を押してください(読み方をひらがなで入力しても正解になります)。まちがえても何度でも挑戦できます。<b>ヒント</b>を押すと読み方のヒントが見られます。</p>
       </div>
       <div class="plist" id="puzzleList"></div>
     </div>
@@ -172,7 +177,10 @@
     <div class="play">
       <div class="board3" id="board3"></div>
       <p class="hintline" id="hintLine"></p>
-      <div class="choices" id="choices"></div>
+      <div class="answerbox" id="answerbox">
+        <input id="answerInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="漢字を入力">
+        <button type="button" id="submitBtn">けってい</button>
+      </div>
       <div class="words" id="words"></div>
       <div class="actions">
         <button type="button" id="againBtn">この問題をもう一度</button>
@@ -266,7 +274,6 @@
       top:{k:"航",w:"航海",r:"こうかい"}, bottom:{k:"岸",w:"海岸",r:"かいがん"},
       left:{k:"近",w:"近海",r:"きんかい"}, right:{k:"外",w:"海外",r:"かいがい"}}
   ];
-  const CENTERS=PUZZLES.map(p=>p.center);
 
   /* ---------- 保存(クリア済み一覧) ---------- */
   const SOLVED_KEY="jukugo-solved", META_KEY="jukugo-meta";
@@ -276,14 +283,8 @@
   function addSolved(id){ const a=getSolved(); if(a.indexOf(id)<0){ a.push(id); lsSet(SOLVED_KEY,a); } }
   lsSet(META_KEY,{total:PUZZLES.length});
 
-  function shuffle(arr){
-    const a=arr.slice();
-    for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; const t=a[i]; a[i]=a[j]; a[j]=t; }
-    return a;
-  }
-
   /* ---------- ゲーム状態 ---------- */
-  const G={ puzzle:null, choices:null, solved:false, mistakes:0, hintLevel:0, hintUsed:false, wonAt:0 };
+  const G={ puzzle:null, solved:false, mistakes:0, hintLevel:0, hintUsed:false, wonAt:0 };
 
   function renderPuzzleList(){
     const wrap=$("puzzleList"); wrap.innerHTML="";
@@ -308,13 +309,14 @@
     const p=findPuzzle(id);
     if(!p) return;
     G.puzzle=p; G.solved=false; G.mistakes=0; G.hintLevel=0; G.hintUsed=false; G.wonAt=0;
-    const distractors=shuffle(CENTERS.filter(c=>c!==p.center)).slice(0,5);
-    G.choices=shuffle([p.center,...distractors]);
     $("playTitle").textContent="熟語パズル "+(PUZZLES.indexOf(p)+1);
     $("hintLine").textContent="";
     $("overlay").classList.remove("show");
     buildBoard();
-    buildChoices();
+    $("answerbox").classList.remove("done");
+    $("answerInput").value="";
+    $("answerInput").disabled=false;
+    $("submitBtn").disabled=false;
     $("words").classList.remove("show");
     $("words").innerHTML="";
     show("play");
@@ -340,24 +342,18 @@
     });
   }
 
-  function buildChoices(){
-    const wrap=$("choices"); wrap.innerHTML=""; wrap.classList.remove("done");
-    G.choices.forEach(k=>{
-      const b=document.createElement("button");
-      b.type="button"; b.textContent=k;
-      b.addEventListener("click",()=>pick(k,b));
-      wrap.appendChild(b);
-    });
-  }
-
-  function pick(k,btn){
+  function submitAnswer(){
     if(G.solved) return;
-    if(k===G.puzzle.center){ solve(false); return; }
+    const input=$("answerInput");
+    const val=input.value.trim();
+    if(!val) return;
+    if(val===G.puzzle.center || val===G.puzzle.reading){ solve(false); return; }
     G.mistakes++;
     const blank=$("blankCell");
     blank.classList.remove("wrong"); void blank.offsetWidth; blank.classList.add("wrong");
     toast("ちがうみたい…");
-    btn.disabled=true;
+    input.value="";
+    input.focus({preventScroll:true});
   }
 
   function solve(viaHint){
@@ -368,7 +364,8 @@
     blank.classList.remove("wrong");
     blank.classList.add("solved");
     if(viaHint || G.hintUsed) blank.classList.add("hinted");
-    $("choices").classList.add("done");
+    $("answerbox").classList.add("done");
+    $("answerInput").disabled=true; $("submitBtn").disabled=true; $("answerInput").blur();
     const wordsEl=$("words");
     wordsEl.innerHTML =
       [p.top,p.left,p.right,p.bottom].map(w=>
@@ -410,7 +407,11 @@
 
   /* ---------- イベント ---------- */
   $("hintBtn").addEventListener("click",hint);
-  $("toSetup").addEventListener("click",()=>{ renderPuzzleList(); show("setup"); });
+  $("submitBtn").addEventListener("click",submitAnswer);
+  $("answerInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter" && !e.isComposing){ e.preventDefault(); submitAnswer(); }
+  });
+  $("toSetup").addEventListener("click",()=>{ $("answerInput").blur(); renderPuzzleList(); show("setup"); });
   $("againBtn").addEventListener("click",()=>startPuzzle(G.puzzle.id));
   $("ovNext").addEventListener("click",()=>{
     const idx=PUZZLES.indexOf(G.puzzle);
@@ -425,7 +426,7 @@
   });
   $("play").addEventListener("click",e=>{
     if(G.solved && !$("overlay").classList.contains("show") && Date.now()-(G.wonAt||0)>400
-      && !e.target.closest("#choices") && !e.target.closest("#hintBtn") && !e.target.closest(".actions")){
+      && !e.target.closest(".answerbox") && !e.target.closest("#hintBtn") && !e.target.closest(".actions")){
       showResultModal();
     }
   });
