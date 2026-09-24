@@ -73,6 +73,7 @@
   .pcard .nm{font-weight:800;font-size:15px;}
   .pcard .hard{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;color:var(--pick);
     background:color-mix(in srgb,var(--pick) 14%,transparent);border-radius:999px;padding:2px 7px;vertical-align:middle;}
+  .pcard .hard.vhard{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent);}
   .pcard .sub{font-size:11.5px;color:var(--text-dim);font-weight:700;}
   .pcard .check{color:var(--accent);font-weight:800;font-size:15px;flex:none;}
 
@@ -322,7 +323,40 @@
       left:{k:"正",w:"正解",r:"せいかい"}, right:{k:"明",w:"解明",r:"かいめい"}},
     {id:36, center:"断", reading:"だん",
       top:{k:"横",w:"横断",r:"おうだん"}, bottom:{k:"定",w:"断定",r:"だんてい"},
-      left:{k:"決",w:"決断",r:"けつだん"}, right:{k:"念",w:"断念",r:"だんねん"}}
+      left:{k:"決",w:"決断",r:"けつだん"}, right:{k:"念",w:"断念",r:"だんねん"}},
+    {id:37, center:"概", reading:"がい",
+      top:{k:"大",w:"大概",r:"たいがい"}, bottom:{k:"要",w:"概要",r:"がいよう"},
+      left:{k:"気",w:"気概",r:"きがい"}, right:{k:"念",w:"概念",r:"がいねん"}},
+    {id:38, center:"枠", reading:"わく",
+      top:{k:"大",w:"大枠",r:"おおわく"}, bottom:{k:"内",w:"枠内",r:"わくない"},
+      left:{k:"外",w:"外枠",r:"そとわく"}, right:{k:"組",w:"枠組",r:"わくぐみ"}},
+    {id:39, center:"環", reading:"かん",
+      top:{k:"循",w:"循環",r:"じゅんかん"}, bottom:{k:"境",w:"環境",r:"かんきょう"},
+      left:{k:"一",w:"一環",r:"いっかん"}, right:{k:"状",w:"環状",r:"かんじょう"}},
+    {id:40, center:"徹", reading:"てつ",
+      top:{k:"貫",w:"貫徹",r:"かんてつ"}, bottom:{k:"底",w:"徹底",r:"てってい"},
+      left:{k:"透",w:"透徹",r:"とうてつ"}, right:{k:"夜",w:"徹夜",r:"てつや"}},
+    {id:41, center:"融", reading:"ゆう",
+      top:{k:"金",w:"金融",r:"きんゆう"}, bottom:{k:"合",w:"融合",r:"ゆうごう"},
+      left:{k:"溶",w:"溶融",r:"ようゆう"}, right:{k:"通",w:"融通",r:"ゆうずう"}},
+    {id:42, center:"慣", reading:"かん",
+      top:{k:"習",w:"習慣",r:"しゅうかん"}, bottom:{k:"例",w:"慣例",r:"かんれい"},
+      left:{k:"旧",w:"旧慣",r:"きゅうかん"}, right:{k:"用",w:"慣用",r:"かんよう"}},
+    {id:43, center:"弊", reading:"へい",
+      top:{k:"疲",w:"疲弊",r:"ひへい"}, bottom:{k:"害",w:"弊害",r:"へいがい"},
+      left:{k:"旧",w:"旧弊",r:"きゅうへい"}, right:{k:"社",w:"弊社",r:"へいしゃ"}},
+    {id:44, center:"錯", reading:"さく",
+      top:{k:"交",w:"交錯",r:"こうさく"}, bottom:{k:"誤",w:"錯誤",r:"さくご"},
+      left:{k:"倒",w:"倒錯",r:"とうさく"}, right:{k:"覚",w:"錯覚",r:"さっかく"}},
+    {id:45, center:"鑑", reading:"かん",
+      top:{k:"図",w:"図鑑",r:"ずかん"}, bottom:{k:"定",w:"鑑定",r:"かんてい"},
+      left:{k:"年",w:"年鑑",r:"ねんかん"}, right:{k:"賞",w:"鑑賞",r:"かんしょう"}},
+    {id:46, center:"拓", reading:"たく",
+      top:{k:"魚",w:"魚拓",r:"ぎょたく"}, bottom:{k:"殖",w:"拓殖",r:"たくしょく"},
+      left:{k:"干",w:"干拓",r:"かんたく"}, right:{k:"本",w:"拓本",r:"たくほん"}},
+    {id:47, center:"覇", reading:"は",
+      top:{k:"制",w:"制覇",r:"せいは"}, bottom:{k:"権",w:"覇権",r:"はけん"},
+      left:{k:"連",w:"連覇",r:"れんぱ"}, right:{k:"者",w:"覇者",r:"はしゃ"}}
   ];
 
   /* ---------- 保存(クリア済み一覧) ---------- */
@@ -345,7 +379,7 @@
       b.type="button"; b.className="pcard"+(done?" done":"");
       b.innerHTML=
         '<span class="pnum">'+(idx+1)+'</span>'+
-        '<span class="body"><span class="nm">熟語パズル '+(idx+1)+(idx>=20?'<span class="hard">むずかしめ</span>':'')+'</span>'+
+        '<span class="body"><span class="nm">熟語パズル '+(idx+1)+(idx>=36?'<span class="hard vhard">超むずかしめ</span>':(idx>=20?'<span class="hard">むずかしめ</span>':''))+'</span>'+
         '<span class="sub">'+esc('上'+p.top.k+' 下'+p.bottom.k+' 左'+p.left.k+' 右'+p.right.k)+'</span></span>'+
         (done?'<span class="check">✓</span>':'');
       b.addEventListener("click",()=>startPuzzle(p.id));
