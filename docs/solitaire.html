@@ -246,7 +246,8 @@
 
   const G={ draw:1, deck:[], stock:[], waste:[], found:{S:0,H:0,D:0,C:0}, tab:[],
             sel:null, hist:[], moves:0, t0:0, timer:null, won:false,
-            lastTapLoc:null, lastTapT:0 };
+            lastTapLoc:null, lastTapT:0,
+            deadlock:false, progress:0, progressAtLastRecycle:0 };
 
   function seg(id,on){
     const w=$(id);
@@ -268,6 +269,7 @@
     G.waste=[];
     G.found={S:0,H:0,D:0,C:0};
     G.sel=null; G.hist=[]; G.moves=0; G.won=false;
+    G.deadlock=false; G.progress=0; G.progressAtLastRecycle=0;
     G.t0=Date.now();
     clearInterval(G.timer);
     G.timer=setInterval(updateMeta,1000);
@@ -298,7 +300,7 @@
     const s=JSON.parse(G.hist.pop());
     G.stock=s.stock; G.waste=s.waste; G.found=s.found;
     G.tab=s.tab.map(c=>c.map(([id,up])=>({id,up:!!up})));
-    G.moves=s.moves; G.sel=null; G.won=false;
+    G.moves=s.moves; G.sel=null; G.won=false; G.deadlock=false;
     render(); updateMeta();
   }
 
@@ -317,15 +319,51 @@
     return out;
   }
 
+  /* ---------- 手詰まり判定 ---------- */
+  // 場（各列の露出カード以降）に、組札や他の列へ動かせるカードが1枚でもあるか
+  function boardMoveExists(){
+    for(let c=0;c<7;c++){
+      const t=G.tab[c];
+      const fu=t.findIndex(x=>x.up);
+      if(fu<0) continue;
+      for(let idx=fu; idx<t.length; idx++){
+        const id=t[idx].id;
+        if(idx===t.length-1 && canToFound(id)) return true;
+        if(colDests(id,c).length) return true;
+      }
+    }
+    return false;
+  }
+  function wasteMoveExists(){
+    if(!G.waste.length) return false;
+    const id=G.waste[G.waste.length-1];
+    return canToFound(id) || colDests(id,-1).length>0;
+  }
+  function hasAnyCurrentMove(){ return boardMoveExists() || wasteMoveExists(); }
+  function markDeadlock(){
+    if(G.deadlock) return;
+    G.deadlock=true;
+    toast("手詰まりです…");
+    render();
+  }
+  // 山札・捨て札にまだカードがあっても、今の場に対して1枚も動かせない状態のまま
+  // 一周(手が一切進まないまま)したなら、これ以上何周しても状況は変わらない
+  function checkDeadlockNow(){
+    if(G.won || G.deadlock) return;
+    if(hasAnyCurrentMove()) return;
+    if(!G.stock.length && !G.waste.length) markDeadlock();
+  }
+
   /* ---------- moves ---------- */
   function afterMove(){
-    G.moves++;
+    G.moves++; G.progress++; G.deadlock=false;
     // 露出したカードをめくる
     G.tab.forEach(c=>{ if(c.length){ const top=c[c.length-1]; if(!top.up) top.up=true; } });
     G.sel=null;
     if(checkWin()){ G.won=true; render(); winModal(); return; }
     render(); updateMeta();
     maybeAutoFinish();
+    checkDeadlockNow();
   }
   function moveToFound(src){
     // src: {kind:'w'} | {kind:'t',col} | {kind:'f',suit}
@@ -350,7 +388,15 @@
     pushHist();
     if(!G.stock.length){
       if(!G.waste.length){ G.hist.pop(); return; }
+      // 直前に戻してから一度もカードが動いておらず、今の場にも動かせるカードが無いなら、
+      // このまま何周しても同じ札が同じ順で出てくるだけで状況は変わらない＝手詰まり
+      if(G.progress===G.progressAtLastRecycle && !hasAnyCurrentMove()){
+        G.hist.pop();
+        markDeadlock();
+        return;
+      }
       G.stock = G.waste.reverse(); G.waste=[];
+      G.progressAtLastRecycle = G.progress;
     }else{
       const n=Math.min(G.draw,G.stock.length);
       for(let i=0;i<n;i++) G.waste.push(G.stock.pop());
@@ -416,15 +462,19 @@
     if(ids.length===1){
       const id=ids[0];
       const dests=colDests(id, src.kind==="t"?src.col:-1);
+      const foundOk = src.kind!=="f" && canToFound(id);
       const lowRank = rankOf(id)<=2;
-      if(src.kind!=="f" && canToFound(id) && (lowRank || dests.length===0)){ moveToFound(src); return; }
-      const ne=dests.filter(c=>G.tab[c].length), em=dests.filter(c=>!G.tab[c].length);
-      if(ne.length===1 && em.length===0){ moveRun(ids,src,ne[0]); return; }
-      if(dests.length===1){ moveRun(ids,src,dests[0]); return; }
-      if(dests.length===0){
-        if(src.kind!=="f" && canToFound(id)){ moveToFound(src); return; }
-        return; // どこにも行けない
+      // A・2は場に残しても意味がほぼ無いので組札へ即直行
+      if(foundOk && lowRank){ moveToFound(src); return; }
+      const total = dests.length + (foundOk?1:0);
+      if(total===0) return; // どこにも行けない
+      if(total===1){
+        if(foundOk){ moveToFound(src); return; }
+        moveRun(ids,src,dests[0]); return;
       }
+      // 組札と場、両方に置けるなど行き先が複数ある時は選択状態にして置き先をタップしてもらう
+      // (以前は場を優先して自動で動かしていたが、露出した札しだいで行き先の場が入れ替わり、
+      //  組札に行けるのに列同士を行ったり来たりし続けてしまう不具合があったため撤去)
       selectRun(src,ids,locStr); return;
     }
     // 連なり
@@ -601,7 +651,8 @@
     if(G.sel && G.sel.src.kind==="f"){ const fe=tr.querySelector('[data-loc="found:'+G.sel.src.suit+'"] .pcard'); if(fe) fe.classList.add("sel"); }
 
     $("undoBtn").disabled = !G.hist.length;
-    $("msg").textContent = G.sel ? "置きたい列や組札をタップ（山札で解除）" : "";
+    $("msg").textContent = G.deadlock ? "手詰まりです。「もどす」か「配り直す」をお試しください"
+      : (G.sel ? "置きたい列や組札をタップ（山札で解除）" : "");
   }
 
   /* ---------- events ---------- */
