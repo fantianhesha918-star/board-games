@@ -244,7 +244,7 @@
     let gHtml="";
     ["mix","kanji","idiom"].forEach(k=>{
       const v=by[k]; if(!v || !v.plays) return;
-      gHtml += row(GN[k]+"（プレイ "+v.plays+"回）", "ベスト "+(v.best||0)+"問");
+      gHtml += row(GN[k]+"（プレイ "+v.plays+"／クリア "+(v.clears||0)+"）", "ベスト "+(v.best||0)+"／10");
     });
     return card("よみがなアタック", IC.yomigana,
       row("プレイ回数", s.plays+"回")+

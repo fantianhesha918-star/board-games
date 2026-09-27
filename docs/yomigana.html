@@ -148,6 +148,7 @@
         <h3>遊び方</h3>
         <p>言葉が画面の奥から<b>だんだん迫って</b>きます。大きくなりきる前に、その<b>読み方をひらがなで入力</b>してください。</p>
         <p>1問の制限時間は<b>10秒固定</b>。制限時間内なら何度でも打ち直しOKです。間に合わないと言葉が破裂してミス、残機が0になるとゲームオーバーです。答えるたびに、少しずつ<b>むずかしい言葉</b>が混ざるようになります。</p>
+        <p><b>10問正解</b>で1回のクリアです。残機（はじめは3）が0になる前に10問正解を目指しましょう。</p>
       </div>
       <div class="field">
         <span class="label">出題ジャンル</span>
@@ -212,6 +213,7 @@
 
   const TIME_LIMIT_MS = 10000;
   const LIVES_START = 3;
+  const TARGET_SCORE = 10;
 
   /* ---------- 設定・記録の保存 ---------- */
   const CFG_KEY="yomigana-cfg";
@@ -220,7 +222,7 @@
   const cfg = Object.assign({genre:"mix"}, lsGet(CFG_KEY)||{});
 
   /* ---------- ゲーム状態 ---------- */
-  const G={ phase:"idle", score:0, lives:LIVES_START, lastTerm:"", timer:0, current:null };
+  const G={ phase:"idle", score:0, lives:LIVES_START, misses:0, lastTerm:"", timer:0, current:null };
 
   /* 正解を重ねるほど読みの長い(=むずかしい)言葉が混ざるようにする */
   function kanjiMaxLen(score){ return score<8 ? 3 : (score<20 ? 5 : 99); }
@@ -249,19 +251,21 @@
     return TIME_LIMIT_MS;
   }
 
-  function bestScore(genre){
+  function genreRecord(genre){
     const all = window.BGStats ? BGStats.getAll() : {};
     const by = (all.yomigana && all.yomigana.byGenre) || {};
-    return (by[genre] && by[genre].best) || 0;
+    return by[genre] || {plays:0,clears:0,perfect:0,best:0};
   }
 
   function renderBestLine(){
-    $("bestLine").innerHTML = "ベストスコア: <b>"+bestScore(cfg.genre)+"</b>問";
+    const rec=genreRecord(cfg.genre);
+    $("bestLine").innerHTML = "ベストスコア: <b>"+rec.best+" / "+TARGET_SCORE+"</b>問"+
+      (rec.clears ? "　クリア回数: <b>"+rec.clears+"</b>回" : "");
   }
 
   /* ---------- 画面遷移 ---------- */
   function startGame(){
-    G.score=0; G.lives=LIVES_START; G.lastTerm="";
+    G.score=0; G.lives=LIVES_START; G.misses=0; G.lastTerm="";
     updateHud();
     show("play");
     nextRound();
@@ -269,7 +273,7 @@
 
   function updateHud(){
     $("livesLine").textContent = "のこり "+G.lives;
-    $("scoreLine").textContent = G.score+"問";
+    $("scoreLine").textContent = G.score+" / "+TARGET_SCORE+"問";
   }
 
   function nextRound(){
@@ -320,7 +324,11 @@
     const el=$("flashEl"); el.textContent="○ せいかい"; el.className="flash ok show";
     G.score++;
     updateHud();
-    setTimeout(nextRound, 550);
+    if(G.score>=TARGET_SCORE){
+      setTimeout(clearGame, 650);
+    }else{
+      setTimeout(nextRound, 550);
+    }
   }
 
   function missRound(){
@@ -332,6 +340,7 @@
     const el=$("flashEl"); el.textContent="× ばくはつ"; el.className="flash ng show";
     $("hintLine").textContent="正解: "+G.current.term+"（"+G.current.reading+"）";
     G.lives--;
+    G.misses++;
     updateHud();
     if(G.lives<=0){
       setTimeout(endGame, 750);
@@ -361,13 +370,32 @@
       BGStats.record("yomigana", cur=>{
         cur.plays=(cur.plays||0)+1;
         cur.byGenre=cur.byGenre||{};
-        const rec=cur.byGenre[cfg.genre]=cur.byGenre[cfg.genre]||{plays:0,best:0};
+        const rec=cur.byGenre[cfg.genre]=cur.byGenre[cfg.genre]||{plays:0,clears:0,perfect:0,best:0};
         rec.plays++;
         if(G.score>rec.best){ rec.best=G.score; isBest=true; }
       });
     }
     $("ovTitle").textContent="ゲームオーバー";
-    $("ovDetail").innerHTML = "今回のスコア: <b>"+G.score+"問</b>"+(isBest?"<br>ベスト記録を更新しました！":"");
+    $("ovDetail").innerHTML = "今回のスコア: <b>"+G.score+" / "+TARGET_SCORE+"問</b>"+(isBest?"<br>ベスト記録を更新しました！":"");
+    $("overlay").classList.add("show");
+  }
+
+  function clearGame(){
+    clearTimeout(G.timer);
+    G.phase="over";
+    const perfect = G.misses===0;
+    if(window.BGStats){
+      BGStats.record("yomigana", cur=>{
+        cur.plays=(cur.plays||0)+1;
+        cur.byGenre=cur.byGenre||{};
+        const rec=cur.byGenre[cfg.genre]=cur.byGenre[cfg.genre]||{plays:0,clears:0,perfect:0,best:0};
+        rec.plays++; rec.clears++;
+        if(perfect) rec.perfect++;
+        rec.best=TARGET_SCORE;
+      });
+    }
+    $("ovTitle").textContent="クリア！";
+    $("ovDetail").innerHTML = "見事"+TARGET_SCORE+"問正解！"+(perfect?"<br>ノーミスクリアです！":"<br>まちがえた回数: "+G.misses);
     $("overlay").classList.add("show");
   }
 
