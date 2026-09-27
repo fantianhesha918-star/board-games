@@ -176,7 +176,7 @@
   function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
 
   const GAP_MS=140;
-  const SPEED_MULT={slow:1.4, normal:1.0, fast:0.7};
+  const SPEED_MULT={slow:1.15, normal:1.0, fast:0.7};
 
   const LEVELS=[
     {id:1,  digits:1, count:3,  ms:1400, mixed:false},
@@ -304,7 +304,7 @@
     function step(){
       if(i>=problem.nums.length){ startInput(); return; }
       $("progressLine").textContent=(i+1)+" / "+problem.nums.length;
-      const sign = i===0 ? "" : (problem.ops[i]==="-" ? "－" : "＋");
+      const sign = problem.ops[i]==="-" ? "－" : "";
       box.classList.remove("msg");
       box.textContent=sign+problem.nums[i];
       box.classList.add("flashing");
