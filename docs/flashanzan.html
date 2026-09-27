@@ -62,22 +62,12 @@
   .seg{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px;}
   .seg button{flex:1;border:none;background:transparent;color:var(--text-dim);padding:9px 0;border-radius:9px;font-weight:800;font-size:13.5px;cursor:pointer;}
   .seg button.on{background:var(--surface);color:var(--accent);box-shadow:var(--shadow);}
-  .lvlist{display:flex;flex-direction:column;gap:10px;}
-  .lvcard{
-    position:relative;display:flex;align-items:center;gap:12px;text-align:left;
-    border:2px solid var(--line);background:var(--surface);color:var(--text);
-    padding:12px 16px;border-radius:16px;cursor:pointer;font:inherit;box-shadow:var(--shadow);
-  }
-  .lvcard:active{transform:scale(.98);}
-  .lvcard .pnum{flex:none;width:34px;height:34px;border-radius:10px;background:var(--surface-2);color:var(--text-dim);
-    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
-  .lvcard.mixed .pnum{background:var(--accent);color:#fff;}
-  .lvcard .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-  .lvcard .nm{font-weight:800;font-size:15px;}
-  .lvcard .nm .tag{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;color:var(--pick);
-    background:color-mix(in srgb,var(--pick) 14%,transparent);border-radius:999px;padding:2px 7px;vertical-align:middle;}
-  .lvcard .sub{font-size:11.5px;color:var(--text-dim);font-weight:700;}
-  .lvcard .best{font-size:12px;color:var(--accent);font-weight:800;flex:none;text-align:right;white-space:nowrap;}
+  .seg.wrap{flex-wrap:wrap;}
+  .seg.wrap button{flex:1 1 21%;min-width:44px;}
+  .bestline{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:700;color:var(--text-dim);text-align:center;}
+  .bestline b{color:var(--accent);font-size:16px;}
+  .start-btn{border:none;background:var(--accent);color:#fff;padding:15px 0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);}
+  .start-btn:active{background:var(--accent-press);transform:scale(.98);}
 
   /* play */
   .play{flex:1;display:flex;flex-direction:column;gap:16px;padding:6px 20px 20px;align-items:center;}
@@ -136,9 +126,26 @@
         </div>
       </div>
       <div class="field">
-        <span class="label">レベルを選ぶ</span>
-        <div class="lvlist" id="lvList"></div>
+        <span class="label">出題数</span>
+        <div class="seg wrap" id="segCount">
+          <button data-val="3">3</button>
+          <button data-val="5">5</button>
+          <button data-val="7">7</button>
+          <button data-val="10" class="on">10</button>
+          <button data-val="12">12</button>
+          <button data-val="15">15</button>
+          <button data-val="20">20</button>
+        </div>
       </div>
+      <div class="field">
+        <span class="label">計算の種類</span>
+        <div class="seg" id="segOp">
+          <button data-val="add" class="on">たし算のみ</button>
+          <button data-val="mixed">たし算＋ひき算</button>
+        </div>
+      </div>
+      <p class="bestline" id="bestLine">ベスト連続正解: <b>0</b>問</p>
+      <button class="start-btn" id="startBtn">はじめる</button>
     </div>
   </section>
 
@@ -175,64 +182,35 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1500); }
   function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id)); window.scrollTo(0,0); }
 
-  const GAP_MS=140;
-  const SPEED_MULT={slow:1.15, normal:1.0, fast:0.7};
-
-  const LEVELS=[
-    {id:1,  digits:1, count:3,  ms:1400, mixed:false},
-    {id:2,  digits:1, count:5,  ms:1200, mixed:false},
-    {id:3,  digits:1, count:7,  ms:1000, mixed:false},
-    {id:4,  digits:2, count:5,  ms:1000, mixed:false},
-    {id:5,  digits:2, count:7,  ms:900,  mixed:false},
-    {id:6,  digits:2, count:10, ms:800,  mixed:false},
-    {id:7,  digits:1, count:7,  ms:800,  mixed:true},
-    {id:8,  digits:2, count:7,  ms:700,  mixed:true},
-    {id:9,  digits:2, count:10, ms:600,  mixed:true},
-    {id:10, digits:2, count:15, ms:500,  mixed:true}
-  ];
+  const SPEED_MS={slow:650, normal:450, fast:280};
+  const GAP_RATIO=0.22;
+  const GAP_MIN_MS=60;
+  const COUNT_OPTIONS=[3,5,7,10,12,15,20];
 
   /* ---------- 設定の保存 ---------- */
-  const SPEED_KEY="flashanzan-speed";
+  const CFG_KEY="flashanzan-cfg";
   function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
-  let speedKey = lsGet(SPEED_KEY) || "normal";
+  const cfg = Object.assign({speed:"normal", count:10, op:"add"}, lsGet(CFG_KEY)||{});
 
   /* ---------- ゲーム状態 ---------- */
-  const G={ level:null, problem:null, input:"", phase:"idle", streak:0, timers:[] };
+  const G={ problem:null, input:"", phase:"idle", streak:0, timers:[] };
 
   function clearTimers(){ G.timers.forEach(t=>clearTimeout(t)); G.timers=[]; }
   function setT(fn,ms){ const t=setTimeout(fn,ms); G.timers.push(t); return t; }
 
-  function levelDesc(lv){
-    const d=lv.digits===1?"1桁":"2桁";
-    return d+"×"+lv.count+"口"+(lv.mixed?"（加減算）":"（たし算）");
-  }
+  function comboKey(){ return cfg.speed+"-"+cfg.count+"-"+cfg.op; }
 
-  function renderLevelList(){
-    const wrap=$("lvList"); wrap.innerHTML="";
+  function renderBestLine(){
     const all = window.BGStats ? BGStats.getAll() : {};
-    const by = (all.flashanzan && all.flashanzan.byLevel) || {};
-    LEVELS.forEach(lv=>{
-      const rec=by[lv.id];
-      const b=document.createElement("button");
-      b.type="button"; b.className="lvcard"+(lv.mixed?" mixed":"");
-      b.innerHTML=
-        '<span class="pnum">'+lv.id+'</span>'+
-        '<span class="body"><span class="nm">Lv.'+lv.id+(lv.mixed?'<span class="tag">加減算</span>':'')+'</span>'+
-        '<span class="sub">'+levelDesc(lv)+'</span></span>'+
-        (rec && rec.bestStreak ? '<span class="best">ベスト<br>'+rec.bestStreak+'問</span>' : '');
-      b.addEventListener("click",()=>startLevel(lv.id));
-      wrap.appendChild(b);
-    });
+    const by = (all.flashanzan && all.flashanzan.byCombo) || {};
+    const rec = by[comboKey()];
+    $("bestLine").innerHTML = "ベスト連続正解: <b>"+(rec ? rec.bestStreak : 0)+"</b>問";
   }
 
-  function findLevel(id){ return LEVELS.find(l=>l.id===id); }
-
-  function startLevel(id){
-    G.level=findLevel(id);
+  function startGame(){
     G.streak=0;
     updateStreakLine();
-    $("playTitle").textContent="フラッシュ暗算 Lv."+id;
     show("play");
     nextProblem(true);
   }
@@ -241,15 +219,15 @@
     $("streakLine").textContent = G.streak>0 ? "連続 "+G.streak+"問" : "";
   }
 
-  /* ---------- 問題の生成 ---------- */
-  function genProblem(lv){
-    const min = lv.digits===1 ? 1 : 10;
-    const max = lv.digits===1 ? 9 : 99;
+  /* ---------- 問題の生成(数字は1〜99から一様に選ぶ) ---------- */
+  function genProblem(){
+    const count=cfg.count, mixed=(cfg.op==="mixed");
+    const min=1, max=99;
     const nums=[], ops=[];
     let total=0;
-    for(let i=0;i<lv.count;i++){
+    for(let i=0;i<count;i++){
       let op="+";
-      if(i>0 && lv.mixed && Math.random()<0.5) op="-";
+      if(i>0 && mixed && Math.random()<0.5) op="-";
       let n;
       if(op==="-"){
         const capMax=Math.min(max,total);
@@ -282,7 +260,7 @@
     $("progressLine").textContent="";
     const box=$("numbox");
     box.classList.remove("wrong"); box.classList.remove("flashing"); box.classList.remove("msg");
-    G.problem=genProblem(G.level);
+    G.problem=genProblem();
     if(withCountdown){
       let n=3;
       box.textContent=n;
@@ -298,8 +276,9 @@
   }
 
   function playSequence(){
-    const lv=G.level, problem=G.problem, box=$("numbox");
-    const mult=SPEED_MULT[speedKey]||1;
+    const problem=G.problem, box=$("numbox");
+    const showMs = SPEED_MS[cfg.speed] || SPEED_MS.normal;
+    const gapMs = Math.max(GAP_MIN_MS, Math.round(showMs*GAP_RATIO));
     let i=0;
     function step(){
       if(i>=problem.nums.length){ startInput(); return; }
@@ -311,8 +290,8 @@
       setT(()=>{
         box.textContent="";
         box.classList.remove("flashing");
-        setT(()=>{ i++; step(); }, GAP_MS);
-      }, Math.round(lv.ms*mult));
+        setT(()=>{ i++; step(); }, gapMs);
+      }, showMs);
     }
     step();
   }
@@ -360,12 +339,12 @@
     rl.classList.add("show");
     $("tapLine").textContent="画面をタップして次の問題へ";
     if(window.BGStats){
-      const lv=G.level;
+      const key=comboKey();
       BGStats.record("flashanzan", cur=>{
         cur.plays=(cur.plays||0)+1;
         if(correct) cur.clears=(cur.clears||0)+1;
-        cur.byLevel=cur.byLevel||{};
-        const rec=cur.byLevel[lv.id]=cur.byLevel[lv.id]||{plays:0,clears:0,bestStreak:0};
+        cur.byCombo=cur.byCombo||{};
+        const rec=cur.byCombo[key]=cur.byCombo[key]||{plays:0,clears:0,bestStreak:0};
         rec.plays++; if(correct) rec.clears++;
         if(G.streak>rec.bestStreak) rec.bestStreak=G.streak;
       });
@@ -391,21 +370,27 @@
   $("toSetup").addEventListener("click",()=>{
     clearTimers();
     G.phase="idle";
-    renderLevelList();
+    renderBestLine();
     show("setup");
   });
+  $("startBtn").addEventListener("click",startGame);
 
-  (function segSpeed(){
-    const wrap=$("segSpeed");
-    wrap.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.val===speedKey));
+  function seg(id,key,isNumber){
+    const wrap=$(id);
+    wrap.querySelectorAll("button").forEach(b=>b.classList.toggle("on", String(cfg[key])===b.dataset.val));
     wrap.addEventListener("click",e=>{
       const b=e.target.closest("button"); if(!b) return;
-      speedKey=b.dataset.val; lsSet(SPEED_KEY,speedKey);
+      cfg[key] = isNumber ? parseInt(b.dataset.val,10) : b.dataset.val;
+      lsSet(CFG_KEY,cfg);
       wrap.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b));
+      renderBestLine();
     });
-  })();
+  }
+  seg("segSpeed","speed");
+  seg("segCount","count",true);
+  seg("segOp","op");
 
-  renderLevelList();
+  renderBestLine();
 })();
 </script>
 </body>
