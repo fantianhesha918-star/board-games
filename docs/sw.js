@@ -1,6 +1,6 @@
 /* チンチラのボードゲーム — オフライン対応 Service Worker
    デプロイのたびに VERSION を上げること（古いキャッシュを掃除するトリガー）。 */
-const VERSION = "2026-09-23a";
+const VERSION = "2026-09-27a";
 const CACHE = "bg-" + VERSION;
 
 const CORE = [
