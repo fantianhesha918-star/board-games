@@ -126,6 +126,13 @@
         </div>
       </div>
       <div class="field">
+        <span class="label">桁数</span>
+        <div class="seg" id="segDigits">
+          <button data-val="1">1桁</button>
+          <button data-val="2" class="on">2桁</button>
+        </div>
+      </div>
+      <div class="field">
         <span class="label">出題数</span>
         <div class="seg wrap" id="segCount">
           <button data-val="3">3</button>
@@ -191,7 +198,7 @@
   const CFG_KEY="flashanzan-cfg";
   function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
-  const cfg = Object.assign({speed:"normal", count:10, op:"add"}, lsGet(CFG_KEY)||{});
+  const cfg = Object.assign({speed:"normal", digits:2, count:10, op:"add"}, lsGet(CFG_KEY)||{});
 
   /* ---------- ゲーム状態 ---------- */
   const G={ problem:null, input:"", phase:"idle", streak:0, timers:[] };
@@ -199,7 +206,7 @@
   function clearTimers(){ G.timers.forEach(t=>clearTimeout(t)); G.timers=[]; }
   function setT(fn,ms){ const t=setTimeout(fn,ms); G.timers.push(t); return t; }
 
-  function comboKey(){ return cfg.speed+"-"+cfg.count+"-"+cfg.op; }
+  function comboKey(){ return cfg.speed+"-"+cfg.digits+"-"+cfg.count+"-"+cfg.op; }
 
   function renderBestLine(){
     const all = window.BGStats ? BGStats.getAll() : {};
@@ -222,7 +229,8 @@
   /* ---------- 問題の生成(数字は1〜99から一様に選ぶ) ---------- */
   function genProblem(){
     const count=cfg.count, mixed=(cfg.op==="mixed");
-    const min=1, max=99;
+    const min = cfg.digits===1 ? 1 : 10;
+    const max = cfg.digits===1 ? 9 : 99;
     const nums=[], ops=[];
     let total=0;
     for(let i=0;i<count;i++){
@@ -387,6 +395,7 @@
     });
   }
   seg("segSpeed","speed");
+  seg("segDigits","digits",true);
   seg("segCount","count",true);
   seg("segOp","op");
 

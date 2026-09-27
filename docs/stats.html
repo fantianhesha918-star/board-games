@@ -230,7 +230,7 @@
     Object.keys(by).forEach(key=>{
       const v=by[key]; if(!v || !v.plays) return;
       const parts=key.split("-");
-      const label=(SP[parts[0]]||parts[0])+"／"+parts[1]+"問／"+(OP[parts[2]]||parts[2]);
+      const label=(SP[parts[0]]||parts[0])+"／"+parts[1]+"桁／"+parts[2]+"問／"+(OP[parts[3]]||parts[3]);
       cHtml += row(label+"（プレイ "+v.plays+"）", "ベスト "+(v.bestStreak||0)+"問");
     });
     return card("フラッシュ暗算", IC.flashanzan,
