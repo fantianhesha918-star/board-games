@@ -107,7 +107,8 @@
     crossword:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><rect x="9" y="9" width="6" height="6" fill="currentColor" stroke="none"/></svg>',
     jukugo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><circle cx="12" cy="12" r="2.4" stroke-dasharray="1.6 1.6"/></svg>',
     flashanzan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M13 6L7 13h4l-1 5 6-8h-4l1-4z" fill="currentColor" stroke="none"/></svg>',
-    yomigana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 16L12 7l4 9M9.5 13h5"/></svg>'
+    yomigana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 16L12 7l4 9M9.5 13h5"/></svg>',
+    atamaoshiri:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="10" y="6" width="4" height="7" rx="2"/><path d="M7.5 11.5a4.5 4.5 0 0 0 9 0M12 16v2.5M9.5 19.5h5"/></svg>'
   };
 
   function othelloCard(s){
@@ -256,6 +257,15 @@
     );
   }
 
+  function atamaoshiriCard(s){
+    if(!s || !s.plays) return card("あたまおしりゲーム", IC.atamaoshiri, empty);
+    return card("あたまおしりゲーム", IC.atamaoshiri,
+      row("プレイ回数", s.plays+"回")+
+      row("自己ベスト(合計点)", (s.best||0)+"点", "hi")+
+      row("1位になった回数", (s.wins||0)+"回")
+    );
+  }
+
   function render(){
     const all = window.BGStats ? BGStats.getAll() : {};
     $("cards").innerHTML =
@@ -269,7 +279,8 @@
       crosswordCard(all.crossword)+
       jukugoCard(all.jukugo)+
       flashanzanCard(all.flashanzan)+
-      yomiganaCard(all.yomigana);
+      yomiganaCard(all.yomigana)+
+      atamaoshiriCard(all.atamaoshiri);
   }
   render();
 
