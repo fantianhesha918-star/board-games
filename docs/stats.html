@@ -258,8 +258,8 @@
   }
 
   function atamaoshiriCard(s){
-    if(!s || !s.plays) return card("あたまおしりゲーム", IC.atamaoshiri, empty);
-    return card("あたまおしりゲーム", IC.atamaoshiri,
+    if(!s || !s.plays) return card("かしら・しっぽゲーム", IC.atamaoshiri, empty);
+    return card("かしら・しっぽゲーム", IC.atamaoshiri,
       row("プレイ回数", s.plays+"回")+
       row("自己ベスト(合計点)", (s.best||0)+"点", "hi")+
       row("1位になった回数", (s.wins||0)+"回")

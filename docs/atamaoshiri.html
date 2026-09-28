@@ -12,7 +12,7 @@
 <script src="pwa.js" defer></script>
 <script src="stats.js"></script>
 <script type="module" src="online.js"></script>
-<title>あたまおしりゲーム</title>
+<title>かしら・しっぽゲーム</title>
 <style>
   :root{
     --bg:#f2f1ec;--surface:#ffffff;--surface-2:#faf9f5;
@@ -94,8 +94,17 @@
 
   .arena{position:relative;width:100%;max-width:340px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:22px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;overflow:hidden;}
   .turnlabel{font-size:13px;font-weight:800;color:var(--text-dim);}
-  .introcount{font-size:44px;font-weight:800;color:var(--accent);}
-  .introtext{font-size:15px;font-weight:700;color:var(--text-dim);}
+
+  .chant{display:flex;justify-content:center;width:100%;padding:6px 4px;min-height:26px;}
+  .chant-wrap{position:relative;display:inline-block;max-width:100%;}
+  .chant-wrap .base{color:var(--text-dim);font-size:15px;font-weight:800;white-space:nowrap;}
+  .chant-wrap .fill{position:absolute;inset:0;overflow:hidden;width:0%;}
+  .chant-wrap .fill span{color:var(--accent);font-size:15px;font-weight:800;white-space:nowrap;display:block;}
+  .revealkana{display:flex;align-items:center;gap:12px;}
+  .revealkana .kw{font-size:38px;font-weight:800;color:var(--line);background:var(--surface-2);border-radius:14px;padding:4px 16px;min-width:52px;text-align:center;transition:color .25s;}
+  .revealkana .kw.on{color:var(--text);}
+  .revealkana .arrow{font-size:18px;color:var(--text-dim);}
+
   .promptrow{display:flex;align-items:center;gap:14px;}
   .promptrow .kana{font-size:44px;font-weight:800;color:var(--text);background:var(--surface-2);border-radius:14px;padding:6px 18px;}
   .promptrow .arrow{font-size:20px;color:var(--text-dim);}
@@ -151,14 +160,14 @@
   <section id="setup" class="screen active">
     <div class="topbar">
       <a class="back-btn" href="index.html">‹</a>
-      <h1>あたまおしりゲーム</h1>
+      <h1>かしら・しっぽゲーム</h1>
       <span class="spacer"></span>
       <a class="icon-btn" href="rules.html#atamaoshiri">ルール</a>
     </div>
     <div class="setup">
       <div class="howto">
         <h3>あそびかた</h3>
-        <p>画面に出た<b>「あたまの文字」と「おしりの文字」</b>に当てはまる言葉を、マイクで話して答えるゲームです。2〜4人でそれぞれの端末をつないで遊びます。</p>
+        <p>画面に出た<b>「かしらの文字」と「しっぽの文字」</b>に当てはまる言葉を、マイクで話して答えるゲームです。2〜4人でそれぞれの端末をつないで遊びます。</p>
         <p>1人ずつ順番に挑戦。<b>制限時間10秒</b>のカウントダウン中に思いついた言葉を話し、<b>3文字以上</b>の言葉なら文字数がそのまま得点になります(長い言葉ほど高得点)。全員の挑戦が終わったら合計点で順位が決まります。</p>
       </div>
       <div class="field">
@@ -194,7 +203,7 @@
   <section id="play" class="screen">
     <div class="topbar">
       <a class="back-btn" href="#" id="toSetup">‹</a>
-      <h1>あたまおしりゲーム</h1>
+      <h1>かしら・しっぽゲーム</h1>
       <span class="spacer"></span>
       <a class="icon-btn" href="rules.html#atamaoshiri">ルール</a>
     </div>
@@ -226,9 +235,22 @@
   const PAIRS = [["あ","め","あきらめ"],["あ","さ","あいまいさ"],["あ","ぎ","あさぎ"],["あ","に","あんいに"],["あ","だ","あいだ"],["あ","こ","あんこ"],["あ","る","あひる"],["あ","び","あくび"],["あ","つ","あいさつ"],["い","え","いれかえ"],["い","ろ","いろいろ"],["い","す","いかす"],["い","ち","いのち"],["い","ご","いちご"],["い","り","いのり"],["い","み","いたみ"],["い","じ","いくじ"],["い","か","いなか"],["う","た","うたかた"],["う","み","うらみ"],["う","ぎ","うさぎ"],["う","さ","うわさ"],["う","わ","うちわ"],["う","う","うでずもう"],["う","い","うすい"],["え","お","えがお"],["え","つ","えんぴつ"],["え","ぐ","えのぐ"],["え","ん","えほん"],["え","が","えいが"],["お","し","おかし"],["お","ね","おかね"],["お","と","おとうと"],["お","く","おんがく"],["お","ま","おひさま"],["お","ん","おかあさん"],["お","り","おどり"],["か","み","かがみ"],["か","さ","かるさ"],["か","め","かため"],["か","く","かぞく"],["か","す","からす"],["か","び","かようび"],["か","り","かみなり"],["か","た","かるた"],["か","ん","かいだん"],["き","の","きもの"],["き","て","きって"],["き","ろ","きいろ"],["き","ね","きつね"],["き","つ","きせつ"],["き","う","きぼう"],["き","り","きゅうり"],["き","ょ","きんぎょ"],["く","つ","くろまつ"],["く","も","くろがも"],["く","り","くすり"],["く","ま","くるま"],["く","ら","くじら"],["く","の","くだもの"],["く","き","くうき"],["け","き","けしき"],["け","と","けいと"],["け","り","けむり"],["け","さ","けむたさ"],["け","ん","けいさん"],["こ","り","こおり"],["こ","も","こども"],["こ","え","こころえ"],["こ","ぎ","こおろぎ"],["こ","ば","ことば"],["こ","ん","こうえん"],["こ","ゃ","こうちゃ"],["さ","な","さかな"],["さ","ら","さくら"],["さ","う","さとう"],["さ","ふ","さいふ"],["さ","ぽ","さんぽ"],["さ","ん","さくぶん"],["さ","ち","さかみち"],["し","ま","しろくま"],["し","い","しあい"],["し","ん","しんぶん"],["し","く","しかく"],["し","ゃ","しょうぼうしゃ"],["し","う","しょうぼう"],["す","か","すいか"],["す","な","すみやかな"],["す","め","すずめ"],["す","い","すいえい"],["す","う","すもう"],["す","じ","すうじ"],["せ","か","せなか"],["せ","き","せんぷうき"],["せ","ち","せかいいち"],["せ","つ","せいかつ"],["そ","ら","そこぢから"],["そ","じ","そうじ"],["そ","う","そつぎょう"],["そ","ん","そうだん"],["た","ご","たまご"],["た","こ","たいこ"],["た","き","たぬき"],["た","ら","たから"],["た","う","たいよう"],["た","び","たんじょうび"],["た","く","たいいく"],["ち","う","ちきゅう"],["ち","ら","ちから"],["ち","ず","ちかよらず"],["ち","ん","ちゃわん"],["ち","ろ","ちゃいろ"],["つ","き","つきづき"],["つ","え","つくえ"],["つ","め","つばめ"],["つ","く","つうやく"],["て","み","てがみ"],["て","き","てんき"],["て","ろ","てぶくろ"],["て","な","てじな"],["と","い","とけい"],["と","り","とおまわり"],["と","ふ","とうふ"],["と","ち","ともだち"],["な","つ","なりたつ"],["な","だ","なみだ"],["な","び","なわとび"],["な","え","なまえ"],["に","り","にわとり"],["に","う","にんぎょう"],["に","つ","にもつ"],["ぬ","み","ぬいぐるみ"],["ぬ","え","ぬりえ"],["ね","こ","ねっこ"],["ね","ん","ねだん"],["ね","う","ねぼう"],["ね","が","ねんが"],["の","り","のこり"],["の","ら","のはら"],["の","の","のみもの"],["は","な","はなやかな"],["は","し","はげまし"],["は","み","はさみ"],["は","ん","はんぶん"],["は","び","はなび"],["は","ゃ","はいしゃ"],["ひ","き","ひこうき"],["ひ","ね","ひるね"],["ひ","り","ひまわり"],["ひ","つ","ひみつ"],["ふ","ん","ふうせん"],["ふ","ろ","ふくろ"],["ふ","ふ","ふうふ"],["へ","わ","へいわ"],["ほ","し","ほどこし"],["ほ","ん","ほうもん"],["ほ","き","ほうき"],["ほ","う","ほうそう"],["ま","め","まじめ"],["ま","り","まつり"],["ま","ご","まいご"],["ま","う","まほう"],["み","ず","みずしらず"],["み","ん","みかん"],["み","り","みどり"],["み","と","みなと"],["み","い","みらい"],["む","め","むすめ"],["む","し","むかし"],["む","ゃ","むぎちゃ"],["め","ね","めがね"],["め","か","めだか"],["め","し","めいし"],["も","り","ものがたり"],["も","ば","もくば"],["も","い","もんだい"],["や","ま","やまやま"],["や","い","やさい"],["や","ん","やかん"],["や","う","やきゅう"],["ゆ","き","ゆうき"],["ゆ","め","ゆるめ"],["ゆ","わ","ゆびわ"],["ゆ","ん","ゆうびん"],["よ","る","よみがえる"],["よ","い","よてい"],["よ","う","よしゅう"],["ら","だ","らくだ"],["ら","ん","らいねん"],["り","ご","りんご"],["り","う","りゆう"],["り","り","りょうり"],["る","じ","るいじ"],["れ","し","れきし"],["れ","こ","れいぞうこ"],["れ","う","れんしゅう"],["ろ","く","ろうそく"],["ろ","か","ろうか"],["わ","に","わがままに"],["わ","の","わすれもの"],["わ","き","わりびき"],["が","う","がっこう"],["が","く","がいこく"],["ぎ","う","ぎんこう"],["ぎ","ん","ぎもん"],["ぐ","て","ぐんて"],["ぐ","い","ぐあい"],["げ","ん","げんかん"],["げ","き","げんき"],["ご","し","ごしごし"],["ご","ん","ごはん"],["ざ","し","ざっし"],["ざ","う","ざいりょう"],["じ","ん","じかん"],["じ","ゃ","じてんしゃ"],["ぜ","ぶ","ぜんぶ"],["ぜ","い","ぜっけい"],["ぞ","ん","ぞうきん"],["だ","ん","だいこん"],["だ","う","だんぼう"],["で","わ","でんわ"],["で","ゃ","でんしゃ"],["ど","つ","どうぶつ"],["ど","び","どようび"],["ば","ら","ばらばら"],["ば","ん","ばんごはん"],["び","ん","びょういん"],["ぶ","く","ぶたにく"],["ぶ","ぐ","ぶんぼうぐ"],["べ","う","べんとう"],["ぼ","し","ぼうし"],["ぼ","う","ぼくじょう"],["ぴ","か","ぴかぴか"],["ぽ","か","ぽかぽか"]];
 
   const ANSWER_MS = 10000;
-  const INTRO_MS = 1600;
   const MIN_LEN = 3;
   const STALE_GRACE_MS = 8000;
+
+  // 出題前のかけ声(本家番組の口上そのままではなく、同じテンポ感のオリジナル台詞)。
+  // カラオケのように、行ごとに文字色が左から右へ変わっていく演出で表示する。
+  const INTRO_LINES = [
+    { text:"かしら と しっぽ で ことばさがし",        ms:1900 },
+    { text:"かしら と しっぽ で ことばさがし",        ms:1900 },
+    { text:"かしらの文字は… こちら！",                ms:1500, reveal:"head" },
+    { text:"しっぽの文字は… こちら！",                ms:1500, reveal:"tail" },
+    { text:"さあ どんな言葉に なるかな？",             ms:1700 }
+  ];
+  (function(){ let acc=0; INTRO_LINES.forEach(l=>{ l.start=acc; acc+=l.ms; }); })();
+  const INTRO_TOTAL_MS = INTRO_LINES.reduce((a,l)=>a+l.ms,0);
+  const HEAD_REVEAL_AT = INTRO_LINES.find(l=>l.reveal==="head").start;
+  const TAIL_REVEAL_AT = INTRO_LINES.find(l=>l.reveal==="tail").start;
 
   function shuffledIdx(n){
     const a=[...Array(n).keys()];
@@ -255,7 +277,7 @@
       cap, turnsPerPlayer, totalTurns,
       pairSeq: buildPairSeq(totalTurns),
       turnNum:0, activeSeat:0, phase:"intro",
-      introUntil: Date.now()+INTRO_MS, deadline:null, current:null,
+      introUntil: Date.now()+INTRO_TOTAL_MS, deadline:null, current:null,
       scores, history:[], seq:1
     };
   }
@@ -398,10 +420,7 @@
     const arena=$("arena");
 
     if(s.phase==="intro"){
-      arena.innerHTML =
-        '<div class="turnlabel">'+(isMine? "あなたの番です" : seatName(s.activeSeat)+"さんの番です")+'</div>'+
-        '<div class="introcount" id="introCount">よーい</div>'+
-        '<div class="introtext">お題が出ます…</div>';
+      renderIntroPhase(s, isMine);
       return;
     }
     if(s.phase==="answer"){
@@ -453,6 +472,42 @@
   }
 
   function esc(s){ return escapeHtml(s); }
+
+  let introRAF=null;
+  function stopIntroAnim(){ if(introRAF){ cancelAnimationFrame(introRAF); introRAF=null; } }
+
+  function renderIntroPhase(s, isMine){
+    const p=currentPair(s);
+    const introStart = s.introUntil - INTRO_TOTAL_MS;
+    const arena=$("arena");
+    arena.innerHTML =
+      '<div class="turnlabel">'+(isMine? "あなたの番です" : seatName(s.activeSeat)+"さんの番です")+'</div>'+
+      '<div class="chant"><div class="chant-wrap"><div class="base" id="chantBase"></div><div class="fill" id="chantFill"><span id="chantFillText"></span></div></div></div>'+
+      '<div class="revealkana"><span class="kw" id="kwHead">？</span><span class="arrow">→ ⋯ →</span><span class="kw" id="kwTail">？</span></div>';
+    stopIntroAnim();
+    function frame(){
+      const now=Date.now();
+      let elapsed=Math.max(0, now-introStart);
+      const clamped=Math.min(elapsed, INTRO_TOTAL_MS-1);
+      let li=INTRO_LINES.length-1;
+      for(let i=0;i<INTRO_LINES.length;i++){
+        if(clamped < INTRO_LINES[i].start+INTRO_LINES[i].ms){ li=i; break; }
+      }
+      const line=INTRO_LINES[li];
+      const within=clamped-line.start;
+      const base=$("chantBase"), fillText=$("chantFillText"), fill=$("chantFill");
+      if(base && base.textContent!==line.text){ base.textContent=line.text; fillText.textContent=line.text; }
+      const pct=Math.max(0, Math.min(100, within/line.ms*100));
+      if(fill) fill.style.width=pct+"%";
+      const kwHead=$("kwHead"), kwTail=$("kwTail");
+      if(kwHead){ const on=elapsed>=HEAD_REVEAL_AT; kwHead.classList.toggle("on", on); kwHead.textContent= on? p.head : "？"; }
+      if(kwTail){ const on=elapsed>=TAIL_REVEAL_AT; kwTail.classList.toggle("on", on); kwTail.textContent= on? p.tail : "？"; }
+      if(elapsed < INTRO_TOTAL_MS && ROOM.data && ROOM.data.state && ROOM.data.state.phase==="intro" && ROOM.data.state.turnNum===s.turnNum){
+        introRAF=requestAnimationFrame(frame);
+      }
+    }
+    frame();
+  }
 
   function renderScoreboard(s){
     const rows=[];
@@ -599,11 +654,7 @@
 
   function updateTimers(s){
     if(s.phase==="intro"){
-      const el=$("introCount"); if(el){
-        const remain=Math.max(0, s.introUntil-Date.now());
-        el.textContent = remain>1100 ? "よーい" : (remain>0 ? "…" : "スタート！");
-      }
-      return;
+      return; // アニメーションは renderIntroPhase() 内の requestAnimationFrame ループが担当
     }
     if(s.phase==="answer"){
       const bar=$("timebar"); if(bar){
@@ -628,7 +679,7 @@
     const next=s.turnNum+1;
     let ns;
     if(next>=s.totalTurns) ns=Object.assign({}, s, { phase:"done", history, seq:(s.seq||0)+1 });
-    else ns=Object.assign({}, s, { turnNum:next, activeSeat:next%s.cap, phase:"intro", introUntil:Date.now()+INTRO_MS, deadline:null, current:null, history, seq:(s.seq||0)+1 });
+    else ns=Object.assign({}, s, { turnNum:next, activeSeat:next%s.cap, phase:"intro", introUntil:Date.now()+INTRO_TOTAL_MS, deadline:null, current:null, history, seq:(s.seq||0)+1 });
     pushState(ns);
   }
 
@@ -637,7 +688,7 @@
     const next=s.turnNum+1;
     let ns;
     if(next>=s.totalTurns) ns=Object.assign({}, s, { phase:"done", seq:(s.seq||0)+1 });
-    else ns=Object.assign({}, s, { turnNum:next, activeSeat:next%s.cap, phase:"intro", introUntil:Date.now()+INTRO_MS, deadline:null, current:null, seq:(s.seq||0)+1 });
+    else ns=Object.assign({}, s, { turnNum:next, activeSeat:next%s.cap, phase:"intro", introUntil:Date.now()+INTRO_TOTAL_MS, deadline:null, current:null, seq:(s.seq||0)+1 });
     pushState(ns);
   }
 </script>
